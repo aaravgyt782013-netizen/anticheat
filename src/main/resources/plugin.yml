@@ -9,7 +9,7 @@ description: Configurable anti-cheat foundation for Anna MC.
 commands:
   annaac:
     description: ANNA AC administration commands
-    usage: /annaac <alerts|check|history|reload|debug>
+    usage: /annaac <alerts|check|history|reload|debug|testdiscord>
     aliases: [aac]
 permissions:
   annaac.alerts:
