@@ -252,8 +252,20 @@ checks:
     ignored-permissions: []
     # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
-    # Arm-swing events per second above which the check may flag; tune for your player base.
+    # Arm-swing events per second above which the Bukkit-event signal may flag.
     max-cps: 24
+    # Use PacketEvents INTERACT_ENTITY attack packets for a second attack-rate signal when PacketEvents is installed.
+    attack-packets-enabled: true
+    # Rolling attack packet window length in milliseconds (effective range 250–5000).
+    attack-window-ms: 1000
+    # Maximum attacks within the rolling window before a sample counts as over-limit.
+    max-attacks-per-window: 24
+    # Minimum delay between rolling-window evaluations in milliseconds (effective minimum 100).
+    attack-evaluation-interval-ms: 250
+    # Consecutive over-limit evaluations required before the packet signal adds violation level.
+    minimum-over-limit-windows: 3
+    # Minimum time between repeated packet-level attack-rate flags.
+    attack-flag-cooldown-ms: 3000
     # Minimum time between repeated flags from this check.
     flag-cooldown-ms: 1500
     # Violation level (VL) added when this check flags.
