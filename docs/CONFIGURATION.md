@@ -2,7 +2,12 @@
 
 ## Main files
 
-- `plugins/ANNA-AC/config.yml`: prefix, language, detector thresholds, Discord settings, evidence limits, and punishment controls. Every YAML option has a nearby explanatory comment.
+- `plugins/ANNA-AC/config.yml`: global prefix, language, debug option, and global ignored worlds.
+- `plugins/ANNA-AC/checks.yml`: every gameplay detector and its thresholds, exemptions, alert cooldowns, and violation settings.
+- `plugins/ANNA-AC/discord.yml`: console/staff alert toggles and all Discord webhook/embed settings.
+- `plugins/ANNA-AC/database.yml`: evidence storage directory, retention period, record cap, detail length, and in-memory violation retention.
+- `plugins/ANNA-AC/punishments.yml`: global kick switch, independent-signal correlation safety controls, kick message, and per-check actions.
+- `plugins/ANNA-AC/messages_en.yml` and `messages_hi.yml`: English and Hindi message text.
 - `plugins/ANNA-AC/messages_en.yml`: English messages.
 - `plugins/ANNA-AC/messages_hi.yml`: Hindi messages.
 - `plugins/ANNA-AC/evidence/<uuid>.jsonl`: recorded detector/security evidence.
@@ -10,7 +15,7 @@
 
 ## Prefix and language
 
-Set the prefix in config:
+Set the prefix and language in `config.yml`:
 
     settings:
       prefix: "&8[&bANNA AC&8] &r"
@@ -20,9 +25,9 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 
 ## Recommended safe starting posture
 
-- Leave experimental detector `checks.<check>.enabled` values false on the live public server until staging tests pass.
-- Keep `punishments.actions.<check>.enabled: false` for all checks initially. Alert first, review evidence, then enable one action only after measuring false positives.
-- Keep `punishments.enabled: true` if you want the global master switch available; per-check action flags remain the second gate.
+- Edit `checks.<check>.enabled` in `checks.yml`; leave experimental detectors disabled on the live public server until staging tests pass.
+- Keep `punishments.actions.<check>.enabled: false` in `punishments.yml` for all checks initially. Alert first, review evidence, then enable one action only after measuring false positives.
+- Keep `punishments.enabled: true` in `punishments.yml` if you want the global master switch available; per-check action flags remain the second gate.
 - Keep `punishments.require-independent-families: true` on a public server. By default, an automatic kick requires violations from at least two distinct detector families inside `correlation-window-ms`. If you enable only one family, the plugin will warn that kicks cannot trigger until you lower the family threshold or enable a second family.
 - Keep creative and spectator exemptions, and add any server-specific worlds/permissions to ignored lists only after reviewing the effect.
 - Install the compatible PacketEvents build if you want the optional packet-rate/timer telemetry. Without it, packet telemetry is unavailable.
@@ -30,7 +35,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 
 ## Checks currently present
 
-| Check key | Purpose | Default |
+| Check key in `checks.yml` | Purpose | Default |
 |---|---|---|
 | `movement` | Basic displacement heuristic | Disabled |
 | `movement-physics` | Repeated movement-envelope outlier heuristic | Disabled |
@@ -56,9 +61,9 @@ These are signals, not guaranteed identification of Meteor, Wurst, Baritone, or 
 - `/annaac check <player> [check]`: view violation level; requires `annaac.admin`.
 - `/annaac history <player>`: inspect recent online-player evidence; requires `annaac.admin`.
 - `/annaac debug <player>`: view basic runtime data; requires `annaac.admin`.
-- `/annaac reload`: reload config and selected language messages; requires `annaac.admin`.
+- `/annaac reload`: reload `config.yml`, `checks.yml`, `discord.yml`, `database.yml`, `punishments.yml`, and selected language messages; requires `annaac.admin`.
 - `annaac.bypass` and `annaac.bypass.<check>` bypass detector processing. Give only to trusted staff/test accounts.
 
 ## Discord
 
-Follow [DISCORD_SETUP.md](DISCORD_SETUP.md) to create a webhook and configure secure outbound alerts. A webhook URL must be configured by the server owner; it is intentionally not included in the repository.
+Follow [DISCORD_SETUP.md](DISCORD_SETUP.md) to create a webhook and edit `discord.yml` to configure secure outbound alerts. A webhook URL must be configured by the server owner; it is intentionally not included in the repository.
