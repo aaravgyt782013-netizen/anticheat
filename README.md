@@ -19,7 +19,7 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 - **Timer telemetry:** a separate sustained movement-packet-rate signal with a configurable sample duration and ping/proxy caveat. It is not a deterministic client-tick simulator; disabled by default.
 - **Force OP guard:** blocks configured privilege-management commands from players lacking annaac.admin, audits console commands, and monitors operator-list changes and can compare a saved operator baseline across restarts. It cannot prevent malicious plugins, direct server-file edits, console compromise, or every permission-plugin alias.
 
-Shared features: per-check violation levels/decay, alert throttling, console/staff/Discord alerts, JSONL evidence with retention caps, per-staff alert toggles, admin commands, pure detection-math unit tests, config regression tests, and GitHub Actions build/tests.
+Shared features: startup/reload configuration diagnostics, `/annaac status` system summary, per-check violation levels/decay across reconnects with bounded retention, alert throttling, console/staff/Discord alerts, JSONL evidence with retention caps, per-staff alert toggles, admin commands, pure detection-math unit tests, config regression tests, and GitHub Actions build/tests.
 
 ## Anti-Xray and cheat coverage
 
