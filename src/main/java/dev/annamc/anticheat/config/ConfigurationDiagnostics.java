@@ -30,13 +30,25 @@ public final class ConfigurationDiagnostics {
         java.util.Set<String> activeFamilies = new java.util.HashSet<>();
         for (String check : DETECTORS) {
             boolean enabled = plugin.getConfig().getBoolean("checks." + check + ".enabled", false);
-            boolean action = plugin.getConfig().getBoolean("punishments.enabled", true)
-                    && plugin.getConfig().getBoolean("punishments.actions." + check + ".enabled", false);
+            String actionPath = "punishments.actions." + check;
+            boolean actionEnabled = plugin.getConfig().getBoolean(actionPath + ".enabled", false);
+            boolean action = plugin.getConfig().getBoolean("punishments.enabled", true) && actionEnabled;
+            String actionType = plugin.getConfig().getString(actionPath + ".type", "KICK");
+            if (actionType == null) actionType = "KICK";
+            actionType = actionType.trim().toUpperCase(java.util.Locale.ROOT);
+            if (!java.util.Set.of("KICK", "WARN", "COMMAND", "NONE").contains(actionType)) {
+                notes.add("Unknown punishment type '" + actionType + "' for " + check
+                        + "; use KICK, WARN, COMMAND or NONE.");
+            }
+            if (actionEnabled && "COMMAND".equals(actionType)
+                    && plugin.getConfig().getStringList(actionPath + ".commands").isEmpty()) {
+                notes.add("Punishment action '" + check + "' uses COMMAND but its commands list is empty.");
+            }
             if (enabled) {
                 enabledChecks++;
                 activeFamilies.add(SignalCorrelation.familyFor(check));
             }
-            if (action) enabledActions++;
+            if (action && !"NONE".equals(actionType)) enabledActions++;
             if (action && !enabled) {
                 notes.add("Punishment action '" + check + "' is enabled while its detector is disabled; it cannot trigger.");
             }
