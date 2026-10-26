@@ -12,6 +12,7 @@ public final class Messages {
     private final JavaPlugin plugin;
     private YamlConfiguration selected;
     private YamlConfiguration english;
+    private YamlConfiguration fallback;
 
     public Messages(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -21,6 +22,7 @@ public final class Messages {
     public void reload() {
         saveIfMissing("messages_en.yml");
         saveIfMissing("messages_hi.yml");
+        fallback = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
         english = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages_en.yml"));
         String language = plugin.getConfig().getString("settings.language", "en");
         if (language == null) language = "en";
@@ -37,6 +39,7 @@ public final class Messages {
     public String get(String key) {
         String value = selected == null ? null : selected.getString(key);
         if (value == null && english != null) value = english.getString(key);
+        if (value == null && fallback != null) value = fallback.getString(key);
         if (value == null) value = key;
         String prefix = plugin.getConfig().getString("settings.prefix", "&8[&bANNA AC&8] &r");
         value = value.replace("%prefix%", prefix == null ? "" : prefix);
