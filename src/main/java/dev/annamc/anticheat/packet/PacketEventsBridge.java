@@ -26,6 +26,7 @@ public final class PacketEventsBridge {
     private final Map<UUID, Integer> fastIntervals = new ConcurrentHashMap<>();
     private final Map<UUID, Deque<Long>> packetTimes = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastFlag = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastTimerFlag = new ConcurrentHashMap<>();
     private PacketListenerAbstract listener;
 
     public PacketEventsBridge(JavaPlugin plugin, ViolationManager violations) {
@@ -63,15 +64,33 @@ public final class PacketEventsBridge {
                 int sampleWindow = plugin.getConfig().getInt("checks.packet-rate.sample-window", 40);
                 long cooldown = plugin.getConfig().getLong("checks.packet-rate.flag-cooldown-ms", 3000L);
                 long previousFlag = lastFlag.getOrDefault(id, 0L);
-                if ((fast >= sampleWindow || dev.annamc.anticheat.check.DetectionMath.exceedsPacketRate(pps, maxPps)) && nowMs - previousFlag >= cooldown) {
+                Player player = Bukkit.getPlayer(id);
+                if ((fast >= sampleWindow || dev.annamc.anticheat.check.DetectionMath.exceedsPacketRate(pps, maxPps))
+                        && nowMs - previousFlag >= cooldown) {
                     lastFlag.put(id, nowMs);
                     fastIntervals.put(id, 0);
-                    Player player = Bukkit.getPlayer(id);
                     if (player != null) {
                         String detail = "movement packet telemetry: rolling-pps=" + pps
                                 + ", fast-interval-streak=" + fast
                                 + "; review proxy, ping and client before action";
                         Bukkit.getScheduler().runTask(plugin, () -> violations.add(player, "packet-rate", 1.0, detail));
+                    }
+                }
+
+                if (player != null && plugin.getConfig().getBoolean("checks.timer.enabled", false)) {
+                    long firstPacket;
+                    synchronized (times) { firstPacket = times.isEmpty() ? nowMs : times.peekFirst(); }
+                    long sampleDuration = plugin.getConfig().getLong("checks.timer.minimum-sample-duration-ms", 1200L);
+                    int timerMaxPps = plugin.getConfig().getInt("checks.timer.max-movement-packets-per-second", 23);
+                    long timerCooldown = plugin.getConfig().getLong("checks.timer.flag-cooldown-ms", 5000L);
+                    long timerPrevious = lastTimerFlag.getOrDefault(id, 0L);
+                    if (nowMs - firstPacket >= sampleDuration && pps >= timerMaxPps
+                            && nowMs - timerPrevious >= timerCooldown) {
+                        lastTimerFlag.put(id, nowMs);
+                        String detail = "sustained movement packet rate pps=" + pps
+                                + " max=" + timerMaxPps + "; telemetry only, validate ping/proxy/client";
+                        Bukkit.getScheduler().runTask(plugin, () -> violations.add(player, "timer",
+                                plugin.getConfig().getDouble("checks.timer.violation-add", 1.0), detail));
                     }
                 }
             }
@@ -85,5 +104,6 @@ public final class PacketEventsBridge {
         fastIntervals.clear();
         packetTimes.clear();
         lastFlag.clear();
+        lastTimerFlag.clear();
     }
 }
