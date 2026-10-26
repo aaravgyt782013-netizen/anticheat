@@ -160,6 +160,7 @@ public final class ViolationManager implements Listener {
             playerLevels.remove(check);
             lastUpdate.remove(key);
             lastAlert.remove(key);
+            lastPunishment.remove(key);
             if (playerLevels.isEmpty()) levels.remove(id, playerLevels);
             return 0.0;
         }
