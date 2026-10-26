@@ -13,7 +13,6 @@ import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,9 +45,10 @@ public final class ViolationManager implements Listener {
         UUID id = player.getUniqueId();
         String key = id + ":" + check;
         long now = System.currentTimeMillis();
+        // Decay first: decayToNow may remove an empty profile from the map.
+        // Reacquire the profile afterward so this violation is stored in the live map.
+        double current = decayToNow(id, check, now) + amount;
         Map<String, Double> playerLevels = levels.computeIfAbsent(id, ignored -> new ConcurrentHashMap<>());
-        double current = decayToNow(id, check, now);
-        current += amount;
         playerLevels.put(check, current);
         lastUpdate.put(key, now);
         lastActivity.put(id, now);
