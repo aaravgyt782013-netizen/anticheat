@@ -434,9 +434,9 @@ checks:
 
   # Security auditing for privileged player commands and changes to the operator list.
   force-op:
-    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    # Enable privileged player-command blocking and operator-list security auditing.
     enabled: true
-    # Send alerts when this feature detects a possible violation.
+    # Send alerts for privileged-command or operator-list security events.
     alert: true
     # Block configured OP/permission-management commands issued by players without annaac.admin.
     cancel-player-op-commands: true
