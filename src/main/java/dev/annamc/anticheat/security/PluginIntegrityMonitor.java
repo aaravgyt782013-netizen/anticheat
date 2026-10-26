@@ -46,6 +46,7 @@ public final class PluginIntegrityMonitor implements Listener {
     private final Map<String, String> reportedStates = new HashMap<>();
     private final Path pluginsDirectory;
     private final Path baselinePath;
+    private final long monitorStartedAtMillis = System.currentTimeMillis();
 
     public PluginIntegrityMonitor(JavaPlugin plugin, AlertService alerts) {
         this.plugin = plugin;
@@ -64,6 +65,12 @@ public final class PluginIntegrityMonitor implements Listener {
                 () -> scan("scheduled", false), delay + intervalSeconds * 20L, intervalSeconds * 20L);
     }
 
+    private boolean withinLifecycleGracePeriod() {
+        long graceSeconds = clamp(plugin.getConfig().getLong(
+                "security.plugin-monitor.lifecycle-audit-grace-seconds", 120L), 0L, 3600L);
+        return System.currentTimeMillis() - monitorStartedAtMillis < graceSeconds * 1000L;
+    }
+
     public void scanNow(String reason) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> scan(reason, false));
     }
@@ -72,7 +79,7 @@ public final class PluginIntegrityMonitor implements Listener {
     public void onPluginEnable(PluginEnableEvent event) {
         if (!plugin.getConfig().getBoolean("security.plugin-monitor.enabled", true)
                 || !plugin.getConfig().getBoolean("security.plugin-monitor.audit-plugin-lifecycle", true)
-                || event.getPlugin().equals(plugin)) return;
+                || event.getPlugin().equals(plugin) || withinLifecycleGracePeriod()) return;
         reportState("lifecycle-enabled:" + event.getPlugin().getName(),
                 "Plugin enabled after ANNA AC started: " + event.getPlugin().getName());
     }
