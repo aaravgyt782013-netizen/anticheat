@@ -13,7 +13,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -119,8 +118,6 @@ public final class AlertService {
             if (includeDetail && !detail.isBlank()) payload.append(",").append(field("Evidence", truncate(detail, 900), false));
             if (includeUuid) payload.append(",").append(field("Player UUID", player.getUniqueId().toString(), false));
             payload.append("],\"footer\":{\"text\":").append(json("Anna MC • ANNA AC")).append("}}]");
-        } else {
-            payload.append(",\"content\":").append(json((content.isEmpty() ? "" : content + "\n") + plain));
         }
         payload.append("}");
 
