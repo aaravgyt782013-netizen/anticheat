@@ -63,7 +63,7 @@ public final class PacketEventsBridge {
                 int sampleWindow = plugin.getConfig().getInt("checks.packet-rate.sample-window", 40);
                 long cooldown = plugin.getConfig().getLong("checks.packet-rate.flag-cooldown-ms", 3000L);
                 long previousFlag = lastFlag.getOrDefault(id, 0L);
-                if ((fast >= sampleWindow || pps >= maxPps) && nowMs - previousFlag >= cooldown) {
+                if ((fast >= sampleWindow || dev.annamc.anticheat.check.DetectionMath.exceedsPacketRate(pps, maxPps)) && nowMs - previousFlag >= cooldown) {
                     lastFlag.put(id, nowMs);
                     fastIntervals.put(id, 0);
                     Player player = Bukkit.getPlayer(id);
