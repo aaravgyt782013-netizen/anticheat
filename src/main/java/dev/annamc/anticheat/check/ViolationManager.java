@@ -113,7 +113,7 @@ public final class ViolationManager implements Listener {
         double elapsedSeconds = Math.max(0L, now - previous) / 1000.0;
         double decay = finiteNonNegative(plugin.getConfig().getDouble(
                 "checks." + check + ".violation-decay-per-second", 0.0), 0.0);
-        double current = Math.max(0.0, stored - elapsedSeconds * decay);
+        double current = ViolationMath.decay(stored, Math.max(0L, now - previous), decay);
         if (current <= 1.0e-9) {
             playerLevels.remove(check);
             lastUpdate.remove(key);
