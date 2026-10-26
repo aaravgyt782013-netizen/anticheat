@@ -69,8 +69,18 @@ public final class ConfigurationDiagnostics {
         long retentionHours = plugin.getConfig().getLong("database.violation-retention-hours", 24L);
         if (retentionHours < 1) notes.add("database.violation-retention-hours must be at least 1; ANNA AC uses a minimum of 1 hour.");
 
+        int retentionDays = plugin.getConfig().getInt("database.retention-days", 7);
+        if (retentionDays < 0 || retentionDays > 36500) {
+            notes.add("database.retention-days is outside the supported range 0–36500; the storage layer clamps the value.");
+        }
+        int maxRecords = plugin.getConfig().getInt("database.max-records-per-player", 5000);
+        if (maxRecords < 1 || maxRecords > 20000) {
+            notes.add("database.max-records-per-player is outside the supported range 1–20000; the storage layer clamps the value.");
+        }
         int evidenceLimit = plugin.getConfig().getInt("database.max-detail-length", 1200);
-        if (evidenceLimit < 64) notes.add("database.max-detail-length is below 64; the storage layer enforces a 64-character minimum.");
+        if (evidenceLimit < 64 || evidenceLimit > 10000) {
+            notes.add("database.max-detail-length is outside the supported range 64–10000; the storage layer clamps the value.");
+        }
 
         return List.copyOf(notes);
     }
