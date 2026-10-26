@@ -14,6 +14,7 @@ commands:
   status-antinuke: "%prefix%&7Anti-nuke protection: &f%status%"
   status-plugin-monitor: "%prefix%&7Plugin integrity/malware-risk monitor: &f%status%"
   security-scan-started: "%prefix%&aPlugin integrity scan start ho gaya. Results console/staff/Discord mein bheje jayenge."
+  security-baseline-approval-started: "%prefix%&eBaseline approval queue ho gaya. Sirf har plugin JAR ko manually review karne ke baad use karein."
   no-permission: "%prefix%&cAapke paas permission nahi hai."
   reloaded: "%prefix%&aConfiguration aur language messages reload ho gaye."
   usage: "%prefix%&7Use karein: &f/annaac <status|alerts|check <player> [check]|history <player>|reload|debug <player>|testdiscord>"
