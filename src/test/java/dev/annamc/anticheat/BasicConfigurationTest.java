@@ -9,7 +9,7 @@ class BasicConfigurationTest {
     private String config() throws Exception {
         // Read all modular configuration files and ignore comments/indentation so tests assert active option names.
         return java.util.stream.Stream.of(
-                        "config.yml", "checks.yml", "discord.yml", "database.yml", "punishments.yml")
+                        "config.yml", "checks.yml", "discord.yml", "database.yml", "punishments.yml", "security.yml")
                 .flatMap(name -> {
                     try {
                         return Files.readAllLines(Path.of("src/main/resources", name)).stream();
@@ -48,6 +48,12 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("correlation-window-ms: 12000"));
         assertTrue(yaml.contains("max-detail-length: 1200"));
         assertTrue(yaml.contains("violation-retention-hours: 24"));
+        assertTrue(yaml.contains("block-bulk-commands: true"));
+        assertTrue(yaml.contains("explosion-block-limit: true"));
+        assertTrue(yaml.contains("integrity-hash-enabled: true"));
+        assertTrue(yaml.contains("static-scan-enabled: true"));
+        assertTrue(yaml.contains("minimum-risk-score: 5"));
+        assertTrue(yaml.contains("alert-changed-plugin-jars: true"));
     }
 
     @Test void experimentalChecksAreDisabledByDefault() throws Exception {
