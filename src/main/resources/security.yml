@@ -67,5 +67,9 @@ security:
     scan-resource-files: true
     # Extra plugin files intentionally excluded from hash alerts and static scanning. Use exact JAR filenames.
     ignore-plugin-files: []
+    # Alert when a plugin JAR filename contains any configured high-risk term. This is weak evidence and may be a false positive.
+    flag-suspicious-filenames: true
+    # Case-insensitive filename terms that trigger a manual-review alert.
+    suspicious-filename-keywords: [backdoor, stealer, keylogger, tokenlogger, credentialstealer, credential-stealer, ransomware, exfiltration]
     # Send a summary for each periodic scan. Keep false to avoid filling security channels; manual scans always report.
     report-scan-summary: false
