@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
 
@@ -31,6 +32,9 @@ public final class NoFallSignalCheck implements Listener {
 
     @EventHandler
     public void onTeleport(PlayerTeleportEvent event) { falls.remove(event.getPlayer().getUniqueId()); }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) { falls.remove(event.getPlayer().getUniqueId()); }
 
     @EventHandler(ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
