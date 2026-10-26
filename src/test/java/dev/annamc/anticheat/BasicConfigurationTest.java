@@ -27,6 +27,11 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("violation-decay-per-second"));
         assertTrue(yaml.contains("kick-vl"));
         assertTrue(yaml.contains("alert-cooldown-ms"));
+        assertTrue(yaml.contains("require-independent-families: true"));
+        assertTrue(yaml.contains("minimum-independent-families: 2"));
+        assertTrue(yaml.contains("correlation-window-ms: 12000"));
+        assertTrue(yaml.contains("max-evidence-detail-length: 1200"));
+        assertTrue(yaml.contains("violation-retention-hours: 24"));
     }
 
     @Test void experimentalChecksAreDisabledByDefault() throws Exception {
