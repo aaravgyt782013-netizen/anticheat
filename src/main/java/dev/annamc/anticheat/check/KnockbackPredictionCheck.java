@@ -79,9 +79,9 @@ public final class KnockbackPredictionCheck implements Listener {
         Pending updated = p.withObservations(observations);
         pending.put(player.getUniqueId(), updated);
         int required = plugin.getConfig().getInt("checks.knockback.minimum-observations", 4);
-        if (observations >= required) {
+        if (observations >= required && age >= plugin.getConfig().getInt("checks.knockback.minimum-age-ms", 120)) {
             double threshold = plugin.getConfig().getDouble("checks.knockback.minimum-observed-displacement", 0.08);
-            if (displacement < threshold && age >= plugin.getConfig().getInt("checks.knockback.minimum-age-ms", 120)) {
+            if (displacement < threshold) {
                 violations.add(player, "knockback",
                         plugin.getConfig().getDouble("checks.knockback.violation-add", 1.0),
                         String.format(java.util.Locale.ROOT,
