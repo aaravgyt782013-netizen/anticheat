@@ -9,14 +9,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Basic OP audit guard. It audits visible commands and detects new operator UUIDs,
- * but cannot prove or detect every underlying exploit path.
- */
 public final class ForceOpGuard implements Listener {
     private final JavaPlugin plugin;
     private final EvidenceStore evidence;
@@ -34,17 +31,23 @@ public final class ForceOpGuard implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)) return;
-        String command = event.getMessage().trim().toLowerCase();
+        String command = event.getMessage().trim().toLowerCase(java.util.Locale.ROOT);
         if (isOpGrantCommand(command) && !event.getPlayer().hasPermission("annaac.admin")) {
             alert(event.getPlayer().getUniqueId(), event.getPlayer().getName(),
                     "unauthorized player attempted an OP-related command", event.getPlayer());
+            if (plugin.getConfig().getBoolean("checks.force-op.kick-player-on-attempt", false)) {
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    if (event.getPlayer().isOnline())
+                        event.getPlayer().kickPlayer("Unauthorized operator command attempt.");
+                });
+            }
         }
     }
 
     @EventHandler
     public void onConsoleCommand(ServerCommandEvent event) {
         if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)) return;
-        String command = event.getCommand().trim().toLowerCase();
+        String command = event.getCommand().trim().toLowerCase(java.util.Locale.ROOT);
         if (isOpGrantCommand(command)) {
             plugin.getLogger().warning("[ANNA AC SECURITY] Console executed an OP-related command. Verify this was authorized.");
         }
@@ -69,14 +72,16 @@ public final class ForceOpGuard implements Listener {
             String name = operator.getName() == null ? id.toString() : operator.getName();
             alert(id, name, "operator status was newly observed; actor is unknown", online);
         }
-        knownOperators.removeIf(id -> Bukkit.getOfflinePlayer(id).isOp() == false);
+        knownOperators.removeIf(id -> !Bukkit.getOfflinePlayer(id).isOp());
     }
 
     private void alert(UUID id, String name, String detail, Player player) {
         String message = "§cANNA AC SECURITY §8» §f" + name + " §7" + detail;
         plugin.getLogger().warning(message.replaceAll("§[0-9A-FK-ORa-fk-or]", ""));
-        for (Player staff : Bukkit.getOnlinePlayers()) {
-            if (staff.hasPermission("annaac.alerts")) staff.sendMessage(message);
+        if (plugin.getConfig().getBoolean("checks.force-op.alert", true)) {
+            for (Player staff : Bukkit.getOnlinePlayers()) {
+                if (staff.hasPermission("annaac.alerts")) staff.sendMessage(message);
+            }
         }
         evidence.record(id, name, "force-op-audit", 0.0, detail);
     }
