@@ -68,7 +68,7 @@ public final class ConfigurationDiagnostics {
         }
 
         if (enabledChecks == 0) notes.add("No detection checks are enabled; ANNA AC is currently not analysing gameplay.");
-        if (enabledActions == 0) notes.add("No automatic kick actions are enabled. This is the recommended initial public-server setting.");
+        if (enabledActions == 0) notes.add("No automatic punishment actions are enabled. This is the recommended initial public-server setting.");
         else notes.add("Automatic punishment is configured for " + enabledActions
                 + " check(s); validate each enabled detector on a staging server before public use.");
 
