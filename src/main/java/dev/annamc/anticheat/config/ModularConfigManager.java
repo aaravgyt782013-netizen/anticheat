@@ -6,6 +6,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -25,6 +27,8 @@ public final class ModularConfigManager {
 
     public void load() {
         FileConfiguration main = plugin.getConfig();
+        boolean mainDefaultsAdded = mergeMissingDefaults(main, "config.yml");
+        if (mainDefaultsAdded) plugin.saveConfig();
         File folder = plugin.getDataFolder();
         if (!folder.exists() && !folder.mkdirs()) {
             throw new IllegalStateException("Cannot create ANNA AC data directory: " + folder);
@@ -41,6 +45,15 @@ public final class ModularConfigManager {
         YamlConfiguration discord = YamlConfiguration.loadConfiguration(new File(folder, "discord.yml"));
         YamlConfiguration database = YamlConfiguration.loadConfiguration(new File(folder, "database.yml"));
         YamlConfiguration punishments = YamlConfiguration.loadConfiguration(new File(folder, "punishments.yml"));
+
+        boolean checksDefaultsAdded = mergeMissingDefaults(checks, "checks.yml");
+        boolean discordDefaultsAdded = mergeMissingDefaults(discord, "discord.yml");
+        boolean databaseDefaultsAdded = mergeMissingDefaults(database, "database.yml");
+        boolean punishmentsDefaultsAdded = mergeMissingDefaults(punishments, "punishments.yml");
+        if (checksDefaultsAdded) saveConfiguration(checks, "checks.yml");
+        if (discordDefaultsAdded) saveConfiguration(discord, "discord.yml");
+        if (databaseDefaultsAdded) saveConfiguration(database, "database.yml");
+        if (punishmentsDefaultsAdded) saveConfiguration(punishments, "punishments.yml");
 
         if (checksCreated) migrateSection(main, "checks", checks, "checks");
         if (discordCreated) migrateSection(main, "alerts", discord, "alerts");
@@ -86,6 +99,67 @@ public final class ModularConfigManager {
         overlay(database, "database", main);
         overlay(punishments, "punishments", main);
         plugin.getLogger().info("Loaded checks.yml, discord.yml, database.yml and punishments.yml.");
+    }
+
+    /**
+     * Adds newly introduced defaults without overwriting any explicit user value.
+     * This lets existing installations gain newly configurable options on upgrade.
+     */
+    private boolean mergeMissingDefaults(ConfigurationSection target, String resource) {
+        try (var stream = plugin.getResource(resource)) {
+            if (stream == null) {
+                plugin.getLogger().warning("Could not find bundled defaults for " + resource + ".");
+                return false;
+            }
+            YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(stream, StandardCharsets.UTF_8));
+            return mergeNode(target, defaults, "");
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not load bundled defaults for " + resource, e);
+        }
+    }
+
+    private boolean mergeNode(ConfigurationSection target, ConfigurationSection defaults, String parent) {
+        boolean changed = false;
+        for (String key : defaults.getKeys(false)) {
+            String path = parent.isEmpty() ? key : parent + "." + key;
+            if (defaults.isConfigurationSection(key)) {
+                if (!target.isConfigurationSection(path)) {
+                    if (target.contains(path)) {
+                        plugin.getLogger().warning("Cannot merge default section '" + path
+                                + "' because the existing value is not a section.");
+                        continue;
+                    }
+                    target.createSection(path);
+                    copyComments(defaults, target, key, path);
+                    changed = true;
+                }
+                ConfigurationSection targetChild = target.getConfigurationSection(path);
+                ConfigurationSection defaultChild = defaults.getConfigurationSection(key);
+                if (targetChild != null && defaultChild != null) {
+                    changed |= mergeNode(targetChild, defaultChild, path);
+                }
+            } else if (!target.contains(path)) {
+                copyComments(defaults, target, key, path);
+                target.set(path, defaults.get(key));
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    private void copyComments(ConfigurationSection source, ConfigurationSection target,
+                              String sourcePath, String targetPath) {
+        target.setComments(targetPath, source.getComments(sourcePath));
+        target.setInlineComments(targetPath, source.getInlineComments(sourcePath));
+    }
+
+    private void saveConfiguration(YamlConfiguration configuration, String name) {
+        try {
+            configuration.save(new File(plugin.getDataFolder(), name));
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not save upgraded configuration " + name, e);
+        }
     }
 
     private boolean ensureFile(String resource, boolean validatePunishments) {
