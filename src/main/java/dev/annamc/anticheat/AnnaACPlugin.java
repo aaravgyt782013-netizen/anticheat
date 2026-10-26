@@ -3,6 +3,7 @@ package dev.annamc.anticheat;
 import dev.annamc.anticheat.alert.AlertService;
 import dev.annamc.anticheat.check.ClickRateCheck;
 import dev.annamc.anticheat.config.ConfigurationDiagnostics;
+import dev.annamc.anticheat.config.ModularConfigManager;
 import dev.annamc.anticheat.check.FastBreakCheck;
 import dev.annamc.anticheat.check.CombatPatternCheck;
 import dev.annamc.anticheat.check.KnockbackPredictionCheck;
@@ -26,15 +27,17 @@ public final class AnnaACPlugin extends JavaPlugin {
     private EvidenceStore evidenceStore;
     private PacketEventsBridge packetBridge;
     private Messages messages;
+    private ModularConfigManager configManager;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         saveResource("messages.yml", false);
-        saveResource("punishments.yml", false);
         saveResource("messages_en.yml", false);
         saveResource("messages_hi.yml", false);
 
+        configManager = new ModularConfigManager(this);
+        configManager.load();
         messages = new Messages(this);
         evidenceStore = new EvidenceStore(this);
         AlertService alerts = new AlertService(this, evidenceStore, messages);
@@ -72,6 +75,16 @@ public final class AnnaACPlugin extends JavaPlugin {
             getLogger().warning("Configuration: " + note);
         }
         getLogger().info("ANNA AC enabled. Experimental checks are disabled by default; validate on a staging server.");
+    }
+
+    /** Reloads the base file and then overlays the separate editable configuration files. */
+    public void reloadAllConfiguration() {
+        reloadConfig();
+        if (configManager != null) configManager.load();
+        if (messages != null) messages.reload();
+        for (String note : ConfigurationDiagnostics.inspect(this)) {
+            getLogger().warning("Configuration: " + note);
+        }
     }
 
     @Override
