@@ -49,9 +49,13 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                 }
                 int enabledActions = 0;
                 for (String check : ConfigurationDiagnostics.DETECTORS) {
+                    String actionType = plugin.getConfig().getString("punishments.actions." + check + ".type", "KICK");
+                    if (actionType == null) actionType = "KICK";
+                    actionType = actionType.trim().toUpperCase(java.util.Locale.ROOT);
                     if (plugin.getConfig().getBoolean("punishments.enabled", true)
                             && plugin.getConfig().getBoolean("punishments.actions." + check + ".enabled", false)
-                            && plugin.getConfig().getBoolean("checks." + check + ".enabled", false)) {
+                            && plugin.getConfig().getBoolean("checks." + check + ".enabled", false)
+                            && java.util.Set.of("KICK", "WARN", "COMMAND").contains(actionType)) {
                         enabledActions++;
                     }
                 }
@@ -66,6 +70,9 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                         "status", packetEvents ? "installed" : "missing")));
                 sender.sendMessage(messages.get("commands.status-discord", java.util.Map.of(
                         "status", discordEnabled ? "enabled/configured" : "disabled/not configured")));
+                boolean forceOpEnabled = plugin.getConfig().getBoolean("checks.force-op.enabled", true);
+                sender.sendMessage(messages.get("commands.status-force-op", java.util.Map.of(
+                        "status", forceOpEnabled ? "enabled" : "disabled")));
                 sender.sendMessage(messages.get("commands.status-punishments", java.util.Map.of(
                         "status", enabledActions == 0 ? "disabled (safe mode)" : "enabled for " + enabledActions + " check(s)")));
                 for (String note : ConfigurationDiagnostics.inspect(plugin)) {
