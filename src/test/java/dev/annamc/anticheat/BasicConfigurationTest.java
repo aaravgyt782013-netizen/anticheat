@@ -41,7 +41,7 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("require-independent-families: true"));
         assertTrue(yaml.contains("minimum-independent-families: 2"));
         assertTrue(yaml.contains("minimum-signals-per-family: 2"));
-        assertTrue(yaml.contains('type: "KICK"'));
+        assertTrue(yaml.contains("type: \"KICK\""));
         assertTrue(yaml.contains("threshold-vl: 10.0"));
         assertTrue(yaml.contains("cooldown-ms: 30000"));
         assertTrue(yaml.contains("commands: []"));
