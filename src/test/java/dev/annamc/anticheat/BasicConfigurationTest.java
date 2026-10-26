@@ -56,6 +56,7 @@ class BasicConfigurationTest {
         String yaml = config();
         assertTrue(yaml.contains("cancel-player-op-commands: true"));
         assertTrue(yaml.contains("detect-op-grants: true"));
+        assertTrue(yaml.contains("persist-operator-baseline: true"));
         assertTrue(yaml.contains("protected-command-prefixes:"));
         assertTrue(yaml.contains("audit-console-op-commands: true"));
     }
