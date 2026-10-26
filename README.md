@@ -18,6 +18,13 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 
 Shared features: per-check violation levels/decay, alert throttling, console/staff/Discord alerts, JSONL evidence with retention caps, per-staff alert toggles, admin commands, pure detection-math unit tests, config regression tests, and GitHub Actions build/tests.
 
+## Anti-Xray and cheat coverage
+
+- [Paper Anti-Xray setup for ANNA MC](docs/ANTI_XRAY.md): recommended Paper world configuration, restart and verification guidance.
+- [Cheat coverage roadmap](docs/CHEAT_COVERAGE.md): current signals and planned coverage for behaviors associated with Meteor, Wurst, Baritone, and other clients.
+
+Anti-Xray is provided by Paper's block obfuscation, not by a client-brand detector inside ANNA AC. No server-side plugin can reliably identify every client or every feature; experimental checks must be validated before punishments are enabled.
+
 ## Configuration
 
 In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
