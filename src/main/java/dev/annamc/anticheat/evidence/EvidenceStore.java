@@ -111,10 +111,10 @@ public final class EvidenceStore {
         try {
             if (!Files.isRegularFile(file)) return;
             List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
-            int retentionDays = Math.max(0,
-                    plugin.getConfig().getInt("database.retention-days", 7));
-            int maxRecords = Math.max(1,
-                    plugin.getConfig().getInt("database.max-records-per-player", 5000));
+            int retentionDays = Math.max(0, Math.min(36500,
+                    plugin.getConfig().getInt("database.retention-days", 7)));
+            int maxRecords = Math.max(1, Math.min(20000,
+                    plugin.getConfig().getInt("database.max-records-per-player", 5000)));
             Instant cutoff = Instant.now().minus(retentionDays, ChronoUnit.DAYS);
             List<String> retained = new ArrayList<>(lines.size());
             for (String line : lines) {
