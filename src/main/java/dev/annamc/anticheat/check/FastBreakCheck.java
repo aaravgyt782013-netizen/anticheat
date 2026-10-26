@@ -70,6 +70,12 @@ public final class FastBreakCheck implements Listener {
         // The break-speed API is progress per server tick; ceil gives the
         // conservative number of full ticks expected to reach 100% progress.
         int expectedTicks = Math.max(1, (int) Math.ceil(1.0 / progressPerTick));
+        int minimumTicks = Math.max(1,
+                plugin.getConfig().getInt("checks.fast-break.minimum-expected-ticks", 2));
+        if (expectedTicks < minimumTicks) {
+            sessions.remove(id);
+            return;
+        }
         long now = System.currentTimeMillis();
         long timeout = Math.max(1000L,
                 plugin.getConfig().getLong("checks.fast-break.session-timeout-ms", 15000L));
