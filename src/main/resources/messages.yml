@@ -1,0 +1,6 @@
+alerts:
+  movement: "&bANNA AC &8» &f%player% &7failed &b%check% &8(VL: &f%vl%&8) &7%detail%"
+  op-grant: "&cANNA AC SECURITY &8» &fOP status changed for &c%player%&7. Actor may be unavailable."
+commands:
+  no-permission: "&cYou do not have permission."
+  reloaded: "&aConfiguration reloaded."
