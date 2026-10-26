@@ -2,6 +2,7 @@ package dev.annamc.anticheat;
 
 import dev.annamc.anticheat.alert.AlertService;
 import dev.annamc.anticheat.check.ClickRateCheck;
+import dev.annamc.anticheat.check.FastBreakCheck;
 import dev.annamc.anticheat.check.CombatPatternCheck;
 import dev.annamc.anticheat.check.KnockbackPredictionCheck;
 import dev.annamc.anticheat.check.MovementCheck;
@@ -44,6 +45,7 @@ public final class AnnaACPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ReachCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new WallHitCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new NukerBurstCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new FastBreakCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ClickRateCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new CombatPatternCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ScaffoldSignalCheck(this, violations), this);
