@@ -33,7 +33,7 @@ Anti-Xray is provided by Paper's block obfuscation, not by a client-brand detect
 
 ## Configuration
 
-In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
+In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. The wall-hit signal also exposes its sampling distance, occlusion ratio, and geometry margin. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
 
 All experimental detection checks and all automatic kick actions are disabled by default. Leave them that way until they pass staging validation. The legacy movement heuristic is also disabled by default.
 
