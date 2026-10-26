@@ -9,7 +9,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +30,7 @@ public final class ViolationManager implements Listener {
     private final Map<String, Long> lastAlert = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastActivity = new ConcurrentHashMap<>();
     private final Set<String> pendingKicks = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, java.util.Deque<Signal>> recentSignals = new ConcurrentHashMap<>();
 
     public ViolationManager(JavaPlugin plugin, AlertService alerts) {
         this.plugin = plugin;
@@ -48,6 +52,7 @@ public final class ViolationManager implements Listener {
         playerLevels.put(check, current);
         lastUpdate.put(key, now);
         lastActivity.put(id, now);
+        int independentFamilies = recordAndCountFamilies(id, check, now);
 
         double alertVl = finiteNonNegative(plugin.getConfig().getDouble("checks." + check + ".alert-vl", 1.0), 1.0);
         long alertCooldown = Math.max(0L, plugin.getConfig().getLong(
@@ -61,8 +66,13 @@ public final class ViolationManager implements Listener {
 
         double kickVl = finiteNonNegative(plugin.getConfig().getDouble("checks." + check + ".kick-vl", 12.0), 12.0);
         boolean actionEnabled = plugin.getConfig().getBoolean("punishments.actions." + check + ".enabled", false);
+        boolean requireIndependentFamilies = plugin.getConfig().getBoolean(
+                "punishments.require-independent-families", true);
+        int minimumFamilies = Math.max(1, Math.min(4,
+                plugin.getConfig().getInt("punishments.minimum-independent-families", 2)));
+        boolean corroborated = !requireIndependentFamilies || independentFamilies >= minimumFamilies;
         if (plugin.getConfig().getBoolean("punishments.enabled", true)
-                && actionEnabled && current >= kickVl && pendingKicks.add(key)) {
+                && actionEnabled && current >= kickVl && corroborated && pendingKicks.add(key)) {
             String reason = plugin.getConfig().getString(
                     "punishments.kick-message", "&cUnfair advantage detected.");
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -72,6 +82,11 @@ public final class ViolationManager implements Listener {
                     pendingKicks.remove(key);
                 }
             });
+        } else if (plugin.getConfig().getBoolean("settings.debug", false)
+                && plugin.getConfig().getBoolean("punishments.enabled", true)
+                && actionEnabled && current >= kickVl && !corroborated) {
+            plugin.getLogger().info("Kick suppressed for " + player.getName() + " / " + check
+                    + ": only " + independentFamilies + " independent signal family/families in the correlation window.");
         }
         return current;
     }
@@ -111,6 +126,23 @@ public final class ViolationManager implements Listener {
         return current;
     }
 
+    private int recordAndCountFamilies(UUID id, String check, long now) {
+        long windowMs = Math.max(1000L, Math.min(120000L,
+                plugin.getConfig().getLong("punishments.correlation-window-ms", 12000L)));
+        int maxSignals = Math.max(10, Math.min(2000,
+                plugin.getConfig().getInt("punishments.max-correlation-signals-per-player", 100)));
+        java.util.Deque<Signal> signals = recentSignals.computeIfAbsent(id, ignored -> new ArrayDeque<>());
+        synchronized (signals) {
+            long cutoff = now - windowMs;
+            while (!signals.isEmpty() && signals.peekFirst().time < cutoff) signals.removeFirst();
+            signals.addLast(new Signal(now, SignalCorrelation.familyFor(check)));
+            while (signals.size() > maxSignals) signals.removeFirst();
+            Set<String> families = new HashSet<>();
+            for (Signal signal : signals) families.add(signal.family);
+            return families.size();
+        }
+    }
+
     private static double finiteNonNegative(double value, double fallback) {
         return Double.isFinite(value) && value >= 0.0 ? value : fallback;
     }
@@ -135,11 +167,14 @@ public final class ViolationManager implements Listener {
     private void reset(UUID id) {
         levels.remove(id);
         lastActivity.remove(id);
+        recentSignals.remove(id);
         String prefix = id + ":";
         lastUpdate.keySet().removeIf(key -> key.startsWith(prefix));
         lastAlert.keySet().removeIf(key -> key.startsWith(prefix));
         pendingKicks.removeIf(key -> key.startsWith(prefix));
     }
+
+    private record Signal(long time, String family) {}
 
     @EventHandler public void onJoin(PlayerJoinEvent event) {
         // Do not clear violation levels on reconnect; decay is applied on read/add.
