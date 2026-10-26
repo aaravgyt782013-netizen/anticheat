@@ -6,6 +6,9 @@ import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import dev.annamc.anticheat.check.ViolationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayDeque;
@@ -19,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * violation updates are deferred to the main thread. Packet timing is not proof
  * of a timer cheat and this listener's checks are disabled by default.
  */
-public final class PacketEventsBridge {
+public final class PacketEventsBridge implements Listener {
     private final JavaPlugin plugin;
     private final ViolationManager violations;
     private final Map<UUID, Long> lastMovementPacket = new ConcurrentHashMap<>();
@@ -104,6 +107,17 @@ public final class PacketEventsBridge {
             }
         };
         PacketEvents.getAPI().getEventManager().registerListener(listener);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        UUID id = event.getPlayer().getUniqueId();
+        lastMovementPacket.remove(id);
+        movementStreamStarted.remove(id);
+        fastIntervals.remove(id);
+        packetTimes.remove(id);
+        lastFlag.remove(id);
+        lastTimerFlag.remove(id);
     }
 
     public void unregister() {
