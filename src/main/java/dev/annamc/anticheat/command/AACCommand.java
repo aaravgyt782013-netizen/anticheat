@@ -96,8 +96,16 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(AlertService.color("&cPlugin integrity monitoring is disabled in security.yml."));
                     return true;
                 }
-                annaAc.getPluginIntegrityMonitor().scanNow("manual");
-                sender.sendMessage(messages.get("commands.security-scan-started"));
+                if (args.length >= 2 && args[1].equalsIgnoreCase("approve")) {
+                    if (sender instanceof Player && !sender.hasPermission("annaac.security.baseline-approve")) {
+                        return deny(sender);
+                    }
+                    annaAc.getPluginIntegrityMonitor().approveCurrentBaseline(sender.getName());
+                    sender.sendMessage(messages.get("commands.security-baseline-approval-started"));
+                } else {
+                    annaAc.getPluginIntegrityMonitor().scanNow("manual");
+                    sender.sendMessage(messages.get("commands.security-scan-started"));
+                }
             }
             case "check" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
@@ -178,6 +186,9 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 2 && args[0].equalsIgnoreCase("securityscan"))
+            return List.of("approve").stream()
+                    .filter(s -> s.startsWith(args[1].toLowerCase(java.util.Locale.ROOT))).toList();
         if (args.length == 1) return List.of("alerts", "status", "securityscan", "check", "history", "reload", "debug", "testdiscord").stream()
                 .filter(s -> s.startsWith(args[0].toLowerCase(java.util.Locale.ROOT))).toList();
         if (args.length == 2 && List.of("check", "history", "debug").contains(args[0].toLowerCase(java.util.Locale.ROOT)))
