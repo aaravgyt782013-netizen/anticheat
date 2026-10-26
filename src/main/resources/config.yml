@@ -52,6 +52,14 @@ punishments:
   enabled: true
   # Message shown to a player when a configured check kicks them.
   kick-message: "&cUnfair advantage detected. If this is a mistake, contact staff."
+  # Require evidence from independent detector families before an automatic kick; safer for public servers.
+  require-independent-families: true
+  # Number of independent families required when require-independent-families is true (1–4).
+  minimum-independent-families: 2
+  # Time window in milliseconds used to correlate distinct detector families (effective range 1000–120000).
+  correlation-window-ms: 12000
+  # Maximum recent signals retained per player for correlation, protecting memory use.
+  max-correlation-signals-per-player: 100
   # Per-check punishment switches. Each check must be enabled here as well as in its detector settings.
   actions:
     # Basic horizontal movement-distance heuristic. Not a complete Minecraft physics simulator.
