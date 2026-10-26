@@ -40,7 +40,7 @@ public final class AntiNukeGuard implements Listener {
         this.alerts = alerts;
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBulkCommand(PlayerCommandPreprocessEvent event) {
         if (!enabled("block-bulk-commands")) return;
         Player player = event.getPlayer();
@@ -86,7 +86,7 @@ public final class AntiNukeGuard implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
         if (!enabled("block-break-rate-limit")) return;
         Player p = event.getPlayer();
@@ -120,12 +120,12 @@ public final class AntiNukeGuard implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityExplosion(EntityExplodeEvent event) {
         checkExplosion(event.blockList().size(), event.getLocation().getWorld(), "entity explosion", event::setCancelled);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockExplosion(BlockExplodeEvent event) {
         checkExplosion(event.blockList().size(), event.getBlock().getWorld(), "block explosion", event::setCancelled);
     }
