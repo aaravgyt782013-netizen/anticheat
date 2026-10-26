@@ -79,6 +79,7 @@ checks:
     minimum-observations: 4
     minimum-age-ms: 120
     minimum-observed-displacement: 0.08
+    minimum-forward-projection: 0.04
     violation-add: 1.0
     violation-decay-per-second: 0.25
     alert-vl: 2.0
