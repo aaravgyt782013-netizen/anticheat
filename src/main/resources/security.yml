@@ -1,0 +1,59 @@
+# Server protection, destructive-action limits, and plugin integrity monitoring.
+security:
+  antinuke:
+    # Master switch for all anti-nuke protections in this section.
+    enabled: true
+    # Block known bulk world-edit commands issued by players unless they have an explicit bypass permission.
+    block-bulk-commands: true
+    # Player permissions allowed to use protected bulk-edit commands. Keep this list narrow.
+    allow-bulk-command-permissions: [annaac.security.bypass]
+    # Destructive command labels that are blocked for untrusted players (case-insensitive).
+    protected-bulk-command-labels: [fill, minecraft:fill, setblock, minecraft:setblock, clone, minecraft:clone, //set, //replace, //regen, //paste, //cut, //move, //stack, //overlay, //naturalize, //flora, //drain]
+    # Optionally kick a player after a blocked bulk command. Disabled to avoid punishment from typos.
+    kick-on-blocked-bulk-command: false
+    # Message used only when kick-on-blocked-bulk-command is enabled.
+    blocked-command-kick-message: "&cA destructive command was blocked by server security."
+    # Enable a rolling completed-block-break rate limiter. Keep disabled until tuned for your server.
+    block-break-rate-limit: false
+    # Window used for the completed-block-break count.
+    block-break-window-ms: 2000
+    # Maximum completed block-break events per player inside the window before rate limiting.
+    max-block-breaks-per-window: 120
+    # Duration in milliseconds to suppress further block-break events after a limit is exceeded.
+    block-break-block-ms: 3000
+    # Cancel explosions whose affected-block list exceeds this maximum.
+    explosion-block-limit: true
+    # Maximum blocks one explosion may affect before it is cancelled (0 cancels all block-damaging explosions).
+    max-explosion-affected-blocks: 250
+    # Worlds excluded from block-break rate limits and explosion limits. Empty applies to all worlds.
+    ignored-worlds: []
+    # Cooldown between repeated security alerts for the same player.
+    alert-cooldown-ms: 5000
+
+  plugin-monitor:
+    # Master switch for hash inventory, lifecycle auditing, and static risk scanning.
+    enabled: true
+    # Audit plugins that enable or disable after ANNA AC starts.
+    audit-plugin-lifecycle: true
+    # Detect new, changed, or missing JARs compared with the saved owner-reviewed hash baseline.
+    integrity-hash-enabled: true
+    # Alert when a new JAR appears after the first baseline was generated.
+    alert-new-plugin-jars: true
+    # Alert when an existing JAR's SHA-256 changes.
+    alert-changed-plugin-jars: true
+    # Alert when a JAR recorded in the baseline disappears.
+    alert-removed-plugin-jars: true
+    # Scan class constants for combinations of potentially dangerous capabilities. This is heuristic, not proof of malware.
+    static-scan-enabled: true
+    # Risk score required to report a JAR for manual review (effective range 3–100).
+    minimum-risk-score: 5
+    # Delay before the first scan so plugins have finished starting.
+    initial-scan-delay-ticks: 100
+    # Interval between full plugin-directory scans in seconds (effective range 60–86400).
+    scan-interval-seconds: 300
+    # Maximum decompressed class bytes scanned from one JAR (effective range 100000–64000000).
+    max-scan-bytes-per-jar: 16000000
+    # Extra plugin files intentionally excluded from hash alerts and static scanning. Use exact JAR filenames.
+    ignore-plugin-files: []
+    # Send a summary for each periodic scan. Keep false to avoid filling security channels; manual scans always report.
+    report-scan-summary: false
