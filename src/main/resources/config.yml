@@ -3,6 +3,7 @@ settings:
   debug: false
   evidence-retention-days: 7
   max-evidence-records-per-player: 5000
+  ignored-worlds: []
 
 alerts:
   console: true
@@ -30,6 +31,9 @@ checks:
     enabled: true
     alert: true
     alert-cooldown-ms: 3000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
     setback: false
     max-horizontal-distance-per-tick: 1.25
     violation-add: 1.0
@@ -41,6 +45,9 @@ checks:
     enabled: false
     alert: true
     alert-cooldown-ms: 3000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
     max-distance: 3.6
     violation-add: 1.0
     violation-decay-per-second: 0.35
@@ -51,6 +58,9 @@ checks:
     enabled: false
     alert: true
     alert-cooldown-ms: 3000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
     max-cps: 24
     flag-cooldown-ms: 1500
     violation-add: 1.0
@@ -62,6 +72,9 @@ checks:
     enabled: false
     alert: true
     alert-cooldown-ms: 3000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
     minimum-downward-pitch: 65.0
     min-horizontal-distance: 0.8
     violation-add: 0.25
@@ -73,6 +86,9 @@ checks:
     enabled: false
     alert: true
     alert-cooldown-ms: 3000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
     minimum-interval-ms: 5
     sample-window: 40
     violation-add: 1.0
