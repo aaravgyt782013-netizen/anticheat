@@ -30,7 +30,7 @@ public final class ClickRateCheck implements Listener {
 
     @EventHandler
     public void onSwing(PlayerAnimationEvent event) {
-        if (!plugin.getConfig().getBoolean("checks.click-rate.enabled", false)) return;
+        if (CheckUtil.shouldSkip(plugin, event.getPlayer(), "click-rate")) return;
         Player player = event.getPlayer();
         if (player.hasPermission("annaac.bypass")) return;
         long now = System.nanoTime();
