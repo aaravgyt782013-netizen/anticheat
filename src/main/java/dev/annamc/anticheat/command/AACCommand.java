@@ -120,7 +120,7 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
                     .filter(n -> n.toLowerCase(java.util.Locale.ROOT).startsWith(args[1].toLowerCase(java.util.Locale.ROOT))).toList();
         if (args.length == 3 && args[0].equalsIgnoreCase("check"))
-            return List.of("movement", "reach", "wall-hit", "click-rate", "scaffold-signal", "packet-rate")
+            return List.of("movement", "reach", "wall-hit", "nuker-burst", "click-rate", "scaffold-signal", "packet-rate")
                     .stream().filter(s -> s.startsWith(args[2].toLowerCase(java.util.Locale.ROOT))).toList();
         return List.of();
     }
