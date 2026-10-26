@@ -54,6 +54,19 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 
 These are signals, not guaranteed identification of Meteor, Wurst, Baritone, or any other client. Several are experimental heuristics. See `CHEAT_COVERAGE.md` for the current/planned coverage split.
 
+## Per-check punishment actions
+
+Edit `punishments.yml` under `punishments.actions.<check>`. Every action is disabled by default.
+
+- `enabled`: master per-check action toggle; it must be true alongside global `punishments.enabled` and the detector itself.
+- `type`: `KICK` disconnects the player, `WARN` sends a configured warning, `COMMAND` dispatches configured console commands, and `NONE` records no action.
+- `threshold-vl`: independent violation-level threshold for the action.
+- `cooldown-ms`: minimum delay before the same player's check can trigger the action again.
+- `message`: custom KICK/WARN message. Available placeholders: `%player%`, `%uuid%`, `%check%`, and `%vl%`.
+- `commands`: used only by `COMMAND`. These run as console, so enter only trusted commands you deliberately want ANNA AC to execute. The same placeholders are supported. An empty list does nothing and generates a configuration warning.
+
+Automatic kicks additionally require the configured number of independent detector families, with repeated signals per family. This is a false-positive safety gate, not proof of a cheat. Keep detector actions off until staging tests and staff review are complete.
+
 ## Reload and permissions
 
 - `/annaac status`: show enabled detectors, PacketEvents availability, Discord configuration, automatic-kick state, and configuration warnings; requires `annaac.admin`.
