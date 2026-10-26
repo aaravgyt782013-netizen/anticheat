@@ -27,6 +27,8 @@ security:
     max-explosion-affected-blocks: 250
     # Worlds excluded from block-break rate limits and explosion limits. Empty applies to all worlds.
     ignored-worlds: []
+    # Audit console usage of bulk/destructive commands without blocking console operations.
+    audit-console-bulk-commands: true
     # Cooldown between repeated security alerts for the same player.
     alert-cooldown-ms: 5000
 
