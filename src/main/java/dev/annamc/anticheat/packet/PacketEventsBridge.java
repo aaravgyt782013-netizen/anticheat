@@ -23,6 +23,7 @@ public final class PacketEventsBridge {
     private final JavaPlugin plugin;
     private final ViolationManager violations;
     private final Map<UUID, Long> lastMovementPacket = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> movementStreamStarted = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> fastIntervals = new ConcurrentHashMap<>();
     private final Map<UUID, Deque<Long>> packetTimes = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastFlag = new ConcurrentHashMap<>();
@@ -48,6 +49,7 @@ public final class PacketEventsBridge {
                 long nowMs = nowNanos / 1_000_000L;
                 Long previous = lastMovementPacket.put(id, nowNanos);
                 long intervalMs = previous == null ? Long.MAX_VALUE : (nowNanos - previous) / 1_000_000L;
+                if (previous == null || intervalMs > 1500L) movementStreamStarted.put(id, nowMs);
                 long minimum = plugin.getConfig().getLong("checks.packet-rate.minimum-interval-ms", 5);
                 int fast = intervalMs < minimum ? fastIntervals.merge(id, 1, Integer::sum)
                         : fastIntervals.compute(id, (key, value) -> value == null ? 0 : Math.max(0, value - 1));
@@ -78,8 +80,7 @@ public final class PacketEventsBridge {
                 }
 
                 if (player != null && plugin.getConfig().getBoolean("checks.timer.enabled", false)) {
-                    long firstPacket;
-                    synchronized (times) { firstPacket = times.isEmpty() ? nowMs : times.peekFirst(); }
+                    long firstPacket = movementStreamStarted.getOrDefault(id, nowMs);
                     long sampleDuration = plugin.getConfig().getLong("checks.timer.minimum-sample-duration-ms", 1200L);
                     int timerMaxPps = plugin.getConfig().getInt("checks.timer.max-movement-packets-per-second", 23);
                     long timerCooldown = plugin.getConfig().getLong("checks.timer.flag-cooldown-ms", 5000L);
@@ -101,6 +102,7 @@ public final class PacketEventsBridge {
     public void unregister() {
         if (listener != null) PacketEvents.getAPI().getEventManager().unregisterListener(listener);
         lastMovementPacket.clear();
+        movementStreamStarted.clear();
         fastIntervals.clear();
         packetTimes.clear();
         lastFlag.clear();
