@@ -15,9 +15,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * PacketEvents telemetry for unusually fast movement packet streams.
- * This is not a deterministic timer check: proxies, client versions and packet
- * coalescing affect timing, so the check is disabled by default.
+ * PacketEvents telemetry for fast movement streams. Bukkit player lookups and
+ * violation updates are deferred to the main thread. Packet timing is not proof
+ * of a timer cheat and this listener's checks are disabled by default.
  */
 public final class PacketEventsBridge {
     private final JavaPlugin plugin;
@@ -39,7 +39,8 @@ public final class PacketEventsBridge {
         listener = new PacketListenerAbstract() {
             @Override
             public void onPacketReceive(PacketReceiveEvent event) {
-                if (!plugin.getConfig().getBoolean("checks.packet-rate.enabled", false)) return;
+                if (!plugin.getConfig().getBoolean("checks.packet-rate.enabled", false)
+                        && !plugin.getConfig().getBoolean("checks.timer.enabled", false)) return;
                 String type = String.valueOf(event.getPacketType()).toUpperCase(java.util.Locale.ROOT);
                 if (!(type.contains("PLAYER_POSITION") || type.contains("PLAYER_ROTATION")
                         || type.endsWith("FLYING") || type.contains("PLAYER_POSITION_AND_ROTATION"))) return;
@@ -62,24 +63,27 @@ public final class PacketEventsBridge {
                     while (!times.isEmpty() && times.peekFirst() < cutoff) times.removeFirst();
                     pps = times.size();
                 }
-                int maxPps = plugin.getConfig().getInt("checks.packet-rate.max-movement-packets-per-second", 45);
-                int sampleWindow = plugin.getConfig().getInt("checks.packet-rate.sample-window", 40);
-                long cooldown = plugin.getConfig().getLong("checks.packet-rate.flag-cooldown-ms", 3000L);
-                long previousFlag = lastFlag.getOrDefault(id, 0L);
-                Player player = Bukkit.getPlayer(id);
-                if ((fast >= sampleWindow || dev.annamc.anticheat.check.DetectionMath.exceedsPacketRate(pps, maxPps))
-                        && nowMs - previousFlag >= cooldown) {
-                    lastFlag.put(id, nowMs);
-                    fastIntervals.put(id, 0);
-                    if (player != null) {
+
+                if (plugin.getConfig().getBoolean("checks.packet-rate.enabled", false)) {
+                    int maxPps = plugin.getConfig().getInt("checks.packet-rate.max-movement-packets-per-second", 45);
+                    int sampleWindow = plugin.getConfig().getInt("checks.packet-rate.sample-window", 40);
+                    long cooldown = plugin.getConfig().getLong("checks.packet-rate.flag-cooldown-ms", 3000L);
+                    long previousFlag = lastFlag.getOrDefault(id, 0L);
+                    if ((fast >= sampleWindow || dev.annamc.anticheat.check.DetectionMath.exceedsPacketRate(pps, maxPps))
+                            && nowMs - previousFlag >= cooldown) {
+                        lastFlag.put(id, nowMs);
+                        fastIntervals.put(id, 0);
                         String detail = "movement packet telemetry: rolling-pps=" + pps
                                 + ", fast-interval-streak=" + fast
                                 + "; review proxy, ping and client before action";
-                        Bukkit.getScheduler().runTask(plugin, () -> violations.add(player, "packet-rate", 1.0, detail));
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            Player player = Bukkit.getPlayer(id);
+                            if (player != null) violations.add(player, "packet-rate", 1.0, detail);
+                        });
                     }
                 }
 
-                if (player != null && plugin.getConfig().getBoolean("checks.timer.enabled", false)) {
+                if (plugin.getConfig().getBoolean("checks.timer.enabled", false)) {
                     long firstPacket = movementStreamStarted.getOrDefault(id, nowMs);
                     long sampleDuration = plugin.getConfig().getLong("checks.timer.minimum-sample-duration-ms", 1200L);
                     int timerMaxPps = plugin.getConfig().getInt("checks.timer.max-movement-packets-per-second", 23);
@@ -90,8 +94,11 @@ public final class PacketEventsBridge {
                         lastTimerFlag.put(id, nowMs);
                         String detail = "sustained movement packet rate pps=" + pps
                                 + " max=" + timerMaxPps + "; telemetry only, validate ping/proxy/client";
-                        Bukkit.getScheduler().runTask(plugin, () -> violations.add(player, "timer",
-                                plugin.getConfig().getDouble("checks.timer.violation-add", 1.0), detail));
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            Player player = Bukkit.getPlayer(id);
+                            if (player != null) violations.add(player, "timer",
+                                    plugin.getConfig().getDouble("checks.timer.violation-add", 1.0), detail);
+                        });
                     }
                 }
             }
