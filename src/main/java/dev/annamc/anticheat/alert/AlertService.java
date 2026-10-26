@@ -64,6 +64,16 @@ public final class AlertService {
         evidence.record(player.getUniqueId(), player.getName(), check, vl, detail);
     }
 
+    public boolean testDiscord(String requestedBy) {
+        if (!plugin.getConfig().getBoolean("alerts.discord-enabled", false)) return false;
+        String webhook = plugin.getConfig().getString("alerts.discord-webhook", "");
+        if (webhook == null || webhook.isBlank()) return false;
+        String detail = "Manual webhook test requested by " + requestedBy;
+        String plain = "ANNA AC Discord integration test • " + detail;
+        sendDiscord("CONFIG TEST", new UUID(0L, 0L), "discord-test", 0.0, detail, plain);
+        return true;
+    }
+
     public void sendSecurityAlert(String playerName, UUID playerId, String check, String detail) {
         String safeDetail = detail == null ? "" : detail;
         String message = messages.get("alerts.security-detail", Map.of("player", playerName, "detail", safeDetail));
