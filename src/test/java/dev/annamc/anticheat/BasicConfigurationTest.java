@@ -17,6 +17,9 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("minimum-observed-displacement"));
         assertTrue(yaml.contains("rotation-quantization-degrees"));
         assertTrue(yaml.contains("max-movement-packets-per-second"));
+        assertTrue(yaml.contains("maximum-hit-angle-degrees"));
+        assertTrue(yaml.contains("minimum-consecutive-placements"));
+        assertTrue(yaml.contains("ping-window-extension-per-ms"));
         assertTrue(yaml.contains("violation-decay-per-second"));
         assertTrue(yaml.contains("kick-vl"));
         assertTrue(yaml.contains("alert-cooldown-ms"));
@@ -32,6 +35,7 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("scaffold-signal:\n    enabled: false"));
         assertTrue(yaml.contains("no-fall:\n    enabled: false"));
         assertTrue(yaml.contains("packet-rate:\n    enabled: false"));
+        assertTrue(yaml.contains("timer:\n    enabled: false"));
     }
 
     @Test void allPunishmentsAreIndividuallyConfigurableAndDisabledByDefault() throws Exception {
@@ -45,6 +49,7 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("scaffold-signal:\n      enabled: false"));
         assertTrue(yaml.contains("no-fall:\n      enabled: false"));
         assertTrue(yaml.contains("packet-rate:\n      enabled: false"));
+        assertTrue(yaml.contains("timer:\n      enabled: false"));
     }
 
     @Test void forceOpHasCommandBlockingAndAuditControls() throws Exception {
