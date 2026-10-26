@@ -76,6 +76,22 @@ public final class ConfigurationDiagnostics {
             notes.add("PacketEvents is missing, but packet-rate, timer, or click-rate packet telemetry is enabled; those packet signals will not function.");
         }
 
+        boolean antiNukeEnabled = plugin.getConfig().getBoolean("security.antinuke.enabled", true);
+        if (antiNukeEnabled && plugin.getConfig().getBoolean("security.antinuke.block-bulk-commands", true)
+                && plugin.getConfig().getStringList("security.antinuke.allow-bulk-command-permissions").isEmpty()) {
+            notes.add("Anti-nuke bulk command protection is enabled with no bypass permissions; all listed bulk commands will be blocked for players.");
+        }
+        if (plugin.getConfig().getBoolean("security.plugin-monitor.enabled", true)
+                && plugin.getConfig().getBoolean("security.plugin-monitor.integrity-hash-enabled", true)
+                && !plugin.getDataFolder().toPath().resolve("plugin-hashes.yml").toFile().isFile()) {
+            notes.add("Plugin hash baseline does not exist yet; the first scan will inventory current JARs. This is not a malware verdict—review plugin origins before trusting the baseline.");
+        }
+        if (plugin.getConfig().getBoolean("security.plugin-monitor.enabled", true)
+                && !plugin.getConfig().getBoolean("security.plugin-monitor.static-scan-enabled", true)
+                && !plugin.getConfig().getBoolean("security.plugin-monitor.integrity-hash-enabled", true)) {
+            notes.add("Plugin monitor is enabled but both static risk scanning and hash integrity monitoring are disabled.");
+        }
+
         boolean discordEnabled = plugin.getConfig().getBoolean("alerts.discord-enabled", false);
         String webhook = plugin.getConfig().getString("alerts.discord-webhook", "");
         if (discordEnabled && (webhook == null || !isDiscordWebhook(webhook))) {
