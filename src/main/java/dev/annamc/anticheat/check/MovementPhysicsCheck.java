@@ -36,6 +36,11 @@ public final class MovementPhysicsCheck implements Listener {
         samples.remove(event.getPlayer().getUniqueId());
     }
 
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        samples.remove(event.getPlayer().getUniqueId());
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
