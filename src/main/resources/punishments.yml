@@ -1,43 +1,68 @@
-# Legacy compatibility file. Current punishment controls are read from config.yml.
-# Keep every action disabled until the matching detector passes staging validation.
-actions:
-  movement:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  movement-physics:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  timer:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  knockback:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  reach:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  click-rate:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  combat-pattern:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  scaffold-signal:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  no-fall:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
-  packet-rate:
-    enabled: false
-    type: KICK
-    require-repeated-violations: true
+# Automatic punishment settings. Start with actions disabled until staging validation is complete.
+punishments:
+  # Master switch for all automatic punishment actions configured below.
+  enabled: true
+  # Message shown to a player when a configured check kicks them.
+  kick-message: "&cUnfair advantage detected. If this is a mistake, contact staff."
+  # Require evidence from independent detector families before an automatic kick; safer for public servers.
+  require-independent-families: true
+  # Number of independent families required when require-independent-families is true (1–4).
+  minimum-independent-families: 2
+  # Time window in milliseconds used to correlate distinct detector families (effective range 1000–120000).
+  correlation-window-ms: 12000
+  # Maximum recent signals retained per player for correlation, protecting memory use.
+  max-correlation-signals-per-player: 100
+  # Per-check punishment switches. Each check must be enabled here as well as in its detector settings.
+  actions:
+    # Basic horizontal movement-distance heuristic. Not a complete Minecraft physics simulator.
+    movement:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # Experimental movement-envelope heuristic; may flag legitimate movement and is disabled by default.
+    movement-physics:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # Packet-rate timing signal, not a validated simulation of client timer mechanics.
+    timer:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # Experimental check for movement after server-applied velocity.
+    knockback:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # Approximate distance-to-target hitbox check; not full historical hitbox compensation.
+    reach:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # Configurable wall-occlusion signal. It can be affected by latency and attack geometry.
+    wall-hit:
+      # Keep this detector off until validated in your server's staging environment.
+      enabled: false
+    # Block-break burst detector action, disabled until its thresholds pass staging tests.
+    nuker-burst:
+      # Keep automatic punishment disabled for this heuristic.
+      enabled: false
+    # FastBreak repeated timing signal action, disabled until validated on this server.
+    fast-break:
+      # Keep automatic punishment disabled until the detector passes mining/effects tests.
+      enabled: false
+    # Arm-swing/click-rate signal. High CPS alone is not proof of cheating.
+    click-rate:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # Experimental rotation and hit-pattern signal; review evidence before punishment.
+    combat-pattern:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # Experimental repeated placement-angle signal; legitimate bridging can look similar.
+    scaffold-signal:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # Correlates a large fall and landing with observed fall damage; protection plugins may affect results.
+    no-fall:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
+    # PacketEvents-based movement packet-rate signal. Requires compatible PacketEvents.
+    packet-rate:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
+      enabled: false
