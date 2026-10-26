@@ -1,227 +1,439 @@
+# General plugin settings.
 settings:
+  # Text shown before ANNA AC messages. Supports Minecraft & color codes.
   prefix: "&8[&bANNA AC&8] &r"
+  # Language for plugin messages: en = English, hi = Hindi.
   language: "en" # Supported: en, hi
+  # Print extra diagnostic information to the server console. Keep false normally.
   debug: false
+  # How many days to retain evidence files before cleanup (if cleanup is implemented).
   evidence-retention-days: 7
+  # Configured cap for evidence records per player.
   max-evidence-records-per-player: 5000
+  # World names where checks should not run. Empty means no worlds are ignored.
   ignored-worlds: []
 
+# Where ANNA AC sends alerts.
 alerts:
+  # Send detector alerts to the server console.
   console: true
+  # Send detector alerts to online staff with annaac.alerts permission.
   staff-chat: true
   # Create a Discord channel webhook and paste its URL here. Never publish it or share it in screenshots.
+  # Enable outbound Discord webhook alerts.
   discord-enabled: false
+  # Private Discord channel webhook URL. Never share or commit this secret.
   discord-webhook: ""
+  # Display name used by the Discord webhook.
   discord-username: "ANNA AC | Security Alerts"
+  # Optional HTTPS image URL for the webhook avatar. Empty uses Discord's default.
   discord-avatar-url: ""
+  # Send alerts as rich Discord embeds instead of plain text.
   discord-embed-enabled: true
+  # Decimal RGB color value for Discord embeds (3447003 is blue).
   discord-embed-color: 3447003
+  # Include the player's UUID in Discord alerts.
   discord-include-player-uuid: false
+  # Include detector evidence details in Discord alerts.
   discord-include-detail: true
   # Keep empty to avoid mentioning a role. If set, this role ID is explicitly mentioned.
+  # Optional numeric Discord role ID to mention. Empty disables role mentions.
   discord-role-mention-id: ""
+  # Maximum time allowed for each webhook request; bounded by the plugin.
   discord-timeout-seconds: 6
 
+# Automatic punishment settings. Start with actions disabled until staging validation is complete.
 punishments:
+  # Enable automatic punishment for this check. Keep false until staging validation is complete.
   enabled: true
+  # Message shown to a player when a configured check kicks them.
   kick-message: "&cUnfair advantage detected. If this is a mistake, contact staff."
+  # Per-check punishment switches. Each check must be enabled here as well as in its detector settings.
   actions:
+    # Basic horizontal movement-distance heuristic. Not a complete Minecraft physics simulator.
     movement:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Experimental movement-envelope heuristic; may flag legitimate movement and is disabled by default.
     movement-physics:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Packet-rate timing signal, not a validated simulation of client timer mechanics.
     timer:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Experimental check for movement after server-applied velocity.
     knockback:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Approximate distance-to-target hitbox check; not full historical hitbox compensation.
     reach:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Arm-swing/click-rate signal. High CPS alone is not proof of cheating.
     click-rate:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Experimental rotation and hit-pattern signal; review evidence before punishment.
     combat-pattern:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Experimental repeated placement-angle signal; legitimate bridging can look similar.
     scaffold-signal:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Correlates a large fall and landing with observed fall damage; protection plugins may affect results.
     no-fall:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # PacketEvents-based movement packet-rate signal. Requires compatible PacketEvents.
     packet-rate:
+      # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
 
+# Configuration option: checks. Change only if you understand its effect.
 checks:
+  # Basic horizontal movement-distance heuristic. Not a complete Minecraft physics simulator.
   movement:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Horizontal movement distance threshold per event tick; tune carefully to avoid false positives.
     max-horizontal-distance-per-tick: 1.25
+    # Violation level (VL) added when this check flags.
     violation-add: 1.0
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.25
+    # VL at which alerts become eligible to be sent.
     alert-vl: 3.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 12.0
 
+  # Experimental movement-envelope heuristic; may flag legitimate movement and is disabled by default.
   movement-physics:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Baseline horizontal movement allowance used by the experimental heuristic.
     base-horizontal-per-tick: 0.72
+    # Movement allowance multiplier when sprinting.
     sprint-multiplier: 1.3
+    # Extra movement allowance per millisecond of measured ping.
     ping-slack-per-ms: 0.001
+    # Maximum extra movement allowance granted for ping.
     max-ping-slack: 0.75
+    # Extra allowance for movement affected by special blocks or terrain.
     special-block-allowance-per-tick: 0.18
+    # Discard or ignore movement samples separated by longer gaps than this.
     max-sample-gap-ms: 250
+    # How far observed movement must exceed the estimate before it is treated as an outlier.
     outlier-ratio: 2.2
+    # Number of consecutive outlier samples required before flagging.
     required-consecutive-outliers: 3
+    # Violation level (VL) added when this check flags.
     violation-add: 1.0
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
     alert-vl: 3.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 12.0
 
+  # Experimental check for movement after server-applied velocity.
   knockback:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 4000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Ignore knockback observations below this horizontal velocity.
     minimum-horizontal-velocity: 0.25
+    # Time window after velocity in which movement is observed.
     observation-window-ms: 350
+    # Additional observation-window time per millisecond of ping.
     ping-window-extension-per-ms: 0.5
+    # Maximum extra observation time allowed for ping.
     max-ping-window-extension-ms: 200
+    # Minimum movement observations required before evaluating a knockback response.
     minimum-observations: 4
+    # Wait this long after velocity before evaluating the response.
     minimum-age-ms: 120
+    # Legacy minimum displacement setting retained for compatibility.
     minimum-observed-displacement: 0.08
+    # Minimum movement projected along the applied velocity direction.
     minimum-forward-projection: 0.04
+    # Violation level (VL) added when this check flags.
     violation-add: 1.0
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.25
+    # VL at which alerts become eligible to be sent.
     alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Approximate distance-to-target hitbox check; not full historical hitbox compensation.
   reach:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Maximum approximate eye-to-target hitbox distance before adding violation.
     max-distance: 3.6
+    # Extra movement allowance per millisecond of measured ping.
     ping-slack-per-ms: 0.001
+    # Maximum extra movement allowance granted for ping.
     max-ping-slack: 0.20
+    # Violation level (VL) added when this check flags.
     violation-add: 1.0
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.35
+    # VL at which alerts become eligible to be sent.
     alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Arm-swing/click-rate signal. High CPS alone is not proof of cheating.
   click-rate:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Arm-swing events per second above which the check may flag; tune for your player base.
     max-cps: 24
+    # Minimum time between repeated flags from this check.
     flag-cooldown-ms: 1500
+    # Violation level (VL) added when this check flags.
     violation-add: 1.0
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
     alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Experimental rotation and hit-pattern signal; review evidence before punishment.
   combat-pattern:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 5000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Rotation-step granularity used to look for repeated aim patterns.
     rotation-quantization-degrees: 0.15
+    # Maximum angle between view direction and target direction used by this signal.
     maximum-hit-angle-degrees: 22.0
+    # Recent rotation history window used around attacks.
     rotation-window-ms: 180
+    # Additional angle tolerance per millisecond of ping.
     ping-angle-allowance-per-ms: 0.02
+    # Upper bound for ping-based angle tolerance.
     max-ping-angle-allowance: 8.0
+    # VL added for a suspicious hit-angle signal.
     hit-angle-violation-add: 0.5
+    # VL added for a repeated-rotation pattern signal.
     rotation-violation-add: 0.5
+    # Time window used to count repeated combat/placement patterns.
     pattern-window-ms: 5000
+    # Minimum attacks required before evaluating a combat pattern.
     minimum-hits: 12
+    # Minimum similar rotation steps before the pattern may flag.
     minimum-repeated-rotations: 7
+    # Violation level (VL) added when this check flags.
     violation-add: 0.5
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.2
+    # VL at which alerts become eligible to be sent.
     alert-vl: 1.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 8.0
 
+  # Experimental repeated placement-angle signal; legitimate bridging can look similar.
   scaffold-signal:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Minimum downward view angle for a placement to count toward this scaffold signal.
     minimum-downward-pitch: 65.0
+    # Minimum horizontal player movement associated with a placement.
     min-horizontal-distance: 0.8
+    # Minimum horizontal speed associated with a placement.
     minimum-horizontal-speed: 0.10
+    # Time window used to count repeated combat/placement patterns.
     pattern-window-ms: 1500
+    # Maximum pitch variation for placements to count as a repeated pattern.
     maximum-pitch-variance: 2.0
+    # Consecutive matching placements required before flagging.
     minimum-consecutive-placements: 8
+    # Violation level (VL) added when this check flags.
     violation-add: 0.25
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
     alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Correlates a large fall and landing with observed fall damage; protection plugins may affect results.
   no-fall:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 4000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Only evaluate falls at least this many blocks high.
     minimum-fall-distance: 4.0
+    # Time window after landing to look for expected fall-damage evidence.
     landing-observation-window-ms: 1500
+    # Ticks to wait after landing before evaluating damage correlation.
     landing-delay-ticks: 2
+    # Violation level (VL) added when this check flags.
     violation-add: 1.0
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.25
+    # VL at which alerts become eligible to be sent.
     alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # PacketEvents-based movement packet-rate signal. Requires compatible PacketEvents.
   packet-rate:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Movement packet intervals below this may contribute to a packet-rate signal.
     minimum-interval-ms: 5
+    # Number of recent packet intervals used in the rate estimate.
     sample-window: 40
+    # Movement packet-rate threshold for this telemetry check.
     max-movement-packets-per-second: 45
+    # Minimum time between repeated flags from this check.
     flag-cooldown-ms: 3000
+    # Violation level (VL) added when this check flags.
     violation-add: 1.0
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
     alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Packet-rate timing signal, not a validated simulation of client timer mechanics.
   timer:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: false
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
     alert-cooldown-ms: 5000
+    # World names where checks should not run. Empty means no worlds are ignored.
     ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
     ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
     exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Minimum elapsed time required before timer-rate telemetry is evaluated.
     minimum-sample-duration-ms: 1200
+    # Movement packet-rate threshold for this telemetry check.
     max-movement-packets-per-second: 23
+    # Minimum time between repeated flags from this check.
     flag-cooldown-ms: 5000
+    # Violation level (VL) added when this check flags.
     violation-add: 1.0
+    # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
     alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Security auditing for privileged player commands and changes to the operator list.
   force-op:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
     enabled: true
+    # Send alerts when this feature detects a possible violation.
     alert: true
+    # Block configured OP/permission-management commands issued by players without annaac.admin.
     cancel-player-op-commands: true
+    # Kick a player after a blocked privileged-command attempt. Off by default.
     kick-player-on-attempt: false
+    # Monitor the server operator list for changes.
     detect-op-grants: true
+    # Save known operator UUIDs across restarts to help identify new OP grants.
     persist-operator-baseline: true
+    # Log and alert when the console executes configured privilege-management commands.
     audit-console-op-commands: true
+    # Command labels/prefixes to audit or block. Add aliases used by your permission plugins.
     protected-command-prefixes: [op, deop, minecraft:op, minecraft:deop, bukkit:op, bukkit:deop, lp, luckperms, lpv, pex, permissions, manuadd]
