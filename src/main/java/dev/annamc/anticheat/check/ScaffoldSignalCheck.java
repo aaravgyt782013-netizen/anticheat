@@ -24,8 +24,7 @@ public final class ScaffoldSignalCheck implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
-        if (!plugin.getConfig().getBoolean("checks.scaffold-signal.enabled", false)
-                || player.hasPermission("annaac.bypass")
+        if (CheckUtil.shouldSkip(plugin, player, "scaffold-signal")
                 || player.getGameMode().name().equals("CREATIVE")
                 || player.isInsideVehicle()
                 || player.isGliding()) return;
