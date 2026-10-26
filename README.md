@@ -36,15 +36,15 @@ Anti-Xray is provided by Paper's block obfuscation, not by a client-brand detect
 
 ## Configuration
 
-In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. The wall-hit signal also exposes its sampling distance, occlusion ratio, and geometry margin. The Nuker burst signal exposes its rolling-window length, block threshold, evaluation interval, repeated-window requirement, and ignored material list. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
+Configuration is split into dedicated files: `config.yml` (global settings), `checks.yml` (per-detector options), `discord.yml` (Discord/staff alert delivery), `database.yml` (evidence storage and retention), `punishments.yml` (actions and correlation controls), and `messages_en.yml` / `messages_hi.yml` (languages). Every YAML option has an explanatory comment directly above it. In `checks.yml`, each detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. The wall-hit signal also exposes its sampling distance, occlusion ratio, and geometry margin. The Nuker burst signal exposes its rolling-window length, block threshold, evaluation interval, repeated-window requirement, and ignored material list. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
 
 All experimental detection checks and all automatic kick actions are disabled by default. Leave them that way until they pass staging validation. The legacy movement heuristic is also disabled by default.
 
 Force OP controls include `checks.force-op.cancel-player-op-commands`, `kick-player-on-attempt`, `detect-op-grants`, `audit-console-op-commands`, `persist-operator-baseline`, and a configurable `protected-command-prefixes` list. Review this list for the permission plugins and aliases actually installed on your server.
 
-Discord: set `alerts.discord-enabled: true` and `alerts.discord-webhook` to a private HTTPS webhook. Keep it secret.
+Discord: set `alerts.discord-enabled: true` and `alerts.discord-webhook` in `discord.yml` to a private HTTPS webhook. Keep it secret.
 
-Evidence JSONL files are stored under `plugins/ANNA-AC/evidence/`. Retention days and maximum records per player are configurable.
+Evidence JSONL files are stored under the directory configured by `database.evidence-directory` in `database.yml` (default: `plugins/ANNA-AC/evidence/`). Retention days, maximum records per player, maximum evidence detail length, and in-memory violation retention are configurable.
 
 ## Build
 
