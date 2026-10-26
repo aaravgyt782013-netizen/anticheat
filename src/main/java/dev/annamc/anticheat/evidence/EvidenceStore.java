@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 
+/** Asynchronous, bounded JSONL evidence storage. */
 public final class EvidenceStore {
     private final JavaPlugin plugin;
     private final AtomicLong writes = new AtomicLong();
@@ -33,23 +36,30 @@ public final class EvidenceStore {
     }
 
     public void record(UUID uuid, String player, String check, double vl, String detail) {
+        int maxDetailLength = Math.max(64,
+                plugin.getConfig().getInt("settings.max-evidence-detail-length", 1200));
         String line = "{\"time\":\"" + Instant.now() + "\",\"uuid\":\"" + uuid
-                + "\",\"player\":\"" + json(player) + "\",\"check\":\"" + json(check)
-                + "\",\"vl\":" + vl + ",\"detail\":\"" + json(detail) + "\"}" + System.lineSeparator();
-        writer.submit(() -> {
-            try {
-                Path dir = plugin.getDataFolder().toPath().resolve("evidence");
-                Files.createDirectories(dir);
-                Path file = dir.resolve(uuid + ".jsonl");
-                Files.writeString(file, line, StandardCharsets.UTF_8,
-                        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-                long count = writes.incrementAndGet();
-                if (count % 100 == 0) pruneFile(file);
-                if (count % 1000 == 0) pruneAll();
-            } catch (IOException e) {
-                plugin.getLogger().log(Level.WARNING, "Could not write evidence", e);
-            }
-        });
+                + "\",\"player\":\"" + escapeJson(truncate(player, 64)) + "\",\"check\":\""
+                + escapeJson(truncate(check, 64)) + "\",\"vl\":" + vl + ",\"detail\":\""
+                + escapeJson(truncate(detail, maxDetailLength)) + "\"}" + System.lineSeparator();
+        try {
+            writer.submit(() -> {
+                try {
+                    Path dir = plugin.getDataFolder().toPath().resolve("evidence");
+                    Files.createDirectories(dir);
+                    Path file = dir.resolve(uuid + ".jsonl");
+                    Files.writeString(file, line, StandardCharsets.UTF_8,
+                            StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                    long count = writes.incrementAndGet();
+                    if (count % 100 == 0) pruneFile(file);
+                    if (count % 1000 == 0) pruneAll();
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.WARNING, "Could not write evidence", e);
+                }
+            });
+        } catch (RejectedExecutionException shuttingDown) {
+            plugin.getLogger().fine("Evidence write skipped during plugin shutdown.");
+        }
     }
 
     public Path file(UUID uuid) {
@@ -71,8 +81,10 @@ public final class EvidenceStore {
         try {
             if (!Files.isRegularFile(file)) return;
             List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
-            int retentionDays = Math.max(0, plugin.getConfig().getInt("settings.evidence-retention-days", 7));
-            int maxRecords = Math.max(1, plugin.getConfig().getInt("settings.max-evidence-records-per-player", 5000));
+            int retentionDays = Math.max(0,
+                    plugin.getConfig().getInt("settings.evidence-retention-days", 7));
+            int maxRecords = Math.max(1,
+                    plugin.getConfig().getInt("settings.max-evidence-records-per-player", 5000));
             Instant cutoff = Instant.now().minus(retentionDays, ChronoUnit.DAYS);
             List<String> retained = new ArrayList<>(lines.size());
             for (String line : lines) {
@@ -112,10 +124,38 @@ public final class EvidenceStore {
 
     public void close() {
         writer.shutdown();
+        try {
+            if (!writer.awaitTermination(3, TimeUnit.SECONDS)) writer.shutdownNow();
+        } catch (InterruptedException interrupted) {
+            writer.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
-    private static String json(String s) {
-        return s.replace("\\", "\\\\").replace("\"", "\\\"")
-                .replace("\n", " ").replace("\r", " ");
+    static String escapeJson(String value) {
+        if (value == null) return "";
+        StringBuilder escaped = new StringBuilder(value.length() + 16);
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            switch (ch) {
+                case '\\' -> escaped.append("\\\\");
+                case '"' -> escaped.append("\\\"");
+                case '\b' -> escaped.append("\\b");
+                case '\f' -> escaped.append("\\f");
+                case '\n' -> escaped.append("\\n");
+                case '\r' -> escaped.append("\\r");
+                case '\t' -> escaped.append("\\t");
+                default -> {
+                    if (ch < 0x20) escaped.append(String.format(java.util.Locale.ROOT, "\\u%04x", (int) ch));
+                    else escaped.append(ch);
+                }
+            }
+        }
+        return escaped.toString();
+    }
+
+    private static String truncate(String value, int maxLength) {
+        if (value == null) return "";
+        return value.length() <= maxLength ? value : value.substring(0, maxLength);
     }
 }
