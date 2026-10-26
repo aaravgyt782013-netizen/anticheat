@@ -2,6 +2,7 @@ package dev.annamc.anticheat;
 
 import dev.annamc.anticheat.alert.AlertService;
 import dev.annamc.anticheat.check.ClickRateCheck;
+import dev.annamc.anticheat.config.ConfigurationDiagnostics;
 import dev.annamc.anticheat.check.FastBreakCheck;
 import dev.annamc.anticheat.check.CombatPatternCheck;
 import dev.annamc.anticheat.check.KnockbackPredictionCheck;
@@ -66,6 +67,9 @@ public final class AnnaACPlugin extends JavaPlugin {
             getLogger().info("PacketEvents detected; packet telemetry registered (experimental and disabled by default).");
         } else {
             getLogger().warning("PacketEvents is not installed. Packet telemetry is unavailable.");
+        }
+        for (String note : ConfigurationDiagnostics.inspect(this)) {
+            getLogger().warning("Configuration: " + note);
         }
         getLogger().info("ANNA AC enabled. Experimental checks are disabled by default; validate on a staging server.");
     }
