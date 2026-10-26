@@ -17,7 +17,7 @@ commands:
   security-baseline-approval-started: "%prefix%&eBaseline approval queued. Only use this after manually reviewing every plugin JAR."
   no-permission: "%prefix%&cYou do not have permission."
   reloaded: "%prefix%&aConfiguration and language messages reloaded."
-  usage: "%prefix%&7Usage: &f/annaac <status|alerts|check <player> [check]|history <player>|reload|debug <player>|testdiscord>"
+  usage: "%prefix%&7Usage: &f/annaac <status|securityscan [approve]|alerts|check <player> [check]|history <player>|reload|debug <player>|testdiscord>"
   player-offline: "%prefix%&cThat player must be online for this command."
   no-evidence: "%prefix%&7No evidence recorded for &f%player%&7."
   loading-history: "%prefix%&7Loading recent evidence for &f%player%&7..."
