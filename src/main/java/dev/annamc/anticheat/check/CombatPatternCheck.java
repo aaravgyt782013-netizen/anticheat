@@ -51,8 +51,8 @@ public final class CombatPatternCheck implements Listener {
 
         Pattern previous = patterns.getOrDefault(p.getUniqueId(), new Pattern(0, 0, 0, 0));
         double quantization = plugin.getConfig().getDouble("checks.combat-pattern.rotation-quantization-degrees", 0.15);
-        boolean same = Math.abs(rotation.yaw - previous.yaw) <= quantization
-                && Math.abs(rotation.pitch - previous.pitch) <= quantization;
+        boolean same = DetectionMath.sameRotationDelta(rotation.yaw, rotation.pitch,
+                previous.yaw, previous.pitch, quantization);
         int repeated = same ? previous.repeated + 1 : Math.max(0, previous.repeated - 1);
         int hits = previous.hits + 1;
         patterns.put(p.getUniqueId(), new Pattern(rotation.yaw, rotation.pitch, repeated, hits));
