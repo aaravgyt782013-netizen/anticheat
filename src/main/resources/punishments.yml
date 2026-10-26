@@ -1,0 +1,8 @@
+actions:
+  movement:
+    enabled: true
+    type: KICK
+    require-repeated-violations: true
+  packet-rate:
+    enabled: false
+    type: ALERT
