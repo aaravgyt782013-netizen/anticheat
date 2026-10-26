@@ -66,7 +66,10 @@ public final class KnockbackPredictionCheck implements Listener {
         Pending p = pending.get(player.getUniqueId());
         if (p == null) return;
         long age = System.currentTimeMillis() - p.startedAt;
-        int maxAge = plugin.getConfig().getInt("checks.knockback.observation-window-ms", 350);
+        int baseMaxAge = plugin.getConfig().getInt("checks.knockback.observation-window-ms", 350);
+        int pingExtension = (int) Math.min(plugin.getConfig().getInt("checks.knockback.max-ping-window-extension-ms", 200),
+                Math.max(0, player.getPing()) * plugin.getConfig().getDouble("checks.knockback.ping-window-extension-per-ms", 0.5));
+        int maxAge = baseMaxAge + pingExtension;
         if (age > maxAge) {
             pending.remove(player.getUniqueId());
             return;
