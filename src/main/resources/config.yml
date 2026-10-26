@@ -120,6 +120,10 @@ checks:
     ignored-permissions: []
     exempt-game-modes: [CREATIVE, SPECTATOR]
     rotation-quantization-degrees: 0.15
+    maximum-hit-angle-degrees: 22.0
+    hit-angle-violation-add: 0.5
+    rotation-violation-add: 0.5
+    pattern-window-ms: 5000
     minimum-hits: 12
     minimum-repeated-rotations: 7
     violation-add: 0.5
