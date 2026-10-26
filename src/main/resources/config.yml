@@ -29,6 +29,7 @@ checks:
   movement:
     enabled: true
     alert: true
+    alert-cooldown-ms: 3000
     setback: false
     max-horizontal-distance-per-tick: 1.25
     violation-add: 1.0
@@ -39,6 +40,7 @@ checks:
   reach:
     enabled: false
     alert: true
+    alert-cooldown-ms: 3000
     max-distance: 3.6
     violation-add: 1.0
     violation-decay-per-second: 0.35
@@ -48,6 +50,7 @@ checks:
   click-rate:
     enabled: false
     alert: true
+    alert-cooldown-ms: 3000
     max-cps: 24
     flag-cooldown-ms: 1500
     violation-add: 1.0
@@ -58,6 +61,7 @@ checks:
   scaffold-signal:
     enabled: false
     alert: true
+    alert-cooldown-ms: 3000
     minimum-downward-pitch: 65.0
     min-horizontal-distance: 0.8
     violation-add: 0.25
@@ -68,6 +72,7 @@ checks:
   packet-rate:
     enabled: false
     alert: true
+    alert-cooldown-ms: 3000
     minimum-interval-ms: 5
     sample-window: 40
     violation-add: 1.0
