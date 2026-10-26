@@ -38,8 +38,11 @@ public final class AlertService {
     }
 
     public void send(Player player, String check, double vl, String detail) {
-        String message = color("&bANNA AC &8» &f" + player.getName() + " &7failed &b" + check
+        String prefix = plugin.getConfig().getString("settings.prefix", "&bANNA AC &8» &f");
+        String message = color(prefix + player.getName() + " &7failed &b" + check
                 + " &8(VL: &f" + String.format(java.util.Locale.ROOT, "%.1f", vl) + "&8) &7" + detail);
+        if (plugin.getConfig().getBoolean("settings.debug", false))
+            plugin.getLogger().info("Debug alert generated: " + ChatColor.stripColor(message));
         if (plugin.getConfig().getBoolean("alerts.console", true))
             plugin.getLogger().warning(ChatColor.stripColor(message));
         if (plugin.getConfig().getBoolean("alerts.staff-chat", true)) {
