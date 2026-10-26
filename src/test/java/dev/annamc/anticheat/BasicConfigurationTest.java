@@ -41,7 +41,6 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("packet-rate:\nenabled: false"));
         assertTrue(yaml.contains("timer:\nenabled: false"));
         assertTrue(yaml.contains("wall-hit:\nenabled: false"));
-        assertTrue(yaml.contains("wall-hit:\nenabled: false"));
     }
 
     @Test void allPunishmentsAreIndividuallyConfigurableAndDisabledByDefault() throws Exception {
@@ -56,6 +55,8 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("no-fall:\nenabled: false"));
         assertTrue(yaml.contains("packet-rate:\nenabled: false"));
         assertTrue(yaml.contains("timer:\nenabled: false"));
+        // One disabled wall-hit option must exist for detection and one for punishment.
+        assertEquals(2, yaml.split("wall-hit:\\nenabled: false", -1).length - 1);
     }
 
     @Test void forceOpHasCommandBlockingAndAuditControls() throws Exception {
