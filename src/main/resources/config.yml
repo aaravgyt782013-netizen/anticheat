@@ -6,7 +6,7 @@ settings:
   language: "en" # Supported: en, hi
   # Print extra diagnostic information to the server console. Keep false normally.
   debug: false
-  # How many days to retain evidence files before cleanup (if cleanup is implemented).
+  # Remove old evidence records after this many days (0 retains only records from today onward).
   evidence-retention-days: 7
   # Configured cap for evidence records per player.
   max-evidence-records-per-player: 5000
@@ -44,7 +44,7 @@ alerts:
 
 # Automatic punishment settings. Start with actions disabled until staging validation is complete.
 punishments:
-  # Enable automatic punishment for this check. Keep false until staging validation is complete.
+  # Master switch for all automatic punishment actions configured below.
   enabled: true
   # Message shown to a player when a configured check kicks them.
   kick-message: "&cUnfair advantage detected. If this is a mistake, contact staff."
@@ -95,7 +95,7 @@ punishments:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
 
-# Configuration option: checks. Change only if you understand its effect.
+# Detection checks and thresholds; each check can be enabled and tuned independently.
 checks:
   # Basic horizontal movement-distance heuristic. Not a complete Minecraft physics simulator.
   movement:
