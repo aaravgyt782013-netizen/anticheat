@@ -24,6 +24,7 @@ import java.util.logging.Level;
 public final class EvidenceStore {
     private final JavaPlugin plugin;
     private final AtomicLong writes = new AtomicLong();
+    private volatile boolean invalidDirectoryWarned;
     private final ExecutorService writer = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "anna-ac-evidence");
         t.setDaemon(true);
@@ -45,7 +46,7 @@ public final class EvidenceStore {
         try {
             writer.submit(() -> {
                 try {
-                    Path dir = plugin.getDataFolder().toPath().resolve("evidence");
+                    Path dir = evidenceDirectory();
                     Files.createDirectories(dir);
                     Path file = dir.resolve(uuid + ".jsonl");
                     Files.writeString(file, line, StandardCharsets.UTF_8,
@@ -63,11 +64,31 @@ public final class EvidenceStore {
     }
 
     public Path file(UUID uuid) {
-        return plugin.getDataFolder().toPath().resolve("evidence").resolve(uuid + ".jsonl");
+        return evidenceDirectory().resolve(uuid + ".jsonl");
+    }
+
+    private Path evidenceDirectory() {
+        Path base = plugin.getDataFolder().toPath().toAbsolutePath().normalize();
+        String relative = plugin.getConfig().getString("database.evidence-directory", "evidence");
+        if (relative == null || relative.isBlank()) relative = "evidence";
+        Path resolved;
+        try {
+            resolved = base.resolve(relative).normalize();
+        } catch (RuntimeException invalidPath) {
+            resolved = base.resolve("evidence");
+        }
+        if (!resolved.startsWith(base)) {
+            if (!invalidDirectoryWarned) {
+                invalidDirectoryWarned = true;
+                plugin.getLogger().warning("database.evidence-directory must stay inside the ANNA AC plugin folder; using 'evidence'.");
+            }
+            return base.resolve("evidence");
+        }
+        return resolved;
     }
 
     private void pruneAll() {
-        Path dir = plugin.getDataFolder().toPath().resolve("evidence");
+        Path dir = evidenceDirectory();
         if (!Files.isDirectory(dir)) return;
         try (var paths = Files.list(dir)) {
             paths.filter(path -> path.getFileName().toString().endsWith(".jsonl"))
