@@ -1,6 +1,7 @@
 package dev.annamc.anticheat.command;
 
 import dev.annamc.anticheat.alert.AlertService;
+import dev.annamc.anticheat.AnnaACPlugin;
 import dev.annamc.anticheat.check.ViolationManager;
 import dev.annamc.anticheat.config.ConfigurationDiagnostics;
 import dev.annamc.anticheat.evidence.EvidenceStore;
@@ -118,10 +119,11 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
             }
             case "reload" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
-                plugin.reloadConfig();
-                messages.reload();
-                for (String note : ConfigurationDiagnostics.inspect(plugin)) {
-                    plugin.getLogger().warning("Configuration: " + note);
+                if (plugin instanceof AnnaACPlugin annaAc) {
+                    annaAc.reloadAllConfiguration();
+                } else {
+                    plugin.reloadConfig();
+                    messages.reload();
                 }
                 sender.sendMessage(messages.get("commands.reloaded"));
             }
