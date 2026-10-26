@@ -15,6 +15,8 @@ commands:
   history-count: "%prefix%&7Recent evidence lines: &f%count%"
   check-result: "%prefix%&f%player% &7[%check%] VL: &f%vl%"
   debug-result: "%prefix%&7Debug &f%player% &7VL=&f%vl% &7world=&f%world% &7ping=&f%ping%"
+  discord-test-sent: "%prefix%&aDiscord test alert queued. Check your staff channel and console."
+  discord-not-configured: "%prefix%&cDiscord alerts are disabled or the webhook URL is empty. Configure alerts.discord-enabled and alerts.discord-webhook first."
   alerts-enabled: "%prefix%&7Staff alerts are now &aenabled&7 for you."
   alerts-disabled: "%prefix%&7Staff alerts are now &cdisabled&7 for you."
   privileged-command-blocked: "%prefix%&cThis privileged command is blocked by server security."
