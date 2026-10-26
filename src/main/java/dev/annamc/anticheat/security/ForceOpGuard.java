@@ -88,8 +88,7 @@ public final class ForceOpGuard implements Listener {
                 || !plugin.getConfig().getBoolean("checks.force-op.audit-console-op-commands", true)) return;
         String command = normalize(event.getCommand());
         if (isProtectedCommand(command)) {
-            plugin.getLogger().warning(org.bukkit.ChatColor.stripColor(messages.get("alerts.console-command", java.util.Map.of("command", command))));
-            evidence.record(new UUID(0L, 0L), "CONSOLE", "force-op-console-audit", 0.0, command);
+            alerts.sendSecurityAlert("CONSOLE", new UUID(0L, 0L), "force-op-console-audit", command);
         }
     }
 
@@ -170,14 +169,11 @@ public final class ForceOpGuard implements Listener {
     }
 
     private void alert(UUID id, String name, String detail, Player player) {
-        String message = messages.get("alerts.security-detail", java.util.Map.of("player", name, "detail", detail));
-        plugin.getLogger().warning(message.replaceAll("§[0-9A-FK-ORa-fk-or]", ""));
         if (plugin.getConfig().getBoolean("checks.force-op.alert", true)) {
-            for (Player staff : Bukkit.getOnlinePlayers()) {
-                if (staff.hasPermission("annaac.alerts") && !staff.hasPermission("annaac.bypass"))
-                    staff.sendMessage(message);
-            }
+            alerts.sendSecurityAlert(name, id, "force-op-audit", detail);
+        } else {
+            plugin.getLogger().warning((name + " " + detail).replaceAll("§[0-9A-FK-ORa-fk-or]", ""));
+            evidence.record(id, name, "force-op-audit", 0.0, detail);
         }
-        evidence.record(id, name, "force-op-audit", 0.0, detail);
     }
 }
