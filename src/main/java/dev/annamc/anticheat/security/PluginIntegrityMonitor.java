@@ -184,7 +184,7 @@ public final class PluginIntegrityMonitor implements Listener {
             if (integrityEnabled && (baselineCreated || !Files.exists(baselinePath))) {
                 try {
                     writeBaselineHashes(baseline, baselineHashes);
-                    baseline.save(baselinePath.toFile());
+                    saveBaselineAtomically(baseline);
                     reportState("baseline-created", "Plugin JAR integrity baseline created at plugins/ANNA-AC/plugin-hashes.yml. Review and approve every entry before trusting it.");
                 } catch (IOException ex) {
                     reportState("baseline-save-failed", "Could not save plugin integrity baseline: " + ex.getClass().getSimpleName());
@@ -238,7 +238,7 @@ public final class PluginIntegrityMonitor implements Listener {
                 approved.set("meta.approved-by", truncate(approvedBy, 80));
                 approved.set("meta.approval-note",
                         "Explicitly approved by an authorized operator. Hash approval is not a malware verdict; inspect each plugin source and origin before approval.");
-                approved.save(baselinePath.toFile());
+                saveBaselineAtomically(approved);
                 synchronized (reportedStates) {
                     reportedStates.keySet().removeIf(key -> key.startsWith("new:")
                             || key.startsWith("changed:") || key.startsWith("removed:")
@@ -254,6 +254,17 @@ public final class PluginIntegrityMonitor implements Listener {
                 scanRunning.set(false);
             }
         });
+    }
+
+    private void saveBaselineAtomically(YamlConfiguration yaml) throws IOException {
+        Path temporary = baselinePath.resolveSibling("plugin-hashes.yml.tmp");
+        yaml.save(temporary.toFile());
+        try {
+            Files.move(temporary, baselinePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException atomicMoveUnsupported) {
+            Files.move(temporary, baselinePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     private static String truncate(String value, int maxLength) {
