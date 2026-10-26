@@ -140,6 +140,10 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     minimum-downward-pitch: 65.0
     min-horizontal-distance: 0.8
+    minimum-horizontal-speed: 0.10
+    pattern-window-ms: 1500
+    maximum-pitch-variance: 2.0
+    minimum-consecutive-placements: 8
     violation-add: 0.25
     violation-decay-per-second: 0.5
     alert-vl: 2.0
