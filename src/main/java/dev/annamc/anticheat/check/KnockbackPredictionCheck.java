@@ -1,0 +1,101 @@
+package dev.annamc.anticheat.check;
+
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerVelocityEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Knockback telemetry compares movement after server velocity is applied.
+ * It is intentionally alert-only by default: collisions, sprinting, walls,
+ * water, active input and latency can all affect the observed displacement.
+ */
+public final class KnockbackPredictionCheck implements Listener {
+    private final JavaPlugin plugin;
+    private final ViolationManager violations;
+    private final Map<UUID, Pending> pending = new ConcurrentHashMap<>();
+
+    public KnockbackPredictionCheck(JavaPlugin plugin, ViolationManager violations) {
+        this.plugin = plugin;
+        this.violations = violations;
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onDamage(EntityDamageByEntityEvent event) {
+        if (event.getEntity() instanceof Player victim
+                && event.getDamager() instanceof Player attacker
+                && !victim.equals(attacker)
+                && plugin.getConfig().getBoolean("checks.knockback.enabled", false)) {
+            pending.put(victim.getUniqueId(), new Pending(victim.getLocation().clone(),
+                    System.currentTimeMillis(), 0, attacker.getUniqueId()));
+        }
+    }
+
+    @EventHandler
+    public void onVelocity(PlayerVelocityEvent event) {
+        if (!plugin.getConfig().getBoolean("checks.knockback.enabled", false)) return;
+        Player player = event.getPlayer();
+        Vector velocity = event.getVelocity();
+        double horizontal = Math.hypot(velocity.getX(), velocity.getZ());
+        double min = plugin.getConfig().getDouble("checks.knockback.minimum-horizontal-velocity", 0.25);
+        if (horizontal < min) return;
+        pending.put(player.getUniqueId(), new Pending(player.getLocation().clone(),
+                System.currentTimeMillis(), 0, null, velocity.clone()));
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) { pending.remove(event.getPlayer().getUniqueId()); }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        if (!plugin.getConfig().getBoolean("checks.knockback.enabled", false)
+                || CheckUtil.shouldSkip(plugin, player, "knockback")
+                || player.isInsideVehicle() || player.isGliding() || player.isSwimming()
+                || player.isInWater()) return;
+        Pending p = pending.get(player.getUniqueId());
+        if (p == null) return;
+        long age = System.currentTimeMillis() - p.startedAt;
+        int maxAge = plugin.getConfig().getInt("checks.knockback.observation-window-ms", 350);
+        if (age > maxAge) {
+            pending.remove(player.getUniqueId());
+            return;
+        }
+        Location to = event.getTo();
+        if (to == null || to.getWorld() != p.origin.getWorld()) return;
+        double dx = to.getX() - p.origin.getX(), dz = to.getZ() - p.origin.getZ();
+        double displacement = Math.hypot(dx, dz);
+        int observations = p.observations + 1;
+        Pending updated = p.withObservations(observations);
+        pending.put(player.getUniqueId(), updated);
+        int required = plugin.getConfig().getInt("checks.knockback.minimum-observations", 4);
+        if (observations >= required) {
+            double threshold = plugin.getConfig().getDouble("checks.knockback.minimum-observed-displacement", 0.08);
+            if (displacement < threshold && age >= plugin.getConfig().getInt("checks.knockback.minimum-age-ms", 120)) {
+                violations.add(player, "knockback",
+                        plugin.getConfig().getDouble("checks.knockback.violation-add", 1.0),
+                        String.format(java.util.Locale.ROOT,
+                                "low observed displacement %.3f within %dms after server velocity; review ping/collisions",
+                                displacement, age));
+            }
+            pending.remove(player.getUniqueId());
+        }
+    }
+
+    private record Pending(Location origin, long startedAt, int observations, UUID attacker, Vector velocity) {
+        Pending(Location origin, long startedAt, int observations, UUID attacker) {
+            this(origin, startedAt, observations, attacker, new Vector());
+        }
+        Pending withObservations(int count) { return new Pending(origin, startedAt, count, attacker, velocity); }
+    }
+}
