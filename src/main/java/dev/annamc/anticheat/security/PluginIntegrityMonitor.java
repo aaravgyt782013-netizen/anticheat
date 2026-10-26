@@ -189,6 +189,64 @@ public final class PluginIntegrityMonitor implements Listener {
         }
     }
 
+    /**
+     * Explicitly replaces the expected JAR hash inventory. This never happens
+     * automatically after an update: the owner must verify plugin origins first.
+     */
+    public void approveCurrentBaseline(String approvedBy) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            if (!plugin.getConfig().getBoolean("security.plugin-monitor.integrity-hash-enabled", true)) {
+                reportState("baseline-approval-disabled",
+                        "Baseline approval refused because security.plugin-monitor.integrity-hash-enabled is false.");
+                return;
+            }
+            if (!scanRunning.compareAndSet(false, true)) {
+                reportState("baseline-approval-busy",
+                        "Plugin hash baseline approval was not performed because an integrity scan is already running. Try again shortly.");
+                return;
+            }
+            try {
+                Map<String, String> hashes = new java.util.TreeMap<>();
+                long maxJars = clamp(plugin.getConfig().getLong(
+                        "security.plugin-monitor.max-plugin-jars-per-scan", 512L), 1L, 2048L);
+                try (var files = Files.list(pluginsDirectory)) {
+                    for (Path jar : files.filter(Files::isRegularFile)
+                            .filter(path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".jar"))
+                            .sorted().limit(maxJars).toList()) {
+                        hashes.put(jar.getFileName().toString(), sha256(jar));
+                    }
+                }
+                YamlConfiguration approved = new YamlConfiguration();
+                for (Map.Entry<String, String> entry : hashes.entrySet()) {
+                    approved.set("hashes." + entry.getKey(), entry.getValue());
+                }
+                approved.set("meta.created-at", java.time.Instant.now().toString());
+                approved.set("meta.approved-by", truncate(approvedBy, 80));
+                approved.set("meta.approval-note",
+                        "Explicitly approved by an authorized operator. Hash approval is not a malware verdict; inspect each plugin source and origin before approval.");
+                approved.save(baselinePath.toFile());
+                synchronized (reportedStates) {
+                    reportedStates.keySet().removeIf(key -> key.startsWith("new:")
+                            || key.startsWith("changed:") || key.startsWith("removed:")
+                            || key.equals("baseline-created"));
+                }
+                reportState("baseline-approved:" + java.time.Instant.now().getEpochSecond(),
+                        "Plugin JAR hash baseline explicitly replaced by " + truncate(approvedBy, 80)
+                                + " for " + hashes.size() + " JAR(s). Verify sources/origins separately; hashes are integrity signals, not a malware verdict.");
+            } catch (Exception ex) {
+                reportState("baseline-approval-failed",
+                        "Could not approve plugin JAR hash baseline: " + ex.getClass().getSimpleName());
+            } finally {
+                scanRunning.set(false);
+            }
+        });
+    }
+
+    private static String truncate(String value, int maxLength) {
+        if (value == null) return "";
+        return value.length() <= maxLength ? value : value.substring(0, maxLength);
+    }
+
     private void scanForRisk(Path jar, String fileName, String hash) {
         int totalBytes = 0;
         int maxBytes = (int) clamp(plugin.getConfig().getLong(
