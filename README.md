@@ -12,7 +12,7 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 - **Nuker burst:** counts completed block-break events in a configurable rolling window, with ignored materials and repeated-window threshold; this does not simulate individual block mining speed and is disabled by default.
 - **FastBreak:** compares Paper’s current per-player block break-progress estimate with observed start-to-break time, allows configurable ping slack, ignores short expected sessions, and requires repeated evidence. This is not packet-level replay and remains disabled by default.
 - **Combat pattern:** looks for repeated near-identical rotation deltas around hits. This is low-confidence telemetry, not proof of KillAura; disabled by default.
-- **Click rate:** arm-swing count over a rolling one-second window. CPS alone is not proof of automation; disabled by default.
+- **Click / attack rate:** arm-swing telemetry plus an optional PacketEvents `INTERACT_ENTITY` attack-packet rolling window with configurable thresholds and repeated over-limit samples. Attack rate alone is not proof of automation; disabled by default.
 - **Scaffold signal:** placement-angle heuristic; weak evidence only and disabled by default.
 - **No-fall signal:** checks a narrow pattern of landing after a significant fall without observed fall damage. Protection plugins and gameplay effects can create the same pattern; disabled by default.
 - **Packet rate:** optional PacketEvents rolling packet-rate and short-interval telemetry; disabled by default.
