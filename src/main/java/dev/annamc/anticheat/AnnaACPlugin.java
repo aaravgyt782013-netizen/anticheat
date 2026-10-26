@@ -1,7 +1,10 @@
 package dev.annamc.anticheat;
 
 import dev.annamc.anticheat.alert.AlertService;
+import dev.annamc.anticheat.check.ClickRateCheck;
 import dev.annamc.anticheat.check.MovementCheck;
+import dev.annamc.anticheat.check.ReachCheck;
+import dev.annamc.anticheat.check.ScaffoldSignalCheck;
 import dev.annamc.anticheat.check.ViolationManager;
 import dev.annamc.anticheat.command.AACCommand;
 import dev.annamc.anticheat.evidence.EvidenceStore;
@@ -14,21 +17,29 @@ public final class AnnaACPlugin extends JavaPlugin {
     private EvidenceStore evidenceStore;
     private PacketEventsBridge packetBridge;
 
-    @Override public void onEnable() {
+    @Override
+    public void onEnable() {
         saveDefaultConfig();
         saveResource("messages.yml", false);
         saveResource("punishments.yml", false);
+
         evidenceStore = new EvidenceStore(this);
         AlertService alerts = new AlertService(this, evidenceStore);
         ViolationManager violations = new ViolationManager(this, alerts);
+
         getServer().getPluginManager().registerEvents(new MovementCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new ReachCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new ClickRateCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new ScaffoldSignalCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(violations, this);
         getServer().getPluginManager().registerEvents(new ForceOpGuard(this, evidenceStore), this);
+
         AACCommand command = new AACCommand(this, violations, evidenceStore);
         if (getCommand("annaac") != null) {
             getCommand("annaac").setExecutor(command);
             getCommand("annaac").setTabCompleter(command);
         }
+
         if (Bukkit.getPluginManager().getPlugin("packetevents") != null) {
             packetBridge = new PacketEventsBridge(this, violations);
             packetBridge.register();
@@ -36,9 +47,11 @@ public final class AnnaACPlugin extends JavaPlugin {
         } else {
             getLogger().warning("PacketEvents is not installed. Packet telemetry is unavailable.");
         }
-        getLogger().info("ANNA AC enabled. Only implemented checks are active.");
+        getLogger().info("ANNA AC enabled. Review config.yml; experimental signals are disabled by default.");
     }
-    @Override public void onDisable() {
+
+    @Override
+    public void onDisable() {
         if (packetBridge != null) packetBridge.unregister();
         if (evidenceStore != null) evidenceStore.close();
     }
