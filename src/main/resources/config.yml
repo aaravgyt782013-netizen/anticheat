@@ -16,19 +16,27 @@ punishments:
   kick-message: "&cUnfair advantage detected. If this is a mistake, contact staff."
   actions:
     movement:
-      enabled: true
+      enabled: false
+    movement-physics:
+      enabled: false
+    knockback:
+      enabled: false
     reach:
       enabled: false
     click-rate:
       enabled: false
+    combat-pattern:
+      enabled: false
     scaffold-signal:
+      enabled: false
+    no-fall:
       enabled: false
     packet-rate:
       enabled: false
 
 checks:
   movement:
-    enabled: true
+    enabled: false
     alert: true
     alert-cooldown-ms: 3000
     ignored-worlds: []
@@ -39,6 +47,42 @@ checks:
     violation-decay-per-second: 0.25
     alert-vl: 3.0
     kick-vl: 12.0
+
+  movement-physics:
+    enabled: true
+    alert: true
+    alert-cooldown-ms: 3000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    base-horizontal-per-tick: 0.72
+    sprint-multiplier: 1.3
+    ping-slack-per-ms: 0.001
+    max-ping-slack: 0.75
+    max-sample-gap-ms: 250
+    outlier-ratio: 2.2
+    required-consecutive-outliers: 3
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 3.0
+    kick-vl: 12.0
+
+  knockback:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 4000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    minimum-horizontal-velocity: 0.25
+    observation-window-ms: 350
+    minimum-observations: 4
+    minimum-age-ms: 120
+    minimum-observed-displacement: 0.08
+    violation-add: 1.0
+    violation-decay-per-second: 0.25
+    alert-vl: 2.0
+    kick-vl: 10.0
 
   reach:
     enabled: false
@@ -67,6 +111,21 @@ checks:
     alert-vl: 2.0
     kick-vl: 10.0
 
+  combat-pattern:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 5000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    rotation-quantization-degrees: 0.15
+    minimum-hits: 12
+    minimum-repeated-rotations: 7
+    violation-add: 0.5
+    violation-decay-per-second: 0.2
+    alert-vl: 1.0
+    kick-vl: 8.0
+
   scaffold-signal:
     enabled: false
     alert: true
@@ -81,6 +140,19 @@ checks:
     alert-vl: 2.0
     kick-vl: 10.0
 
+  no-fall:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 4000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    minimum-fall-distance: 4.0
+    violation-add: 1.0
+    violation-decay-per-second: 0.25
+    alert-vl: 2.0
+    kick-vl: 10.0
+
   packet-rate:
     enabled: false
     alert: true
@@ -90,6 +162,7 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     minimum-interval-ms: 5
     sample-window: 40
+    max-movement-packets-per-second: 45
     violation-add: 1.0
     violation-decay-per-second: 0.5
     alert-vl: 2.0
@@ -98,5 +171,7 @@ checks:
   force-op:
     enabled: true
     alert: true
+    cancel-player-op-commands: true
     kick-player-on-attempt: false
     detect-op-grants: true
+    audit-console-op-commands: true
