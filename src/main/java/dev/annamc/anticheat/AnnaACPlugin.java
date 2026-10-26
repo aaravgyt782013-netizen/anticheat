@@ -61,6 +61,7 @@ public final class AnnaACPlugin extends JavaPlugin {
 
         if (Bukkit.getPluginManager().getPlugin("packetevents") != null) {
             packetBridge = new PacketEventsBridge(this, violations);
+            getServer().getPluginManager().registerEvents(packetBridge, this);
             packetBridge.register();
             getLogger().info("PacketEvents detected; packet telemetry registered (experimental and disabled by default).");
         } else {
