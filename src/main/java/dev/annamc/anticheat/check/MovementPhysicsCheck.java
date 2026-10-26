@@ -54,10 +54,10 @@ public final class MovementPhysicsCheck implements Listener {
         }
 
         long now = System.nanoTime();
-        Sample previous = samples.put(player.getUniqueId(), new Sample(to.clone(), now));
-        if (previous == null) return;
+        Sample previous = samples.get(player.getUniqueId());
+        if (previous == null) { samples.put(player.getUniqueId(), new Sample(to.clone(), now)); return; }
         long elapsedMs = Math.max(1L, (now - previous.nanoTime) / 1_000_000L);
-        if (elapsedMs > plugin.getConfig().getLong("checks.movement-physics.max-sample-gap-ms", 250)) return;
+        if (elapsedMs > plugin.getConfig().getLong("checks.movement-physics.max-sample-gap-ms", 250)) { samples.put(player.getUniqueId(), new Sample(to.clone(), now)); return; }
 
         double dx = to.getX() - previous.location.getX();
         double dz = to.getZ() - previous.location.getZ();
@@ -78,9 +78,8 @@ public final class MovementPhysicsCheck implements Listener {
         if (isOnSlipperyOrSpecialBlock(player)) allowance += 0.18 * ticks;
 
         double ratio = distance / Math.max(0.01, allowance);
-        Sample current = samples.get(player.getUniqueId());
         if (ratio >= plugin.getConfig().getDouble("checks.movement-physics.outlier-ratio", 2.2)) {
-            int streak = current == null ? 1 : current.outlierStreak + 1;
+            int streak = previous.outlierStreak + 1;
             samples.put(player.getUniqueId(), new Sample(to.clone(), now, streak));
             int required = plugin.getConfig().getInt("checks.movement-physics.required-consecutive-outliers", 3);
             if (streak >= required) {
@@ -91,7 +90,7 @@ public final class MovementPhysicsCheck implements Listener {
                                 ratio, distance, allowance, player.getPing()));
                 samples.put(player.getUniqueId(), new Sample(to.clone(), now, 0));
             }
-        } else if (current != null && current.outlierStreak != 0) {
+        } else if (previous.outlierStreak != 0) {
             samples.put(player.getUniqueId(), new Sample(to.clone(), now, 0));
         }
     }
