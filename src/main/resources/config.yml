@@ -211,5 +211,6 @@ checks:
     cancel-player-op-commands: true
     kick-player-on-attempt: false
     detect-op-grants: true
+    persist-operator-baseline: true
     audit-console-op-commands: true
     protected-command-prefixes: [op, deop, minecraft:op, minecraft:deop, bukkit:op, bukkit:deop, lp, luckperms, lpv, pex, permissions, manuadd]
