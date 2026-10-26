@@ -85,6 +85,32 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(AlertService.color("&8» &e" + note));
                 }
             }
+            case "securityhistory" -> {
+                if (!sender.hasPermission("annaac.admin")) return deny(sender);
+                var path = evidence.file(new java.util.UUID(0L, 0L));
+                if (!Files.exists(path)) {
+                    sender.sendMessage(messages.get("commands.no-security-evidence"));
+                    return true;
+                }
+                sender.sendMessage(messages.get("commands.loading-security-history"));
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                    List<String> lines;
+                    try {
+                        lines = Files.readAllLines(path);
+                    } catch (Exception ex) {
+                        plugin.getLogger().warning("Could not read ANNA AC system security evidence: " + ex.getMessage());
+                        Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(messages.get("commands.evidence-read-error")));
+                        return;
+                    }
+                    int start = Math.max(0, lines.size() - 10);
+                    List<String> recent = lines.subList(start, lines.size());
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        sender.sendMessage(messages.get("commands.security-history-count",
+                                java.util.Map.of("count", recent.size())));
+                        for (String line : recent) sender.sendMessage(AlertService.color("&8» &7" + line));
+                    });
+                });
+            }
             case "securityscan" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 if (!(plugin instanceof AnnaACPlugin annaAc)
@@ -189,7 +215,7 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2 && args[0].equalsIgnoreCase("securityscan"))
             return List.of("approve").stream()
                     .filter(s -> s.startsWith(args[1].toLowerCase(java.util.Locale.ROOT))).toList();
-        if (args.length == 1) return List.of("alerts", "status", "securityscan", "check", "history", "reload", "debug", "testdiscord").stream()
+        if (args.length == 1) return List.of("alerts", "status", "securityscan", "securityhistory", "check", "history", "reload", "debug", "testdiscord").stream()
                 .filter(s -> s.startsWith(args[0].toLowerCase(java.util.Locale.ROOT))).toList();
         if (args.length == 2 && List.of("check", "history", "debug").contains(args[0].toLowerCase(java.util.Locale.ROOT)))
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
