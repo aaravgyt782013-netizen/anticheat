@@ -45,7 +45,7 @@ public final class AnnaACPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ScaffoldSignalCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new NoFallSignalCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(violations, this);
-        getServer().getPluginManager().registerEvents(new ForceOpGuard(this, evidenceStore, messages), this);
+        getServer().getPluginManager().registerEvents(new ForceOpGuard(this, evidenceStore, messages, alerts), this);
 
         AACCommand command = new AACCommand(this, violations, evidenceStore, alerts, messages);
         if (getCommand("annaac") != null) {
