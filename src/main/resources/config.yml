@@ -79,6 +79,8 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     minimum-horizontal-velocity: 0.25
     observation-window-ms: 350
+    ping-window-extension-per-ms: 0.5
+    max-ping-window-extension-ms: 200
     minimum-observations: 4
     minimum-age-ms: 120
     minimum-observed-displacement: 0.08
