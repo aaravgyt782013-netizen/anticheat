@@ -208,6 +208,7 @@ public final class PluginIntegrityMonitor implements Listener {
             return;
         }
 
+        addCorrelatedIndicators(indicators);
         int score = score(indicators);
         int threshold = (int) clamp(plugin.getConfig().getLong(
                 "security.plugin-monitor.minimum-risk-score", 5L), 3L, 100L);
@@ -223,20 +224,38 @@ public final class PluginIntegrityMonitor implements Listener {
     }
 
     private static void evaluateIndicators(String data, Set<String> found) {
-        if (has(data, "java/lang/processbuilder", "java/lang/runtime", "exec")) found.add("process-execution-capability");
-        if (has(data, "java/net/socket", "java/net/http/httpclient", "java/net/httpurlconnection")
-                && has(data, "java/lang/runtime", "java/lang/processbuilder", "exec")) found.add("network-plus-process-execution");
-        if (has(data, "java/nio/file/files", "deleteifexists")
-                && has(data, "org/bukkit/bukkit", "dispatchcommand")
-                && has(data, "java/net/socket", "java/net/http/httpclient", "java/net/url")) found.add("network-plus-command-plus-file-delete-capability");
-        if (has(data, "org/bukkit/plugin/pluginmanager", "disableplugin")
-                && has(data, "java/lang/runtime", "java/lang/processbuilder", "exec")) found.add("plugin-management-plus-process-execution");
-        if (has(data, "org/bukkit/bukkit", "dispatchcommand")
-                && has(data, "java/net/socket", "java/net/http/httpclient", "java/net/url")
-                && has(data, "setop", "minecraft:op", "bukkit:op")) found.add("network-plus-command-dispatch-plus-op-strings");
-        if (has(data, "java/nio/file/files", "deleteifexists")
-                && has(data, "worlds/", "level.dat", "region/r.")
-                && has(data, "java/lang/runtime", "java/lang/processbuilder", "exec")) found.add("world-file-delete-plus-process-execution");
+        // Capabilities are collected across the whole JAR because a plugin can split
+        // related behavior across multiple classes. Capability strings alone are weak evidence.
+        if (has(data, "java/lang/processbuilder") || has(data, "java/lang/runtime") && has(data, "exec"))
+            found.add("process-execution-capability");
+        if (has(data, "java/net/socket", "java/net/http/httpclient", "java/net/httpurlconnection", "java/net/url"))
+            found.add("network-capability");
+        if (has(data, "java/nio/file/files", "deleteifexists") || has(data, "java/io/file", "delete"))
+            found.add("file-delete-capability");
+        if (has(data, "org/bukkit/bukkit", "dispatchcommand") || has(data, "org/bukkit/server", "dispatchcommand"))
+            found.add("server-command-dispatch-capability");
+        if (has(data, "org/bukkit/plugin/pluginmanager", "disableplugin"))
+            found.add("plugin-management-capability");
+        if (has(data, "setop") || has(data, "minecraft:op") || has(data, "bukkit:op"))
+            found.add("operator-management-strings");
+        if (has(data, "worlds/", "level.dat") || has(data, "region/r."))
+            found.add("world-file-path-strings");
+    }
+
+    private static void addCorrelatedIndicators(Set<String> found) {
+        if (found.contains("process-execution-capability") && found.contains("network-capability"))
+            found.add("network-plus-process-execution");
+        if (found.contains("network-capability") && found.contains("server-command-dispatch-capability")
+                && found.contains("file-delete-capability"))
+            found.add("network-plus-command-plus-file-delete-capability");
+        if (found.contains("plugin-management-capability") && found.contains("process-execution-capability"))
+            found.add("plugin-management-plus-process-execution");
+        if (found.contains("network-capability") && found.contains("server-command-dispatch-capability")
+                && found.contains("operator-management-strings"))
+            found.add("network-plus-command-dispatch-plus-op-strings");
+        if (found.contains("file-delete-capability") && found.contains("world-file-path-strings")
+                && found.contains("process-execution-capability"))
+            found.add("world-file-delete-plus-process-execution");
     }
 
     private static boolean has(String haystack, String... needles) {
