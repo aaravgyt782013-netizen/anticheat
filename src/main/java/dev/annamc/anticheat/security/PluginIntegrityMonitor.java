@@ -88,7 +88,7 @@ public final class PluginIntegrityMonitor implements Listener {
     public void onPluginDisable(PluginDisableEvent event) {
         if (!plugin.getConfig().getBoolean("security.plugin-monitor.enabled", true)
                 || !plugin.getConfig().getBoolean("security.plugin-monitor.audit-plugin-lifecycle", true)
-                || event.getPlugin().equals(plugin)) return;
+                || event.getPlugin().equals(plugin) || withinLifecycleGracePeriod()) return;
         reportState("lifecycle-disabled:" + event.getPlugin().getName(),
                 "Plugin disabled after ANNA AC started: " + event.getPlugin().getName()
                         + ". Check whether this was an intentional reload/update.");
