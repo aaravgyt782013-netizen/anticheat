@@ -9,6 +9,7 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 - **Knockback telemetry:** compares movement observed after server velocity. Collisions, player input and ping affect results; disabled by default.
 - **Reach:** eye-to-nearest-point-on-target-hitbox signal without full historical hitbox/interpolation compensation; disabled by default.
 - **Wall-hit:** configurable multi-point target-hitbox occlusion signal; not latency-compensated and disabled by default.
+- **Nuker burst:** counts completed block-break events in a configurable rolling window, with ignored materials and repeated-window threshold; this does not simulate individual block mining speed and is disabled by default.
 - **Combat pattern:** looks for repeated near-identical rotation deltas around hits. This is low-confidence telemetry, not proof of KillAura; disabled by default.
 - **Click rate:** arm-swing count over a rolling one-second window. CPS alone is not proof of automation; disabled by default.
 - **Scaffold signal:** placement-angle heuristic; weak evidence only and disabled by default.
@@ -34,7 +35,7 @@ Anti-Xray is provided by Paper's block obfuscation, not by a client-brand detect
 
 ## Configuration
 
-In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. The wall-hit signal also exposes its sampling distance, occlusion ratio, and geometry margin. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
+In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. The wall-hit signal also exposes its sampling distance, occlusion ratio, and geometry margin. The Nuker burst signal exposes its rolling-window length, block threshold, evaluation interval, repeated-window requirement, and ignored material list. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
 
 All experimental detection checks and all automatic kick actions are disabled by default. Leave them that way until they pass staging validation. The legacy movement heuristic is also disabled by default.
 
