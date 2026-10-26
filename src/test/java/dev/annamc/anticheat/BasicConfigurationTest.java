@@ -40,6 +40,8 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("no-fall:\nenabled: false"));
         assertTrue(yaml.contains("packet-rate:\nenabled: false"));
         assertTrue(yaml.contains("timer:\nenabled: false"));
+        assertTrue(yaml.contains("wall-hit:\nenabled: false"));
+        assertTrue(yaml.contains("wall-hit:\nenabled: false"));
     }
 
     @Test void allPunishmentsAreIndividuallyConfigurableAndDisabledByDefault() throws Exception {
