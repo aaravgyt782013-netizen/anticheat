@@ -19,6 +19,8 @@ punishments:
       enabled: false
     movement-physics:
       enabled: false
+    timer:
+      enabled: false
     knockback:
       enabled: false
     reach:
@@ -59,6 +61,7 @@ checks:
     sprint-multiplier: 1.3
     ping-slack-per-ms: 0.001
     max-ping-slack: 0.75
+    special-block-allowance-per-tick: 0.18
     max-sample-gap-ms: 250
     outlier-ratio: 2.2
     required-consecutive-outliers: 3
@@ -93,6 +96,8 @@ checks:
     ignored-permissions: []
     exempt-game-modes: [CREATIVE, SPECTATOR]
     max-distance: 3.6
+    ping-slack-per-ms: 0.001
+    max-ping-slack: 0.20
     violation-add: 1.0
     violation-decay-per-second: 0.35
     alert-vl: 2.0
@@ -121,6 +126,9 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     rotation-quantization-degrees: 0.15
     maximum-hit-angle-degrees: 22.0
+    rotation-window-ms: 180
+    ping-angle-allowance-per-ms: 0.02
+    max-ping-angle-allowance: 8.0
     hit-angle-violation-add: 0.5
     rotation-violation-add: 0.5
     pattern-window-ms: 5000
@@ -157,6 +165,8 @@ checks:
     ignored-permissions: []
     exempt-game-modes: [CREATIVE, SPECTATOR]
     minimum-fall-distance: 4.0
+    landing-observation-window-ms: 1500
+    landing-delay-ticks: 2
     violation-add: 1.0
     violation-decay-per-second: 0.25
     alert-vl: 2.0
@@ -173,6 +183,21 @@ checks:
     sample-window: 40
     max-movement-packets-per-second: 45
     flag-cooldown-ms: 3000
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
+  timer:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 5000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    minimum-sample-duration-ms: 1200
+    max-movement-packets-per-second: 23
+    flag-cooldown-ms: 5000
     violation-add: 1.0
     violation-decay-per-second: 0.5
     alert-vl: 2.0
