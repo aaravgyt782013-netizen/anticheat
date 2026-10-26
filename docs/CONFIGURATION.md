@@ -30,7 +30,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 - Keep `punishments.enabled: true` in `punishments.yml` if you want the global master switch available; per-check action flags remain the second gate.
 - Keep `punishments.require-independent-families: true` on a public server. By default, an automatic kick requires violations from at least two distinct detector families inside `correlation-window-ms`. If you enable only one family, the plugin will warn that kicks cannot trigger until you lower the family threshold or enable a second family.
 - Keep creative and spectator exemptions, and add any server-specific worlds/permissions to ignored lists only after reviewing the effect.
-- Install the compatible PacketEvents build if you want the optional packet-rate/timer telemetry. Without it, packet telemetry is unavailable.
+- Install the compatible PacketEvents build if you want the optional packet-rate/timer telemetry and click-rate attack packet signal. Without it, packet telemetry is unavailable.
 - Force OP auditing is enabled by default, but the command-prefix list must match the permission plugins and aliases actually installed. It cannot prevent host-panel/file/console compromise or malicious plugins.
 
 ## Checks currently present
@@ -44,7 +44,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `wall-hit` | Multi-point hitbox occlusion signal; not latency-compensated | Disabled |
 | `fast-break` | Paper break-progress estimate versus observed mining time | Disabled |
 | `nuker-burst` | Repeated rolling-window block-break burst | Disabled |
-| `click-rate` | Arm-swing rate telemetry | Disabled |
+| `click-rate` | Arm-swing and optional PacketEvents attack-packet rate telemetry | Disabled |
 | `combat-pattern` | Rotation/hit-pattern telemetry | Disabled |
 | `scaffold-signal` | Repeated placement-angle pattern | Disabled |
 | `no-fall` | Fall/landing damage correlation | Disabled |
