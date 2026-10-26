@@ -79,6 +79,11 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                     });
                 });
             }
+            case "testdiscord" -> {
+                if (!sender.hasPermission("annaac.admin")) return deny(sender);
+                sender.sendMessage(messages.get(alerts.testDiscord(sender.getName())
+                        ? "commands.discord-test-sent" : "commands.discord-not-configured"));
+            }
             case "reload" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 plugin.reloadConfig();
@@ -109,7 +114,7 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("alerts", "check", "history", "reload", "debug").stream()
+        if (args.length == 1) return List.of("alerts", "check", "history", "reload", "debug", "testdiscord").stream()
                 .filter(s -> s.startsWith(args[0].toLowerCase(java.util.Locale.ROOT))).toList();
         if (args.length == 2 && List.of("check", "history", "debug").contains(args[0].toLowerCase(java.util.Locale.ROOT)))
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
