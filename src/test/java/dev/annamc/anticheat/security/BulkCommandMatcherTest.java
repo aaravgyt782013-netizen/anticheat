@@ -22,6 +22,8 @@ class BulkCommandMatcherTest {
     void matchesWorldEditDoubleSlashAndExecuteChains() {
         assertTrue(BulkCommandMatcher.matches("//set tnt", DEFAULTS));
         assertTrue(BulkCommandMatcher.matches("/execute as @e run minecraft:fill ~ ~ ~ ~10 ~10 ~10 air", DEFAULTS));
+        assertTrue(BulkCommandMatcher.matches("/execute as @e run execute as @s run fill ~ ~ ~ ~2 ~2 ~2 air", DEFAULTS));
+        assertFalse(BulkCommandMatcher.matches("/execute if block ~ ~ ~ chest{CustomName:'fill'} run say hello", DEFAULTS));
     }
 
     @Test
