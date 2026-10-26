@@ -78,7 +78,7 @@ public final class MovementPhysicsCheck implements Listener {
         if (isOnSlipperyOrSpecialBlock(player)) allowance += 0.18 * ticks;
 
         double ratio = distance / Math.max(0.01, allowance);
-        if (ratio >= plugin.getConfig().getDouble("checks.movement-physics.outlier-ratio", 2.2)) {
+        if (DetectionMath.isMovementOutlier(distance, allowance, plugin.getConfig().getDouble("checks.movement-physics.outlier-ratio", 2.2))) {
             int streak = previous.outlierStreak + 1;
             samples.put(player.getUniqueId(), new Sample(to.clone(), now, streak));
             int required = plugin.getConfig().getInt("checks.movement-physics.required-consecutive-outliers", 3);
