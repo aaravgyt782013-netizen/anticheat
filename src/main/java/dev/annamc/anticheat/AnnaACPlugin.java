@@ -2,7 +2,11 @@ package dev.annamc.anticheat;
 
 import dev.annamc.anticheat.alert.AlertService;
 import dev.annamc.anticheat.check.ClickRateCheck;
+import dev.annamc.anticheat.check.CombatPatternCheck;
+import dev.annamc.anticheat.check.KnockbackPredictionCheck;
 import dev.annamc.anticheat.check.MovementCheck;
+import dev.annamc.anticheat.check.MovementPhysicsCheck;
+import dev.annamc.anticheat.check.NoFallSignalCheck;
 import dev.annamc.anticheat.check.ReachCheck;
 import dev.annamc.anticheat.check.ScaffoldSignalCheck;
 import dev.annamc.anticheat.check.ViolationManager;
@@ -28,9 +32,13 @@ public final class AnnaACPlugin extends JavaPlugin {
         ViolationManager violations = new ViolationManager(this, alerts);
 
         getServer().getPluginManager().registerEvents(new MovementCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new MovementPhysicsCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new KnockbackPredictionCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ReachCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ClickRateCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new CombatPatternCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ScaffoldSignalCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new NoFallSignalCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(violations, this);
         getServer().getPluginManager().registerEvents(new ForceOpGuard(this, evidenceStore), this);
 
@@ -43,11 +51,11 @@ public final class AnnaACPlugin extends JavaPlugin {
         if (Bukkit.getPluginManager().getPlugin("packetevents") != null) {
             packetBridge = new PacketEventsBridge(this, violations);
             packetBridge.register();
-            getLogger().info("PacketEvents detected; packet timing telemetry registered.");
+            getLogger().info("PacketEvents detected; packet telemetry registered (experimental and disabled by default).");
         } else {
             getLogger().warning("PacketEvents is not installed. Packet telemetry is unavailable.");
         }
-        getLogger().info("ANNA AC enabled. Review config.yml; experimental signals are disabled by default.");
+        getLogger().info("ANNA AC enabled. Experimental checks are disabled by default; validate on a staging server.");
     }
 
     @Override
