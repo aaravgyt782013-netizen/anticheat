@@ -10,6 +10,7 @@ import dev.annamc.anticheat.check.NoFallSignalCheck;
 import dev.annamc.anticheat.check.ReachCheck;
 import dev.annamc.anticheat.check.ScaffoldSignalCheck;
 import dev.annamc.anticheat.check.ViolationManager;
+import dev.annamc.anticheat.check.WallHitCheck;
 import dev.annamc.anticheat.command.AACCommand;
 import dev.annamc.anticheat.evidence.EvidenceStore;
 import dev.annamc.anticheat.lang.Messages;
@@ -40,6 +41,7 @@ public final class AnnaACPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MovementPhysicsCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new KnockbackPredictionCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ReachCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new WallHitCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ClickRateCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new CombatPatternCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ScaffoldSignalCheck(this, violations), this);
