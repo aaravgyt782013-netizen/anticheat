@@ -96,7 +96,10 @@ public final class MovementPhysicsCheck implements Listener {
                                 ratio, distance, allowance, player.getPing()));
                 samples.put(player.getUniqueId(), new Sample(to.clone(), now, 0));
             }
-        } else if (previous.outlierStreak != 0) {
+        } else {
+            // Always advance the baseline. Keeping an old baseline across normal
+            // movement makes later distances cover multiple events and corrupts
+            // the per-sample movement envelope.
             samples.put(player.getUniqueId(), new Sample(to.clone(), now, 0));
         }
     }
