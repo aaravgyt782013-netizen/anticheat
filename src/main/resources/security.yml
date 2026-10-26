@@ -55,8 +55,16 @@ security:
     initial-scan-delay-ticks: 100
     # Interval between full plugin-directory scans in seconds (effective range 60–86400).
     scan-interval-seconds: 300
-    # Maximum decompressed class bytes scanned from one JAR (effective range 100000–64000000).
+    # Maximum plugin JAR files considered per scan (effective range 1–2048).
+    max-plugin-jars-per-scan: 512
+    # Maximum JAR entries traversed per plugin (effective range 100–100000).
+    max-entries-per-jar: 20000
+    # Maximum decompressed bytes read from a single class or text resource (effective range 16384–8000000).
+    max-entry-bytes: 2000000
+    # Maximum total decompressed bytes scanned from one JAR (effective range 100000–64000000).
     max-scan-bytes-per-jar: 16000000
+    # Also inspect common metadata/script resources such as plugin.yml, properties, JSON, JS and shell scripts.
+    scan-resource-files: true
     # Extra plugin files intentionally excluded from hash alerts and static scanning. Use exact JAR filenames.
     ignore-plugin-files: []
     # Send a summary for each periodic scan. Keep false to avoid filling security channels; manual scans always report.
