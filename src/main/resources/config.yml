@@ -326,6 +326,8 @@ checks:
     max-ping-slack-ms: 200
     # Discard mining sessions lasting longer than this period.
     session-timeout-ms: 15000
+    # Ignore blocks whose server-calculated expected break duration is below this tick count.
+    minimum-expected-ticks: 2
     # Window used to accumulate separate suspicious breaks before creating evidence.
     sample-window-ms: 10000
     # Number of suspicious breaks required before creating a violation.
