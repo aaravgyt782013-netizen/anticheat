@@ -29,6 +29,9 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("minimum-observed-displacement"));
         assertTrue(yaml.contains("rotation-quantization-degrees"));
         assertTrue(yaml.contains("max-movement-packets-per-second"));
+        assertTrue(yaml.contains("attack-packets-enabled: true"));
+        assertTrue(yaml.contains("max-attacks-per-window: 24"));
+        assertTrue(yaml.contains("minimum-over-limit-windows: 3"));
         assertTrue(yaml.contains("maximum-hit-angle-degrees"));
         assertTrue(yaml.contains("minimum-consecutive-placements"));
         assertTrue(yaml.contains("ping-window-extension-per-ms"));
