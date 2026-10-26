@@ -115,7 +115,8 @@ public final class PluginIntegrityMonitor implements Listener {
             try (var files = Files.list(pluginsDirectory)) {
                 jars = files.filter(Files::isRegularFile)
                         .filter(path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".jar"))
-                        .sorted().limit(512).toList();
+                        .sorted().limit(clamp(plugin.getConfig().getLong(
+                                "security.plugin-monitor.max-plugin-jars-per-scan", 512L), 1L, 2048L)).toList();
             }
 
             for (Path jar : jars) {
@@ -196,17 +197,29 @@ public final class PluginIntegrityMonitor implements Listener {
         try (JarFile archive = new JarFile(jar.toFile(), false)) {
             var entries = archive.entries();
             int count = 0;
-            while (entries.hasMoreElements() && count++ < 20000) {
+            int maxEntries = (int) clamp(plugin.getConfig().getLong(
+                    "security.plugin-monitor.max-entries-per-jar", 20000L), 100L, 100000L);
+            int maxEntryBytes = (int) clamp(plugin.getConfig().getLong(
+                    "security.plugin-monitor.max-entry-bytes", 2000000L), 16384L, 8000000L);
+            boolean scanResources = plugin.getConfig().getBoolean(
+                    "security.plugin-monitor.scan-resource-files", true);
+            while (entries.hasMoreElements() && count++ < maxEntries) {
                 JarEntry entry = entries.nextElement();
-                if (entry.isDirectory() || !entry.getName().toLowerCase(Locale.ROOT).endsWith(".class")) continue;
+                if (entry.isDirectory()) continue;
+                String entryName = entry.getName().toLowerCase(Locale.ROOT);
+                boolean classFile = entryName.endsWith(".class");
+                boolean resourceFile = scanResources && isTextResource(entryName);
+                if (!classFile && !resourceFile) continue;
                 long size = entry.getSize();
-                if (size > 2_000_000L) continue;
+                if (size > maxEntryBytes) continue;
                 try (InputStream in = archive.getInputStream(entry)) {
-                    byte[] bytes = readBounded(in, Math.min(2_000_000, maxBytes - totalBytes));
+                    int remaining = maxBytes - totalBytes;
+                    if (remaining <= 0) break;
+                    byte[] bytes = readBounded(in, Math.min(maxEntryBytes, remaining));
                     totalBytes += bytes.length;
-                    if (totalBytes >= maxBytes) break;
                     String text = new String(bytes, StandardCharsets.ISO_8859_1).toLowerCase(Locale.ROOT);
                     PluginRiskHeuristics.collectFromClassText(text, indicators);
+                    if (totalBytes >= maxBytes) break;
                 }
             }
         } catch (IOException ex) {
@@ -228,6 +241,13 @@ public final class PluginIntegrityMonitor implements Listener {
                     + ". This is not a malware verdict; review the source and origin before action.";
             reportState("risk:" + fileName + ":" + hash + ":" + score, detail);
         }
+    }
+
+    private static boolean isTextResource(String name) {
+        return name.endsWith(".yml") || name.endsWith(".yaml") || name.endsWith(".properties")
+                || name.endsWith(".json") || name.endsWith(".txt") || name.endsWith(".js")
+                || name.endsWith(".xml") || name.endsWith(".toml") || name.endsWith(".conf")
+                || name.endsWith(".sh") || name.endsWith(".bat") || name.endsWith(".ps1");
     }
 
     private static byte[] readBounded(InputStream in, int max) throws IOException {
