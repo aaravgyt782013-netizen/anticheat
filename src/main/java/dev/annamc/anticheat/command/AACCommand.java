@@ -2,6 +2,7 @@ package dev.annamc.anticheat.command;
 
 import dev.annamc.anticheat.alert.AlertService;
 import dev.annamc.anticheat.check.ViolationManager;
+import dev.annamc.anticheat.config.ConfigurationDiagnostics;
 import dev.annamc.anticheat.evidence.EvidenceStore;
 import dev.annamc.anticheat.lang.Messages;
 import org.bukkit.Bukkit;
@@ -38,6 +39,37 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                 if (!(sender instanceof Player player) || !sender.hasPermission("annaac.alerts")) return deny(sender);
                 boolean enabled = alerts.toggleStaffAlerts(player);
                 sender.sendMessage(messages.get(enabled ? "commands.alerts-enabled" : "commands.alerts-disabled"));
+            }
+            case "status" -> {
+                if (!sender.hasPermission("annaac.admin")) return deny(sender);
+                int enabledChecks = 0;
+                for (String check : ConfigurationDiagnostics.DETECTORS) {
+                    if (plugin.getConfig().getBoolean("checks." + check + ".enabled", false)) enabledChecks++;
+                }
+                int enabledActions = 0;
+                for (String check : ConfigurationDiagnostics.DETECTORS) {
+                    if (plugin.getConfig().getBoolean("punishments.enabled", true)
+                            && plugin.getConfig().getBoolean("punishments.actions." + check + ".enabled", false)
+                            && plugin.getConfig().getBoolean("checks." + check + ".enabled", false)) {
+                        enabledActions++;
+                    }
+                }
+                boolean discordEnabled = plugin.getConfig().getBoolean("alerts.discord-enabled", false)
+                        && plugin.getConfig().getString("alerts.discord-webhook", "") != null
+                        && !plugin.getConfig().getString("alerts.discord-webhook", "").isBlank();
+                boolean packetEvents = Bukkit.getPluginManager().getPlugin("packetevents") != null;
+                sender.sendMessage(messages.get("commands.status-header"));
+                sender.sendMessage(messages.get("commands.status-checks", java.util.Map.of(
+                        "enabled", enabledChecks, "total", ConfigurationDiagnostics.DETECTORS.size())));
+                sender.sendMessage(messages.get("commands.status-packet-events", java.util.Map.of(
+                        "status", packetEvents ? "installed" : "missing")));
+                sender.sendMessage(messages.get("commands.status-discord", java.util.Map.of(
+                        "status", discordEnabled ? "enabled/configured" : "disabled/not configured")));
+                sender.sendMessage(messages.get("commands.status-punishments", java.util.Map.of(
+                        "status", enabledActions == 0 ? "disabled (safe mode)" : "enabled for " + enabledActions + " check(s)")));
+                for (String note : ConfigurationDiagnostics.inspect(plugin)) {
+                    sender.sendMessage(AlertService.color("&8» &e" + note));
+                }
             }
             case "check" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
@@ -88,6 +120,9 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 plugin.reloadConfig();
                 messages.reload();
+                for (String note : ConfigurationDiagnostics.inspect(plugin)) {
+                    plugin.getLogger().warning("Configuration: " + note);
+                }
                 sender.sendMessage(messages.get("commands.reloaded"));
             }
             case "debug" -> {
@@ -114,14 +149,13 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("alerts", "check", "history", "reload", "debug", "testdiscord").stream()
+        if (args.length == 1) return List.of("alerts", "status", "check", "history", "reload", "debug", "testdiscord").stream()
                 .filter(s -> s.startsWith(args[0].toLowerCase(java.util.Locale.ROOT))).toList();
         if (args.length == 2 && List.of("check", "history", "debug").contains(args[0].toLowerCase(java.util.Locale.ROOT)))
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
                     .filter(n -> n.toLowerCase(java.util.Locale.ROOT).startsWith(args[1].toLowerCase(java.util.Locale.ROOT))).toList();
         if (args.length == 3 && args[0].equalsIgnoreCase("check"))
-            return List.of("movement", "reach", "wall-hit", "nuker-burst", "fast-break", "click-rate", "scaffold-signal", "packet-rate")
-                    .stream().filter(s -> s.startsWith(args[2].toLowerCase(java.util.Locale.ROOT))).toList();
+            return ConfigurationDiagnostics.DETECTORS.stream().filter(s -> s.startsWith(args[2].toLowerCase(java.util.Locale.ROOT))).toList();
         return List.of();
     }
 }
