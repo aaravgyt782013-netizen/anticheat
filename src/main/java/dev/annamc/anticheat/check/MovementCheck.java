@@ -27,7 +27,7 @@ public final class MovementCheck implements Listener {
     @EventHandler(ignoreCancelled = true) public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         Location from = event.getFrom(), to = event.getTo();
-        if (to == null || !plugin.getConfig().getBoolean("checks.movement.enabled", true)) return;
+        if (to == null || CheckUtil.shouldSkip(plugin, player, "movement")) return;
         if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR
                 || player.isFlying() || player.isInsideVehicle() || player.isGliding() || player.isSwimming()) return;
         if (System.currentTimeMillis() - teleported.getOrDefault(player.getUniqueId(), 0L) < 1000) return;
