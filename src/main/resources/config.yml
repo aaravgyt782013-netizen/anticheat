@@ -3,15 +3,28 @@ settings:
   debug: false
   evidence-retention-days: 7
   max-evidence-records-per-player: 5000
+
 alerts:
   console: true
   staff-chat: true
   discord-webhook: ""
   discord-enabled: false
+
 punishments:
   enabled: true
-  movement-kick-vl: 12.0
   kick-message: "&cUnfair advantage detected. If this is a mistake, contact staff."
+  actions:
+    movement:
+      enabled: true
+    reach:
+      enabled: false
+    click-rate:
+      enabled: false
+    scaffold-signal:
+      enabled: false
+    packet-rate:
+      enabled: false
+
 checks:
   movement:
     enabled: true
@@ -22,11 +35,46 @@ checks:
     violation-decay-per-second: 0.25
     alert-vl: 3.0
     kick-vl: 12.0
+
+  reach:
+    enabled: false
+    alert: true
+    max-distance: 3.6
+    violation-add: 1.0
+    violation-decay-per-second: 0.35
+    alert-vl: 2.0
+    kick-vl: 10.0
+
+  click-rate:
+    enabled: false
+    alert: true
+    max-cps: 24
+    flag-cooldown-ms: 1500
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
+  scaffold-signal:
+    enabled: false
+    alert: true
+    minimum-downward-pitch: 65.0
+    min-horizontal-distance: 0.8
+    violation-add: 0.25
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
   packet-rate:
     enabled: false
     alert: true
     minimum-interval-ms: 5
     sample-window: 40
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
   force-op:
     enabled: true
     alert: true
