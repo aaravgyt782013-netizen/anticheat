@@ -24,6 +24,9 @@ public final class MovementCheck implements Listener {
     @EventHandler public void onTeleport(PlayerTeleportEvent event) {
         teleported.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
     }
+    @EventHandler public void onQuit(PlayerQuitEvent event) {
+        teleported.remove(event.getPlayer().getUniqueId());
+    }
     @EventHandler(ignoreCancelled = true) public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         Location from = event.getFrom(), to = event.getTo();
