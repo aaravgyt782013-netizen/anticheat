@@ -53,7 +53,8 @@ public final class CombatPatternCheck implements Listener {
 
         double angle = hitAngleDegrees(p, target);
         double maxAngle = plugin.getConfig().getDouble("checks.combat-pattern.maximum-hit-angle-degrees", 22.0);
-        double pingAllowance = Math.min(8.0, Math.max(0, p.getPing()) * 0.02);
+        double pingAllowance = Math.min(plugin.getConfig().getDouble("checks.combat-pattern.max-ping-angle-allowance", 8.0),
+                Math.max(0, p.getPing()) * plugin.getConfig().getDouble("checks.combat-pattern.ping-angle-allowance-per-ms", 0.02));
         if (Double.isFinite(angle) && angle > maxAngle + pingAllowance) {
             violations.add(p, "combat-pattern",
                     plugin.getConfig().getDouble("checks.combat-pattern.hit-angle-violation-add", 0.5),
@@ -63,7 +64,7 @@ public final class CombatPatternCheck implements Listener {
         }
 
         Rotation rotation = rotations.get(p.getUniqueId());
-        if (rotation == null || now - rotation.time > 180) return;
+        if (rotation == null || now - rotation.time > plugin.getConfig().getLong("checks.combat-pattern.rotation-window-ms", 180L)) return;
         Pattern previous = patterns.getOrDefault(p.getUniqueId(), new Pattern(0, 0, 0, 0, now));
         long window = plugin.getConfig().getLong("checks.combat-pattern.pattern-window-ms", 5000L);
         if (now - previous.lastHitAt > window) previous = new Pattern(0, 0, 0, 0, now);
