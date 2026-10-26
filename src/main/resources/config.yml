@@ -74,6 +74,10 @@ punishments:
     wall-hit:
       # Keep this detector off until validated in your server's staging environment.
       enabled: false
+    # Block-break burst detector action, disabled until its thresholds pass staging tests.
+    nuker-burst:
+      # Keep automatic punishment disabled for this heuristic.
+      enabled: false
     # Arm-swing/click-rate signal. High CPS alone is not proof of cheating.
     click-rate:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
@@ -250,6 +254,40 @@ checks:
     minimum-occluded-sample-ratio: 1.0
     # Ignore block hits closer than this margin to a target sample to reduce edge noise.
     occlusion-margin: 0.15
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Sustained block-break burst signal for possible Nuker-like automation.
+  # This is not a per-block mining-speed simulator; validate tools, effects and plugins before use.
+  nuker-burst:
+    # Enable the block-break burst signal.
+    enabled: false
+    # Send staff alerts for repeated suspicious bursts.
+    alert: true
+    # Minimum milliseconds between alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Rolling time window used to count finished block-break events.
+    sample-window-ms: 1000
+    # How often (at most) a new over-limit window is counted, in milliseconds.
+    evaluation-interval-ms: 250
+    # Number of non-ignored blocks broken inside the rolling window that triggers suspicion.
+    max-block-breaks-per-window: 18
+    # Consecutive over-limit evaluations required before the check flags.
+    required-over-limit-windows: 3
+    # Block material names excluded from the rolling count; edit for your server's gameplay.
+    ignored-materials: [AIR, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN, DEAD_BUSH, VINE, GLOW_LICHEN, SNOW, COBWEB, SWEET_BERRY_BUSH]
     # Violation level (VL) added when this check flags.
     violation-add: 1.0
     # How quickly this check's VL decreases over time.
