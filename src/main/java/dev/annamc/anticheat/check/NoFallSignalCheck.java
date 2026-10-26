@@ -53,21 +53,29 @@ public final class NoFallSignalCheck implements Listener {
                 falls.put(p.getUniqueId(), new Fall(true, false, System.currentTimeMillis(), false));
             return;
         }
-        if (fall != null && fall.airborne && !fall.landingScheduled
-                && System.currentTimeMillis() - fall.startedAt <= plugin.getConfig().getLong("checks.no-fall.landing-observation-window-ms", 1500L)) {
-            Fall scheduled = new Fall(true, fall.damageObserved, fall.startedAt, true);
-            falls.put(p.getUniqueId(), scheduled);
-            UUID id = p.getUniqueId();
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                Fall latest = falls.get(id);
-                if (latest == null || latest.startedAt != scheduled.startedAt) return;
-                if (!latest.damageObserved && p.isOnline()) {
-                    violations.add(p, "no-fall",
-                            plugin.getConfig().getDouble("checks.no-fall.violation-add", 1.0),
-                            "landed after a significant fall without observed fall damage; review protection plugins");
-                }
-                falls.remove(id);
-            }, Math.max(1L, plugin.getConfig().getLong("checks.no-fall.landing-delay-ticks", 2L)));
+        if (fall != null && fall.airborne && !fall.landingScheduled) {
+            long age = System.currentTimeMillis() - fall.startedAt;
+            long observationWindow = Math.max(1L,
+                    plugin.getConfig().getLong("checks.no-fall.landing-observation-window-ms", 1500L));
+            if (age <= observationWindow) {
+                Fall scheduled = new Fall(true, fall.damageObserved, fall.startedAt, true);
+                falls.put(p.getUniqueId(), scheduled);
+                UUID id = p.getUniqueId();
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    Fall latest = falls.get(id);
+                    if (latest == null || latest.startedAt != scheduled.startedAt) return;
+                    if (!latest.damageObserved && p.isOnline()) {
+                        violations.add(p, "no-fall",
+                                plugin.getConfig().getDouble("checks.no-fall.violation-add", 1.0),
+                                "landed after a significant fall without observed fall damage; review protection plugins");
+                    }
+                    falls.remove(id);
+                }, Math.max(1L, plugin.getConfig().getLong("checks.no-fall.landing-delay-ticks", 2L)));
+            } else {
+                // A fall that took longer than the observation window is stale.
+                // Clear it instead of preventing the next fall from being tracked.
+                falls.remove(p.getUniqueId(), fall);
+            }
         }
     }
 
