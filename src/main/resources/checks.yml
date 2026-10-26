@@ -462,3 +462,21 @@ checks:
     audit-console-op-commands: true
     # Command labels/prefixes to audit or block. Add aliases used by your permission plugins.
     protected-command-prefixes: [op, deop, minecraft:op, minecraft:deop, bukkit:op, bukkit:deop, lp, luckperms, lpv, pex, permissions, manuadd]
+
+  # Experimental mace damage anomaly signal. Keep disabled until validated with your enchantments/plugins.
+  # Damage varies with fall distance, enchantments, and server mechanics; this is a heuristic, not proof.
+  mace-damage:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 5000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Conservative damage envelope; raise tolerance for custom combat/enchantment plugins.
+    base-damage-allowance: 10.0
+    damage-per-fall-block-allowance: 4.5
+    extra-tolerance: 12.0
+    violation-add: 1.0
+    violation-decay-per-second: 0.25
+    alert-vl: 1.0
+    kick-vl: 10.0
