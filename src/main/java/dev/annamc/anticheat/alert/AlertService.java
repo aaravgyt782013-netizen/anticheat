@@ -60,11 +60,11 @@ public final class AlertService {
                         && staffAlertsEnabled(staff)) staff.sendMessage(message);
             }
         }
-        sendDiscord(player, check, vl, detail == null ? "" : detail, plain);
+        sendDiscord(player.getName(), player.getUniqueId(), check, vl, detail == null ? "" : detail, plain);
         evidence.record(player.getUniqueId(), player.getName(), check, vl, detail);
     }
 
-    private void sendDiscord(Player player, String check, double vl, String detail, String plain) {
+    public void sendSecurityAlert(String playerName, UUID playerId, String check, String detail) {\n        String safeDetail = detail == null ? "" : detail;\n        String message = messages.get("alerts.security-detail", Map.of("player", playerName, "detail", safeDetail));\n        String plain = ChatColor.stripColor(message);\n        if (plugin.getConfig().getBoolean("alerts.console", true)) plugin.getLogger().warning(plain);\n        if (plugin.getConfig().getBoolean("alerts.staff-chat", true)) {\n            for (Player staff : Bukkit.getOnlinePlayers()) {\n                if (staff.hasPermission("annaac.alerts") && !staff.hasPermission("annaac.bypass")\n                        && staffAlertsEnabled(staff)) staff.sendMessage(message);\n            }\n        }\n        sendDiscord(playerName, playerId, check, 0.0, safeDetail, plain);\n        evidence.record(playerId, playerName, check, 0.0, safeDetail);\n    }\n\n    private void sendDiscord(String playerName, UUID playerId, String check, double vl, String detail, String plain) {
         if (!plugin.getConfig().getBoolean("alerts.discord-enabled", false)) return;
         String webhook = plugin.getConfig().getString("alerts.discord-webhook", "");
         if (webhook == null || webhook.isBlank()) return;
@@ -112,11 +112,11 @@ public final class AlertService {
                     .append(",\"color\":").append(color)
                     .append(",\"timestamp\":").append(json(Instant.now().toString()))
                     .append(",\"fields\":[")
-                    .append(field("Player", player.getName(), true)).append(",")
+                    .append(field("Player", playerName, true)).append(",")
                     .append(field("Check", check, true)).append(",")
                     .append(field("Violation Level", String.format(java.util.Locale.ROOT, "%.1f", vl), true));
             if (includeDetail && !detail.isBlank()) payload.append(",").append(field("Evidence", truncate(detail, 900), false));
-            if (includeUuid) payload.append(",").append(field("Player UUID", player.getUniqueId().toString(), false));
+            if (includeUuid) payload.append(",").append(field("Player UUID", playerId.toString(), false));
             payload.append("],\"footer\":{\"text\":").append(json("Anna MC • ANNA AC")).append("}}]");
         }
         payload.append("}");
