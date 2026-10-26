@@ -30,6 +30,19 @@ Run each case for at least 10 minutes and record alerts per detector.
 - **Packet rate / timer:** test all proxy and client versions. Packet timing is not equivalent to tick-rate proof; do not punish on this signal alone.
 - **Force OP guard:** in staging, verify unauthorized player OP/deop and configured permission-management commands are cancelled; authorized admin commands are audited; console operations are logged; and OP grants made by another plugin are detected by the operator-list audit.
 
+## Anti-nuke and plugin integrity validation
+
+Run these separately from gameplay detections on a disposable staging copy.
+
+- With a player lacking \`annaac.security.bypass\`, verify configured \`/fill\`, \`/setblock\`, \`/clone\`, WorldEdit batch, and plugin-management/reload commands are cancelled and reported. Verify console commands are audited but not blocked.
+- Grant the bypass permission to one test account, verify the bulk command is allowed by the guard but still requires the permission for the underlying command, and confirm an audit alert is emitted.
+- Test a block-damaging explosion over and under \`max-explosion-affected-blocks\`; ensure large explosions are cancelled and normal TNT/redstone systems still behave as intended.
+- Leave the optional block-break rate limiter off until mining with efficiency tools, haste, custom tools, and server plugins is tested.
+- Run \`/annaac securityscan\` and confirm the first-run baseline is saved at \`plugins/ANNA-AC/plugin-hashes.yml\`. Manually review JAR origins and static-risk alerts; do not assume the generated first inventory is trusted.
+- On a disposable copy, add, replace, and remove a harmless test JAR, then confirm hash alerts appear. Enable and disable a harmless plugin after the lifecycle grace period to verify the audit alert.
+- Test metadata/resource scanning with a harmless fixture that contains a risky-looking string. Confirm it is described as a heuristic/manual review, not an automatic malware verdict.
+- Only test \`/annaac securityscan approve\` after independently reviewing every JAR. Verify it intentionally replaces the hash inventory, and verify a player without \`annaac.security.baseline-approve\` cannot approve it.
+
 ## Release gate
 
 Do not enable a kick action until the detector has passed the full matrix, no unexplained legitimate alerts remain, and at least two staff members have reviewed evidence. Re-run the matrix after changes to Paper, proxy, anti-cheat, movement-related plugins, or server configuration.
