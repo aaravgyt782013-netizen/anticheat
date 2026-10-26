@@ -5,30 +5,47 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class AlertService {
     private final JavaPlugin plugin;
     private final EvidenceStore evidence;
+    private final Set<UUID> mutedStaff = ConcurrentHashMap.newKeySet();
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(4)).build();
 
     public AlertService(JavaPlugin plugin, EvidenceStore evidence) {
         this.plugin = plugin;
         this.evidence = evidence;
     }
+
+    public boolean toggleStaffAlerts(Player player) {
+        UUID id = player.getUniqueId();
+        if (mutedStaff.remove(id)) return true;
+        mutedStaff.add(id);
+        return false;
+    }
+
+    public boolean staffAlertsEnabled(Player player) {
+        return !mutedStaff.contains(player.getUniqueId());
+    }
+
     public void send(Player player, String check, double vl, String detail) {
         String message = color("&bANNA AC &8» &f" + player.getName() + " &7failed &b" + check
-                + " &8(VL: &f" + String.format("%.1f", vl) + "&8) &7" + detail);
+                + " &8(VL: &f" + String.format(java.util.Locale.ROOT, "%.1f", vl) + "&8) &7" + detail);
         if (plugin.getConfig().getBoolean("alerts.console", true))
             plugin.getLogger().warning(ChatColor.stripColor(message));
         if (plugin.getConfig().getBoolean("alerts.staff-chat", true)) {
             for (Player staff : Bukkit.getOnlinePlayers()) {
-                if (staff.hasPermission("annaac.alerts") && !staff.hasPermission("annaac.bypass"))
-                    staff.sendMessage(message);
+                if (staff.hasPermission("annaac.alerts") && !staff.hasPermission("annaac.bypass")
+                        && staffAlertsEnabled(staff)) staff.sendMessage(message);
             }
         }
         String webhook = plugin.getConfig().getString("alerts.discord-webhook", "");
@@ -40,8 +57,13 @@ public final class AlertService {
                         .timeout(Duration.ofSeconds(6)).header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(payload)).build();
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                    try { http.send(request, HttpResponse.BodyHandlers.discarding()); }
-                    catch (Exception e) { plugin.getLogger().fine("Discord webhook delivery failed: " + e.getMessage()); }
+                    try {
+                        HttpResponse<Void> response = http.send(request, HttpResponse.BodyHandlers.discarding());
+                        if (response.statusCode() < 200 || response.statusCode() >= 300)
+                            plugin.getLogger().fine("Discord webhook returned HTTP " + response.statusCode());
+                    } catch (Exception e) {
+                        plugin.getLogger().fine("Discord webhook delivery failed: " + e.getMessage());
+                    }
                 });
             } catch (IllegalArgumentException ex) {
                 plugin.getLogger().warning("Discord webhook URL is invalid; check alerts.discord-webhook.");
@@ -49,7 +71,11 @@ public final class AlertService {
         }
         evidence.record(player.getUniqueId(), player.getName(), check, vl, detail);
     }
-    public static String color(String s) { return ChatColor.translateAlternateColorCodes('&', s); }
+
+    public static String color(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
+    }
+
     private static String json(String s) {
         return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", " ");
     }
