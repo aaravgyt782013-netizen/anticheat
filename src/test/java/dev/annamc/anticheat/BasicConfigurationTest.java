@@ -42,6 +42,7 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("timer:\nenabled: false"));
         assertTrue(yaml.contains("wall-hit:\nenabled: false"));
         assertTrue(yaml.contains("nuker-burst:\nenabled: false"));
+        assertTrue(yaml.contains("fast-break:\nenabled: false"));
     }
 
     @Test void allPunishmentsAreIndividuallyConfigurableAndDisabledByDefault() throws Exception {
@@ -59,6 +60,7 @@ class BasicConfigurationTest {
         // One disabled wall-hit option must exist for detection and one for punishment.
         assertEquals(2, yaml.split("wall-hit:\\nenabled: false", -1).length - 1);
         assertEquals(2, yaml.split("nuker-burst:\\nenabled: false", -1).length - 1);
+        assertEquals(2, yaml.split("fast-break:\\nenabled: false", -1).length - 1);
     }
 
     @Test void forceOpHasCommandBlockingAndAuditControls() throws Exception {
