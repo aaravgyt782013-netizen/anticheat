@@ -27,7 +27,8 @@ public final class ViolationManager implements Listener {
     private final Map<String, Long> lastUpdate = new ConcurrentHashMap<>();
     private final Map<String, Long> lastAlert = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastActivity = new ConcurrentHashMap<>();
-    private final Set<String> pendingKicks = ConcurrentHashMap.newKeySet();
+    private final Set<String> pendingPunishments = ConcurrentHashMap.newKeySet();
+    private final Map<String, Long> lastPunishment = new ConcurrentHashMap<>();
     private final Map<UUID, java.util.Deque<Signal>> recentSignals = new ConcurrentHashMap<>();
 
     public ViolationManager(JavaPlugin plugin, AlertService alerts) {
@@ -63,29 +64,71 @@ public final class ViolationManager implements Listener {
             alerts.send(player, check, current, detail);
         }
 
-        double kickVl = finiteNonNegative(plugin.getConfig().getDouble("checks." + check + ".kick-vl", 12.0), 12.0);
-        boolean actionEnabled = plugin.getConfig().getBoolean("punishments.actions." + check + ".enabled", false);
+        String actionPath = "punishments.actions." + check;
+        double fallbackThreshold = finiteNonNegative(
+                plugin.getConfig().getDouble("checks." + check + ".kick-vl", 12.0), 12.0);
+        double actionThreshold = finiteNonNegative(
+                plugin.getConfig().getDouble(actionPath + ".threshold-vl", fallbackThreshold), fallbackThreshold);
+        boolean actionEnabled = plugin.getConfig().getBoolean(actionPath + ".enabled", false);
+        String actionType = plugin.getConfig().getString(actionPath + ".type", "KICK");
+        if (actionType == null) actionType = "KICK";
+        actionType = actionType.trim().toUpperCase(java.util.Locale.ROOT);
+        boolean knownAction = java.util.Set.of("KICK", "WARN", "COMMAND", "NONE").contains(actionType);
         boolean requireIndependentFamilies = plugin.getConfig().getBoolean(
                 "punishments.require-independent-families", true);
         int minimumFamilies = Math.max(1, Math.min(4,
                 plugin.getConfig().getInt("punishments.minimum-independent-families", 2)));
         boolean corroborated = !requireIndependentFamilies || independentFamilies >= minimumFamilies;
-        if (plugin.getConfig().getBoolean("punishments.enabled", true)
-                && actionEnabled && current >= kickVl && corroborated && pendingKicks.add(key)) {
-            String reason = plugin.getConfig().getString(
-                    "punishments.kick-message", "&cUnfair advantage detected.");
+        long actionCooldown = Math.max(0L, plugin.getConfig().getLong(actionPath + ".cooldown-ms", 30000L));
+        long previousPunishment = lastPunishment.getOrDefault(key, 0L);
+        boolean eligible = plugin.getConfig().getBoolean("punishments.enabled", true)
+                && actionEnabled && knownAction && !"NONE".equals(actionType)
+                && current >= actionThreshold && corroborated
+                && now - previousPunishment >= actionCooldown;
+        if (eligible && pendingPunishments.add(key)) {
+            final String selectedAction = actionType;
             Bukkit.getScheduler().runTask(plugin, () -> {
                 try {
-                    if (player.isOnline()) player.kickPlayer(AlertService.color(reason));
+                    if (!player.isOnline()) return;
+                    String configuredMessage = plugin.getConfig().getString(actionPath + ".message", "");
+                    if (configuredMessage == null) configuredMessage = "";
+                    String renderedMessage = renderActionMessage(configuredMessage, player, check, current);
+                    switch (selectedAction) {
+                        case "KICK" -> {
+                            String reason = renderedMessage.isBlank()
+                                    ? plugin.getConfig().getString("punishments.kick-message",
+                                        "&cUnfair advantage detected. If this is a mistake, contact staff.")
+                                    : renderedMessage;
+                            player.kickPlayer(AlertService.color(reason));
+                        }
+                        case "WARN" -> {
+                            if (renderedMessage.isBlank()) {
+                                renderedMessage = "&cANNA AC &8» &7Suspicious activity detected by &f"
+                                        + check + "&7. If this is a mistake, contact staff.";
+                            }
+                            player.sendMessage(AlertService.color(renderedMessage));
+                        }
+                        case "COMMAND" -> {
+                            java.util.List<String> commands = plugin.getConfig().getStringList(actionPath + ".commands");
+                            for (String configuredCommand : commands) {
+                                if (configuredCommand == null || configuredCommand.isBlank()) continue;
+                                String rendered = renderActionMessage(configuredCommand, player, check, current).trim();
+                                if (rendered.startsWith("/")) rendered = rendered.substring(1);
+                                if (!rendered.isBlank()) Bukkit.dispatchCommand(Bukkit.getConsoleSender(), rendered);
+                            }
+                        }
+                        default -> { /* NONE is filtered before dispatch; unknown actions are rejected. */ }
+                    }
+                    lastPunishment.put(key, System.currentTimeMillis());
                 } finally {
-                    pendingKicks.remove(key);
+                    pendingPunishments.remove(key);
                 }
             });
         } else if (plugin.getConfig().getBoolean("settings.debug", false)
                 && plugin.getConfig().getBoolean("punishments.enabled", true)
-                && actionEnabled && current >= kickVl && !corroborated) {
-            plugin.getLogger().info("Kick suppressed for " + player.getName() + " / " + check
-                    + ": only " + independentFamilies + " independent signal family/families in the correlation window.");
+                && actionEnabled && current >= actionThreshold && !corroborated) {
+            plugin.getLogger().info("Punishment suppressed for " + player.getName() + " / " + check
+                    + ": only " + independentFamilies + " qualifying independent signal families are within the correlation window.");
         }
         return current;
     }
@@ -146,6 +189,14 @@ public final class ViolationManager implements Listener {
         }
     }
 
+    private static String renderActionMessage(String template, Player player, String check, double vl) {
+        if (template == null) return "";
+        return template.replace("%player%", player.getName())
+                .replace("%uuid%", player.getUniqueId().toString())
+                .replace("%check%", check)
+                .replace("%vl%", String.format(java.util.Locale.ROOT, "%.2f", vl));
+    }
+
     private static double finiteNonNegative(double value, double fallback) {
         return Double.isFinite(value) && value >= 0.0 ? value : fallback;
     }
@@ -174,7 +225,8 @@ public final class ViolationManager implements Listener {
         String prefix = id + ":";
         lastUpdate.keySet().removeIf(key -> key.startsWith(prefix));
         lastAlert.keySet().removeIf(key -> key.startsWith(prefix));
-        pendingKicks.removeIf(key -> key.startsWith(prefix));
+        pendingPunishments.removeIf(key -> key.startsWith(prefix));
+        lastPunishment.keySet().removeIf(key -> key.startsWith(prefix));
     }
 
     private record Signal(long time, String family) {}
