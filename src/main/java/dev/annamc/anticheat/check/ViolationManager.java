@@ -26,8 +26,7 @@ public final class ViolationManager implements Listener {
     }
 
     public double add(Player player, String check, double amount, String detail) {
-        if (player.hasPermission("annaac.bypass")
-                || !plugin.getConfig().getBoolean("checks." + check + ".enabled", false)) return get(player, check);
+        if (CheckUtil.shouldSkip(plugin, player, check)) return get(player, check);
         if (!Double.isFinite(amount) || amount <= 0.0) return get(player, check);
 
         UUID id = player.getUniqueId();
