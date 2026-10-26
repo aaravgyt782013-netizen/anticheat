@@ -25,6 +25,12 @@ Shared features: per-check violation levels/decay, alert throttling, console/sta
 
 Anti-Xray is provided by Paper's block obfuscation, not by a client-brand detector inside ANNA AC. No server-side plugin can reliably identify every client or every feature; experimental checks must be validated before punishments are enabled.
 
+## Configuration, languages, and Discord
+
+- [Full configuration guide](docs/CONFIGURATION.md): prefix, English/Hindi language selection, permissions, detector defaults, and safe rollout.
+- [Discord webhook setup](docs/DISCORD_SETUP.md): secure outbound staff alerts, embeds, optional role mentions, and troubleshooting.
+- The webhook URL is intentionally not committed; the server owner must create a private Discord channel webhook and enter it in the server's local config.
+
 ## Configuration
 
 In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
