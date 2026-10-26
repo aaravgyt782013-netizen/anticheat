@@ -149,7 +149,7 @@ public final class ViolationManager implements Listener {
 
     private void cleanupExpiredProfiles() {
         long retentionHours = Math.max(1L,
-                plugin.getConfig().getLong("settings.violation-retention-hours", 24L));
+                plugin.getConfig().getLong("database.violation-retention-hours", 24L));
         long retentionMillis = retentionHours > Long.MAX_VALUE / 3_600_000L
                 ? Long.MAX_VALUE : retentionHours * 3_600_000L;
         long cutoff = System.currentTimeMillis() - retentionMillis;
