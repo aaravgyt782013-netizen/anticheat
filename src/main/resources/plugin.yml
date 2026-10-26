@@ -1,0 +1,20 @@
+name: ANNA-AC
+version: '0.1.0-SNAPSHOT'
+main: dev.annamc.anticheat.AnnaACPlugin
+api-version: '1.21'
+author: Anna MC
+website: https://github.com/aaravgyt782013-netizen/anticheat
+softdepend: [packetevents]
+description: Configurable anti-cheat foundation for Anna MC.
+commands:
+  annaac:
+    description: ANNA AC administration commands
+    usage: /annaac <alerts|check|history|reload|debug>
+    aliases: [aac]
+permissions:
+  annaac.alerts:
+    default: op
+  annaac.admin:
+    default: op
+  annaac.bypass:
+    default: op
