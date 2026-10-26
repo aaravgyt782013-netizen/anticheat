@@ -318,7 +318,23 @@ public final class PluginIntegrityMonitor implements Listener {
                 result.put(fileName, hash);
             }
         }
+        // Read the old path-based format if it was created by an earlier development build.
+        if (result.isEmpty()) readLegacyHashes(root, "", result);
         return result;
+    }
+
+    private static void readLegacyHashes(org.bukkit.configuration.ConfigurationSection section,
+                                         String prefix, Map<String, String> target) {
+        for (String key : section.getKeys(false)) {
+            String path = prefix.isEmpty() ? key : prefix + "." + key;
+            Object raw = section.get(key);
+            if (raw instanceof String value && value.matches("(?i)[0-9a-f]{64}")) {
+                target.put(path, value);
+            } else {
+                var child = section.getConfigurationSection(key);
+                if (child != null) readLegacyHashes(child, path, target);
+            }
+        }
     }
 
     private static void writeBaselineHashes(YamlConfiguration yaml, Map<String, String> hashes) {
