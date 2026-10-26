@@ -78,6 +78,10 @@ punishments:
     nuker-burst:
       # Keep automatic punishment disabled for this heuristic.
       enabled: false
+    # FastBreak repeated timing signal action, disabled until validated on this server.
+    fast-break:
+      # Keep automatic punishment disabled until the detector passes mining/effects tests.
+      enabled: false
     # Arm-swing/click-rate signal. High CPS alone is not proof of cheating.
     click-rate:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
@@ -289,6 +293,46 @@ checks:
     # Block material names excluded from the rolling count; edit for your server's gameplay.
     ignored-materials: [AIR, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN, DEAD_BUSH, VINE, GLOW_LICHEN, SNOW, COBWEB, SWEET_BERRY_BUSH]
     # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Compares observed mining time with Paper's server-calculated break-progress estimate.
+  # Repeated evidence and latency slack are used; this is not a full packet-history simulator.
+  fast-break:
+    # Enable the mining-speed timing signal.
+    enabled: false
+    # Send staff alerts when repeated unexpectedly-fast block breaks are detected.
+    alert: true
+    # Minimum milliseconds between alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Ratio of estimated legal tick duration to require before a break may count as suspicious (0.05–1.0).
+    minimum-time-ratio: 0.5
+    # Minimum observed time threshold in milliseconds after latency slack is applied.
+    minimum-required-time-ms: 60
+    # Latency allowance subtracted from the expected-time threshold per ping millisecond.
+    ping-slack-per-ms: 0.5
+    # Maximum latency allowance subtracted from the expected-time threshold.
+    max-ping-slack-ms: 200
+    # Discard mining sessions lasting longer than this period.
+    session-timeout-ms: 15000
+    # Window used to accumulate separate suspicious breaks before creating evidence.
+    sample-window-ms: 10000
+    # Number of suspicious breaks required before creating a violation.
+    minimum-impossible-breaks: 2
+    # Block material names excluded from this check; customize for server-specific break mechanics.
+    ignored-materials: [AIR, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN, DEAD_BUSH, VINE, GLOW_LICHEN, SNOW, COBWEB, SWEET_BERRY_BUSH]
+    # Violation level (VL) added after the required repeated evidence.
     violation-add: 1.0
     # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.5
