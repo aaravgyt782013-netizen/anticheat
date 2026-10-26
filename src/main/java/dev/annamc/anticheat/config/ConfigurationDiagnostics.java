@@ -41,6 +41,10 @@ public final class ConfigurationDiagnostics {
                 notes.add("Punishment action '" + check + "' is enabled while its detector is disabled; it cannot trigger.");
             }
             if (("packet-rate".equals(check) || "timer".equals(check)) && enabled) packetRequired = true;
+            if ("click-rate".equals(check) && enabled
+                    && plugin.getConfig().getBoolean("checks.click-rate.attack-packets-enabled", true)) {
+                packetRequired = true;
+            }
         }
 
         boolean requireFamilies = plugin.getConfig().getBoolean("punishments.require-independent-families", true);
@@ -57,7 +61,7 @@ public final class ConfigurationDiagnostics {
                 + " check(s); validate each enabled detector on a staging server before public use.");
 
         if (packetRequired && Bukkit.getPluginManager().getPlugin("packetevents") == null) {
-            notes.add("PacketEvents is missing, but packet-rate or timer is enabled; these packet checks will not function.");
+            notes.add("PacketEvents is missing, but packet-rate, timer, or click-rate packet telemetry is enabled; those packet signals will not function.");
         }
 
         boolean discordEnabled = plugin.getConfig().getBoolean("alerts.discord-enabled", false);
