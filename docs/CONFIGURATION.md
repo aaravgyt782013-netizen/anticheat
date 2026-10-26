@@ -7,6 +7,7 @@
 - `plugins/ANNA-AC/discord.yml`: console/staff alert toggles and all Discord webhook/embed settings.
 - `plugins/ANNA-AC/database.yml`: evidence storage directory, retention period, record cap, detail length, and in-memory violation retention.
 - `plugins/ANNA-AC/punishments.yml`: global kick switch, independent-signal correlation safety controls, kick message, and per-check actions.
+- `plugins/ANNA-AC/security.yml`: anti-nuke bulk-command protection, explosion limits, optional block-break rate limiting, plugin JAR hashes, lifecycle auditing, and static malware-risk scanning.
 - `plugins/ANNA-AC/messages_en.yml` and `messages_hi.yml`: English and Hindi message text.
 - `plugins/ANNA-AC/messages_en.yml`: English messages.
 - `plugins/ANNA-AC/messages_hi.yml`: Hindi messages.
@@ -69,13 +70,21 @@ Automatic kicks additionally require the configured number of independent detect
 
 ## Reload and permissions
 
-- `/annaac status`: show enabled detectors, PacketEvents availability, Discord configuration, automatic-kick state, and configuration warnings; requires `annaac.admin`.
+- `/annaac status`: show enabled detectors, PacketEvents availability, Discord configuration, anti-nuke/plugin-monitor switches, automatic-action state, and configuration warnings; requires `annaac.admin`.
+- `/annaac securityscan`: run a manual plugin JAR hash and static-risk scan; requires `annaac.admin`.
+- `/annaac securityscan approve`: replace the plugin hash baseline after manual review. Console/RCON can run it; a player needs both `annaac.admin` and `annaac.security.baseline-approve`.
 - `/annaac alerts`: toggle your own staff alerts; requires `annaac.alerts`.
 - `/annaac check <player> [check]`: view violation level; requires `annaac.admin`.
 - `/annaac history <player>`: inspect recent online-player evidence; requires `annaac.admin`.
 - `/annaac debug <player>`: view basic runtime data; requires `annaac.admin`.
 - `/annaac reload`: reload `config.yml`, `checks.yml`, `discord.yml`, `database.yml`, `punishments.yml`, and selected language messages; requires `annaac.admin`.
 - `annaac.bypass` and `annaac.bypass.<check>` bypass detector processing. Give only to trusted staff/test accounts.
+
+## Anti-nuke and plugin integrity
+
+See [SECURITY_PROTECTION.md](SECURITY_PROTECTION.md) for each `security.yml` option, safe bypass permissions, the first-run hash baseline, manual scans, and how to review/approve an updated baseline. Bulk destructive commands are blocked for players unless they have a configured bypass permission. Large block-damaging explosions above the configured cap are cancelled; the optional mining-rate limit is disabled by default.
+
+The static plugin-risk scan only identifies suspicious combinations of class/resource strings. It can miss obfuscated or runtime-only behavior and can flag legitimate plugins. It never automatically removes or disables plugins. The first hash inventory must be reviewed; do not treat it as an already trusted allowlist.
 
 ## Discord
 
