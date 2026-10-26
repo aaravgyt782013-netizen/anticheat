@@ -137,7 +137,8 @@ public final class ModularConfigManager {
                 ConfigurationSection targetChild = target.getConfigurationSection(path);
                 ConfigurationSection defaultChild = defaults.getConfigurationSection(key);
                 if (targetChild != null && defaultChild != null) {
-                    changed |= mergeNode(targetChild, defaultChild, path);
+                    // Keep the root target and build fully-qualified paths in recursion.
+                    changed |= mergeNode(target, defaultChild, path);
                 }
             } else if (!target.contains(path)) {
                 copyComments(defaults, target, key, path);
