@@ -1,25 +1,33 @@
 # ANNA AC
 
-Original anti-cheat project for **Paper 1.21.11 / Java 21**.
+Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 
-## Implemented signals (not all production-grade)
+## Implemented detector signals
 
-- **Movement displacement:** conservative horizontal displacement heuristic. It is not a movement physics simulator and may flag unusual legitimate movement; tune it on a staging server.
-- **Reach:** eye-to-nearest-point-on-target-hitbox signal. No full ping/interpolation compensation; disabled by default.
-- **Click rate:** arm-swing events in a rolling one-second window. CPS alone is not proof of automation; disabled by default.
+- **Movement displacement:** legacy conservative displacement heuristic; disabled by default.
+- **Movement physics envelope:** repeated movement-envelope outlier heuristic with sprint/speed and ping slack. This is not a deterministic per-tick physics simulator; disabled by default.
+- **Knockback telemetry:** compares movement observed after server velocity. Collisions, player input and ping affect results; disabled by default.
+- **Reach:** eye-to-nearest-point-on-target-hitbox signal without full historical hitbox/interpolation compensation; disabled by default.
+- **Combat pattern:** looks for repeated near-identical rotation deltas around hits. This is low-confidence telemetry, not proof of KillAura; disabled by default.
+- **Click rate:** arm-swing count over a rolling one-second window. CPS alone is not proof of automation; disabled by default.
 - **Scaffold signal:** placement-angle heuristic; weak evidence only and disabled by default.
-- **Packet rate:** optional PacketEvents movement-packet interval telemetry; disabled by default.
-- **Force OP audit:** logs OP/deop commands and newly observed operator status. It does not prevent every possible permission exploit.
+- **No-fall signal:** checks a narrow pattern of landing after a significant fall without observed fall damage. Protection plugins and gameplay effects can create the same pattern; disabled by default.
+- **Packet rate:** optional PacketEvents rolling packet-rate and short-interval telemetry. This is not a validated timer detector; disabled by default.
+- **Force OP guard:** blocks configured privilege-management commands from players lacking annaac.admin, audits console commands, and monitors operator-list changes. It cannot prevent malicious plugins, direct server-file edits, console compromise, or every permission-plugin alias.
 
-Shared features: per-check violation levels/decay, alert throttling, console/staff/Discord alerts, JSONL evidence, configurable evidence retention and record caps, per-staff alert toggles, basic admin commands, and GitHub Actions build/tests.
+Shared features: per-check violation levels/decay, alert throttling, console/staff/Discord alerts, JSONL evidence with retention caps, per-staff alert toggles, admin commands, pure detection-math unit tests, config regression tests, and GitHub Actions build/tests.
 
-## Configurability
+## Configuration
 
-In `plugins/ANNA-AC/config.yml`, movement/reach/click-rate/scaffold/packet signals have independent enablement, alerts, alert cooldowns, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. Global ignored worlds are under `settings.ignored-worlds`. Kick actions are independently controlled under `punishments.actions.<check>.enabled`. Detector-specific thresholds are in each check's section. Force OP auditing has separate enable, alert, OP-change audit, and attempted-command kick settings.
+In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`.
+
+All experimental detection checks and all automatic kick actions are disabled by default. Leave them that way until they pass staging validation. The legacy movement heuristic is also disabled by default.
+
+Force OP controls include `checks.force-op.cancel-player-op-commands`, `kick-player-on-attempt`, `detect-op-grants`, `audit-console-op-commands`, and a configurable `protected-command-prefixes` list. Review this list for the permission plugins and aliases actually installed on your server.
 
 Discord: set `alerts.discord-enabled: true` and `alerts.discord-webhook` to a private HTTPS webhook. Keep it secret.
 
-Evidence JSONL files are stored under `plugins/ANNA-AC/evidence/`. Age and per-player record caps are configured by `settings.evidence-retention-days` and `settings.max-evidence-records-per-player`; pruning is performed asynchronously at startup and periodically as evidence is written.
+Evidence JSONL files are stored under `plugins/ANNA-AC/evidence/`. Retention days and maximum records per player are configurable.
 
 ## Build
 
@@ -29,14 +37,10 @@ JDK 21 and Gradle 8.14+:
 
 The output should be `build/libs/ANNA-AC-0.1.0-SNAPSHOT.jar`. Verify a successful GitHub Actions run for the exact latest commit before installing.
 
-## Safe install
+## Staging validation required
 
-1. Back up your server and test on a staging Paper 1.21.11 server.
-2. Install a compatible PacketEvents Spigot plugin only if packet telemetry is desired.
-3. Put the built JAR in `plugins/`, start once, and review `plugins/ANNA-AC/config.yml`.
-4. Keep experimental checks disabled until you have validated them with normal players and different ping levels.
-5. Grant `annaac.admin` only to trusted administrators and `annaac.alerts` to trusted staff.
+See [docs/STAGING_VALIDATION.md](docs/STAGING_VALIDATION.md) for a test matrix covering legitimate movement, PvP, block placement, fall edge cases, latency, proxy/client combinations, and Force OP behavior. This workflow has not run a live Paper server, so it cannot claim live false-positive testing has passed.
 
-## Not yet complete
+## Limitations
 
-This is a growing foundation, **not a Grim/Vulcan-equivalent anti-cheat yet**. Full per-tick physics prediction, robust knockback and latency compensation, KillAura/aim analysis, inventory/transaction checks, timer simulation, no-fall validation, complete packet exploit checks, robust Force OP prevention, replay capture, web dashboard, and cross-version simulation are not implemented. Do not infer a detection exists from a config section alone.
+ANNA AC is **not yet equivalent to Grim or Vulcan**. Accurate movement prediction requires simulation of Minecraft's version-specific physics and client inputs; robust knockback analysis needs latency-aware velocity tracking and replay; KillAura/aim needs stronger multi-signal analysis; timer detection needs calibrated packet/tick analysis; and Force OP prevention cannot defend against arbitrary malicious plugins or host-level compromise. These current detectors are an extensible foundation, not a promise of production-grade detection accuracy.
