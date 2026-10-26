@@ -33,12 +33,12 @@ public final class EvidenceStore {
 
     public EvidenceStore(JavaPlugin plugin) {
         this.plugin = plugin;
-        writer.submit(this::pruneAll);
+        writer.submit(this::initializeStorage);
     }
 
     public void record(UUID uuid, String player, String check, double vl, String detail) {
-        int maxDetailLength = Math.max(64,
-                plugin.getConfig().getInt("settings.max-evidence-detail-length", 1200));
+        int maxDetailLength = Math.max(64, Math.min(10000,
+                plugin.getConfig().getInt("database.max-detail-length", 1200)));
         String line = "{\"time\":\"" + Instant.now() + "\",\"uuid\":\"" + uuid
                 + "\",\"player\":\"" + escapeJson(truncate(player, 64)) + "\",\"check\":\""
                 + escapeJson(truncate(check, 64)) + "\",\"vl\":" + vl + ",\"detail\":\""
@@ -87,6 +87,15 @@ public final class EvidenceStore {
         return resolved;
     }
 
+    private void initializeStorage() {
+        try {
+            Files.createDirectories(evidenceDirectory());
+            pruneAll();
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Could not initialize evidence storage directory", e);
+        }
+    }
+
     private void pruneAll() {
         Path dir = evidenceDirectory();
         if (!Files.isDirectory(dir)) return;
@@ -103,9 +112,9 @@ public final class EvidenceStore {
             if (!Files.isRegularFile(file)) return;
             List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
             int retentionDays = Math.max(0,
-                    plugin.getConfig().getInt("settings.evidence-retention-days", 7));
+                    plugin.getConfig().getInt("database.retention-days", 7));
             int maxRecords = Math.max(1,
-                    plugin.getConfig().getInt("settings.max-evidence-records-per-player", 5000));
+                    plugin.getConfig().getInt("database.max-records-per-player", 5000));
             Instant cutoff = Instant.now().minus(retentionDays, ChronoUnit.DAYS);
             List<String> retained = new ArrayList<>(lines.size());
             for (String line : lines) {
