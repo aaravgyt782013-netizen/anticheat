@@ -14,6 +14,6 @@ class BasicConfigurationTest {
     }
     @Test void packetRateDetectionIsDisabledByDefault() throws Exception {
         String yaml = Files.readString(Path.of("src/main/resources/config.yml"));
-        assertTrue(yaml.contains("packet-rate:\\n    enabled: false"));
+        assertTrue(yaml.contains("packet-rate:\n    enabled: false"));
     }
 }
