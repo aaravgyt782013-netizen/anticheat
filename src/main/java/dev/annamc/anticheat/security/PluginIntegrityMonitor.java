@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
@@ -106,8 +107,8 @@ public final class PluginIntegrityMonitor implements Listener {
             boolean integrityEnabled = plugin.getConfig().getBoolean(
                     "security.plugin-monitor.integrity-hash-enabled", true);
             YamlConfiguration baseline = YamlConfiguration.loadConfiguration(baselinePath.toFile());
-            boolean hasBaseline = integrityEnabled && baseline.getConfigurationSection("hashes") != null
-                    && !baseline.getConfigurationSection("hashes").getKeys(false).isEmpty();
+            Map<String, String> baselineHashes = readBaselineHashes(baseline);
+            boolean hasBaseline = integrityEnabled && !baselineHashes.isEmpty();
             boolean baselineCreated = false;
             Map<String, String> current = new HashMap<>();
             Set<String> seen = new HashSet<>();
@@ -130,7 +131,7 @@ public final class PluginIntegrityMonitor implements Listener {
                 }
                 current.put(name, hash);
                 seen.add(name);
-                String previous = baseline.getString("hashes." + name, "");
+                String previous = baselineHashes.get(name);
                 boolean ignored = plugin.getConfig().getStringList("security.plugin-monitor.ignore-plugin-files")
                         .stream().anyMatch(n -> name.equalsIgnoreCase(n));
                 if (!ignored && integrityEnabled && hasBaseline) {
@@ -148,12 +149,12 @@ public final class PluginIntegrityMonitor implements Listener {
                 if (plugin.getConfig().getBoolean("security.plugin-monitor.static-scan-enabled", true) && !ignored) {
                     scanForRisk(jar, name, hash);
                 }
-                if (integrityEnabled && !hasBaseline) baseline.set("hashes." + name, hash);
+                if (integrityEnabled && !hasBaseline) baselineHashes.put(name, hash);
             }
 
             if (integrityEnabled && hasBaseline
                     && plugin.getConfig().getBoolean("security.plugin-monitor.alert-removed-plugin-jars", true)) {
-                for (String oldName : baseline.getConfigurationSection("hashes").getKeys(false)) {
+                for (String oldName : baselineHashes.keySet()) {
                     if (!seen.contains(oldName)
                             && !plugin.getConfig().getStringList("security.plugin-monitor.ignore-plugin-files")
                             .stream().anyMatch(n -> oldName.equalsIgnoreCase(n))) {
@@ -168,6 +169,7 @@ public final class PluginIntegrityMonitor implements Listener {
 
             if (integrityEnabled && (baselineCreated || !Files.exists(baselinePath))) {
                 try {
+                    writeBaselineHashes(baseline, baselineHashes);
                     baseline.save(baselinePath.toFile());
                     reportState("baseline-created", "Plugin JAR integrity baseline created at plugins/ANNA-AC/plugin-hashes.yml. Review and approve every entry before trusting it.");
                 } catch (IOException ex) {
@@ -217,9 +219,7 @@ public final class PluginIntegrityMonitor implements Listener {
                     }
                 }
                 YamlConfiguration approved = new YamlConfiguration();
-                for (Map.Entry<String, String> entry : hashes.entrySet()) {
-                    approved.set("hashes." + entry.getKey(), entry.getValue());
-                }
+                writeBaselineHashes(approved, hashes);
                 approved.set("meta.created-at", java.time.Instant.now().toString());
                 approved.set("meta.approved-by", truncate(approvedBy, 80));
                 approved.set("meta.approval-note",
@@ -298,6 +298,36 @@ public final class PluginIntegrityMonitor implements Listener {
                     + " indicators=" + String.join(",", evidence)
                     + ". This is not a malware verdict; review the source and origin before action.";
             reportState("risk:" + fileName + ":" + hash + ":" + score, detail);
+        }
+    }
+
+    /**
+     * Filenames may contain dots, which are YAML configuration path separators.
+     * Store a URL-safe Base64 key and keep the original filename in a value.
+     */
+    private static Map<String, String> readBaselineHashes(YamlConfiguration yaml) {
+        Map<String, String> result = new HashMap<>();
+        var root = yaml.getConfigurationSection("hashes");
+        if (root == null) return result;
+        for (String id : root.getKeys(false)) {
+            var entry = root.getConfigurationSection(id);
+            if (entry == null) continue;
+            String fileName = entry.getString("file");
+            String hash = entry.getString("sha256");
+            if (fileName != null && !fileName.isBlank() && hash != null && !hash.isBlank()) {
+                result.put(fileName, hash);
+            }
+        }
+        return result;
+    }
+
+    private static void writeBaselineHashes(YamlConfiguration yaml, Map<String, String> hashes) {
+        yaml.set("hashes", null);
+        for (Map.Entry<String, String> entry : hashes.entrySet()) {
+            String id = Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(entry.getKey().getBytes(StandardCharsets.UTF_8));
+            yaml.set("hashes." + id + ".file", entry.getKey());
+            yaml.set("hashes." + id + ".sha256", entry.getValue());
         }
     }
 
