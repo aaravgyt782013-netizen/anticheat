@@ -4,13 +4,13 @@ import dev.annamc.anticheat.alert.AlertService;
 import dev.annamc.anticheat.check.ViolationManager;
 import dev.annamc.anticheat.evidence.EvidenceStore;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import java.nio.file.Files;
 import java.util.List;
 
@@ -18,33 +18,45 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
     private final JavaPlugin plugin;
     private final ViolationManager violations;
     private final EvidenceStore evidence;
+    private final AlertService alerts;
 
-    public AACCommand(JavaPlugin plugin, ViolationManager violations, EvidenceStore evidence) {
+    public AACCommand(JavaPlugin plugin, ViolationManager violations, EvidenceStore evidence, AlertService alerts) {
         this.plugin = plugin;
         this.violations = violations;
         this.evidence = evidence;
+        this.alerts = alerts;
     }
-    @Override public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) return usage(sender);
         switch (args[0].toLowerCase()) {
             case "alerts" -> {
-                if (!sender.hasPermission("annaac.alerts")) return deny(sender);
-                sender.sendMessage(AlertService.color("&7Staff alerts are currently controlled by annaac.alerts permission."));
+                if (!(sender instanceof Player player) || !sender.hasPermission("annaac.alerts")) return deny(sender);
+                boolean enabled = alerts.toggleStaffAlerts(player);
+                sender.sendMessage(AlertService.color("&bANNA AC &7staff alerts are now "
+                        + (enabled ? "&aenabled" : "&cdisabled") + "&7 for you."));
             }
             case "check" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 if (args.length < 2) return usage(sender);
                 Player player = Bukkit.getPlayerExact(args[1]);
                 if (player == null) { sender.sendMessage("Player must be online."); return true; }
-                sender.sendMessage(AlertService.color("&bANNA AC &7" + player.getName() + " current VL: &f" + violations.get(player)));
+                sender.sendMessage(AlertService.color("&bANNA AC &7" + player.getName()
+                        + " total VL: &f" + violations.get(player)));
             }
             case "history" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 if (args.length < 2) return usage(sender);
                 Player player = Bukkit.getPlayerExact(args[1]);
-                if (player == null) { sender.sendMessage("Player must be online to resolve their UUID in this initial version."); return true; }
+                if (player == null) {
+                    sender.sendMessage("Player must be online to resolve their UUID in this version.");
+                    return true;
+                }
                 var path = evidence.file(player.getUniqueId());
-                sender.sendMessage(Files.exists(path) ? "Evidence file: plugins/ANNA-AC/evidence/" + player.getUniqueId() + ".jsonl" : "No evidence recorded yet.");
+                sender.sendMessage(Files.exists(path)
+                        ? "Evidence file: plugins/ANNA-AC/evidence/" + player.getUniqueId() + ".jsonl"
+                        : "No evidence recorded yet.");
             }
             case "reload" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
@@ -56,22 +68,27 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                 if (args.length < 2) return usage(sender);
                 Player player = Bukkit.getPlayerExact(args[1]);
                 sender.sendMessage(player == null ? "Player is not online." :
-                        AlertService.color("&7Debug &f" + player.getName() + " &7VL=&f" + violations.get(player)
-                                + " &7world=&f" + player.getWorld().getName() + " &7ping=&f" + player.getPing()));
+                        AlertService.color("&7Debug &f" + player.getName() + " &7VL=&f"
+                                + violations.get(player) + " &7world=&f" + player.getWorld().getName()
+                                + " &7ping=&f" + player.getPing()));
             }
             default -> { return usage(sender); }
         }
         return true;
     }
+
     private boolean deny(CommandSender sender) {
         sender.sendMessage(AlertService.color("&cYou do not have permission."));
         return true;
     }
+
     private boolean usage(CommandSender sender) {
         sender.sendMessage(AlertService.color("&bANNA AC &7/annaac <alerts|check <player>|history <player>|reload|debug <player>>"));
         return true;
     }
-    @Override public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) return List.of("alerts", "check", "history", "reload", "debug").stream()
                 .filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         if (args.length == 2 && List.of("check", "history", "debug").contains(args[0].toLowerCase()))
