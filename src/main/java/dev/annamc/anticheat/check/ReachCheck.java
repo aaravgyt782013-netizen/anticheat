@@ -28,7 +28,7 @@ public final class ReachCheck implements Listener {
         if (!(event.getDamager() instanceof Player player)
                 || !(event.getEntity() instanceof LivingEntity target)
                 || player.equals(target)
-                || !plugin.getConfig().getBoolean("checks.reach.enabled", false)) return;
+                || CheckUtil.shouldSkip(plugin, player, "reach")) return;
         if (player.getWorld() != target.getWorld()
                 || player.getGameMode().name().equals("CREATIVE")
                 || player.isInsideVehicle()
