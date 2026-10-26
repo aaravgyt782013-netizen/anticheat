@@ -1,0 +1,28 @@
+# Where ANNA AC sends alerts.
+alerts:
+  # Send detector alerts to the server console.
+  console: true
+  # Send detector alerts to online staff with annaac.alerts permission.
+  staff-chat: true
+  # Create a Discord channel webhook and paste its URL here. Never publish it or share it in screenshots.
+  # Enable outbound Discord webhook alerts.
+  discord-enabled: false
+  # Private Discord channel webhook URL. Never share or commit this secret.
+  discord-webhook: ""
+  # Display name used by the Discord webhook.
+  discord-username: "ANNA AC | Security Alerts"
+  # Optional HTTPS image URL for the webhook avatar. Empty uses Discord's default.
+  discord-avatar-url: ""
+  # Send alerts as rich Discord embeds instead of plain text.
+  discord-embed-enabled: true
+  # Decimal RGB color value for Discord embeds (3447003 is blue).
+  discord-embed-color: 3447003
+  # Include the player's UUID in Discord alerts.
+  discord-include-player-uuid: false
+  # Include detector evidence details in Discord alerts.
+  discord-include-detail: true
+  # Keep empty to avoid mentioning a role. If set, this role ID is explicitly mentioned.
+  # Optional numeric Discord role ID to mention. Empty disables role mentions.
+  discord-role-mention-id: ""
+  # Maximum time allowed for each webhook request; bounded by the plugin.
+  discord-timeout-seconds: 6
