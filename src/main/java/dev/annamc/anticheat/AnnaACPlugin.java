@@ -20,6 +20,8 @@ import dev.annamc.anticheat.evidence.EvidenceStore;
 import dev.annamc.anticheat.lang.Messages;
 import dev.annamc.anticheat.packet.PacketEventsBridge;
 import dev.annamc.anticheat.security.ForceOpGuard;
+import dev.annamc.anticheat.security.AntiNukeGuard;
+import dev.annamc.anticheat.security.PluginIntegrityMonitor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -28,6 +30,7 @@ public final class AnnaACPlugin extends JavaPlugin {
     private PacketEventsBridge packetBridge;
     private Messages messages;
     private ModularConfigManager configManager;
+    private PluginIntegrityMonitor pluginIntegrityMonitor;
 
     @Override
     public void onEnable() {
@@ -42,6 +45,11 @@ public final class AnnaACPlugin extends JavaPlugin {
         evidenceStore = new EvidenceStore(this);
         AlertService alerts = new AlertService(this, evidenceStore, messages);
         ViolationManager violations = new ViolationManager(this, alerts);
+
+        getServer().getPluginManager().registerEvents(new AntiNukeGuard(this, alerts), this);
+        pluginIntegrityMonitor = new PluginIntegrityMonitor(this, alerts);
+        getServer().getPluginManager().registerEvents(pluginIntegrityMonitor, this);
+        pluginIntegrityMonitor.start();
 
         getServer().getPluginManager().registerEvents(new MovementCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new MovementPhysicsCheck(this, violations), this);
@@ -75,6 +83,10 @@ public final class AnnaACPlugin extends JavaPlugin {
             getLogger().warning("Configuration: " + note);
         }
         getLogger().info("ANNA AC enabled. Experimental checks are disabled by default; validate on a staging server.");
+    }
+
+    public PluginIntegrityMonitor getPluginIntegrityMonitor() {
+        return pluginIntegrityMonitor;
     }
 
     /** Reloads the base file and then overlays the separate editable configuration files. */
