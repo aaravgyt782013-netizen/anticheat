@@ -18,7 +18,7 @@ import java.util.Map;
  * settings from older ANNA AC releases that stored everything in config.yml.
  */
 public final class ModularConfigManager {
-    private static final String[] FILES = {"checks.yml", "discord.yml", "database.yml", "punishments.yml"};
+    private static final String[] FILES = {"checks.yml", "discord.yml", "database.yml", "punishments.yml", "security.yml"};
     private final JavaPlugin plugin;
 
     public ModularConfigManager(JavaPlugin plugin) {
@@ -40,35 +40,42 @@ public final class ModularConfigManager {
         boolean discordCreated = ensureFile("discord.yml", false);
         boolean databaseCreated = ensureFile("database.yml", false);
         boolean punishmentsCreated = ensureFile("punishments.yml", true);
+        boolean securityCreated = ensureFile("security.yml", false);
 
         YamlConfiguration checks = YamlConfiguration.loadConfiguration(new File(folder, "checks.yml"));
         YamlConfiguration discord = YamlConfiguration.loadConfiguration(new File(folder, "discord.yml"));
         YamlConfiguration database = YamlConfiguration.loadConfiguration(new File(folder, "database.yml"));
         YamlConfiguration punishments = YamlConfiguration.loadConfiguration(new File(folder, "punishments.yml"));
+        YamlConfiguration security = YamlConfiguration.loadConfiguration(new File(folder, "security.yml"));
 
         boolean checksDefaultsAdded = mergeMissingDefaults(checks, "checks.yml");
         boolean discordDefaultsAdded = mergeMissingDefaults(discord, "discord.yml");
         boolean databaseDefaultsAdded = mergeMissingDefaults(database, "database.yml");
         boolean punishmentsDefaultsAdded = mergeMissingDefaults(punishments, "punishments.yml");
+        boolean securityDefaultsAdded = mergeMissingDefaults(security, "security.yml");
         if (checksDefaultsAdded) saveConfiguration(checks, "checks.yml");
         if (discordDefaultsAdded) saveConfiguration(discord, "discord.yml");
         if (databaseDefaultsAdded) saveConfiguration(database, "database.yml");
         if (punishmentsDefaultsAdded) saveConfiguration(punishments, "punishments.yml");
+        if (securityDefaultsAdded) saveConfiguration(security, "security.yml");
 
         if (checksCreated) migrateSection(main, "checks", checks, "checks");
         if (discordCreated) migrateSection(main, "alerts", discord, "alerts");
         if (punishmentsCreated) migrateSection(main, "punishments", punishments, "punishments");
+        if (securityCreated) migrateSection(main, "security", security, "security");
         if (databaseCreated) migrateDatabaseSettings(main, database);
 
         saveIfMigrated(checksCreated, checks, "checks.yml");
         saveIfMigrated(discordCreated, discord, "discord.yml");
         saveIfMigrated(databaseCreated, database, "database.yml");
         saveIfMigrated(punishmentsCreated, punishments, "punishments.yml");
+        saveIfMigrated(securityCreated, security, "security.yml");
 
         if (migrationPending) {
             boolean hasLegacySections = main.isConfigurationSection("checks")
                     || main.isConfigurationSection("alerts")
                     || main.isConfigurationSection("punishments")
+                    || main.isConfigurationSection("security")
                     || main.contains("settings.evidence-retention-days")
                     || main.contains("settings.max-evidence-records-per-player")
                     || main.contains("settings.max-evidence-detail-length")
@@ -78,12 +85,13 @@ public final class ModularConfigManager {
                 main.set("checks", null);
                 main.set("alerts", null);
                 main.set("punishments", null);
+                main.set("security", null);
                 main.set("settings.evidence-retention-days", null);
                 main.set("settings.max-evidence-records-per-player", null);
                 main.set("settings.max-evidence-detail-length", null);
                 main.set("settings.violation-retention-hours", null);
                 plugin.saveConfig();
-                plugin.getLogger().info("Migrated legacy options into checks.yml, discord.yml, database.yml and punishments.yml. "
+                plugin.getLogger().info("Migrated legacy options into checks.yml, discord.yml, database.yml, punishments.yml and security.yml. "
                         + "A config.yml.legacy.bak backup was retained.");
             }
             try {
@@ -98,7 +106,13 @@ public final class ModularConfigManager {
         overlay(discord, "alerts", main);
         overlay(database, "database", main);
         overlay(punishments, "punishments", main);
-        plugin.getLogger().info("Loaded checks.yml, discord.yml, database.yml and punishments.yml.");
+        overlay(security, "security", main);
+        if (securityCreated && !migrationPending && main.isConfigurationSection("security")) {
+            backupLegacyMainConfig();
+            main.set("security", null);
+            plugin.saveConfig();
+        }
+        plugin.getLogger().info("Loaded checks.yml, discord.yml, database.yml, punishments.yml and security.yml.");
     }
 
     /**
