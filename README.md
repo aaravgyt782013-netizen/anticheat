@@ -8,6 +8,7 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 - **Movement physics envelope:** repeated movement-envelope outlier heuristic with sprint/speed and ping slack. This is not a deterministic per-tick physics simulator; disabled by default.
 - **Knockback telemetry:** compares movement observed after server velocity. Collisions, player input and ping affect results; disabled by default.
 - **Reach:** eye-to-nearest-point-on-target-hitbox signal without full historical hitbox/interpolation compensation; disabled by default.
+- **Wall-hit:** configurable multi-point target-hitbox occlusion signal; not latency-compensated and disabled by default.
 - **Combat pattern:** looks for repeated near-identical rotation deltas around hits. This is low-confidence telemetry, not proof of KillAura; disabled by default.
 - **Click rate:** arm-swing count over a rolling one-second window. CPS alone is not proof of automation; disabled by default.
 - **Scaffold signal:** placement-angle heuristic; weak evidence only and disabled by default.
