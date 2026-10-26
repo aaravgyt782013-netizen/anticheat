@@ -9,7 +9,7 @@ description: Configurable anti-cheat foundation for Anna MC.
 commands:
   annaac:
     description: ANNA AC administration commands
-    usage: /annaac <status|securityscan|alerts|check|history|reload|debug|testdiscord>
+    usage: /annaac <status|securityscan [approve]|alerts|check|history|reload|debug|testdiscord>
     aliases: [aac]
 permissions:
   annaac.alerts:
@@ -20,4 +20,7 @@ permissions:
     default: op
   annaac.security.bypass:
     description: Allows trusted players to bypass anti-nuke block-break rate limiting and use protected bulk commands.
+    default: false
+  annaac.security.baseline-approve:
+    description: Allows explicitly replacing the plugin JAR integrity hash baseline after manual review.
     default: false
