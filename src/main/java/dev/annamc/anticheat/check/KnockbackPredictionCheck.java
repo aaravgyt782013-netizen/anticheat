@@ -94,12 +94,14 @@ public final class KnockbackPredictionCheck implements Listener {
         if (observations >= required && age >= plugin.getConfig().getInt("checks.knockback.minimum-age-ms", 120)) {
             double projection = (dx * p.velocity.getX() + dz * p.velocity.getZ()) / velocityLength;
             double threshold = plugin.getConfig().getDouble("checks.knockback.minimum-forward-projection", 0.04);
-            if (projection < threshold) {
+            double minimumDisplacement = Math.max(0.0,
+                    plugin.getConfig().getDouble("checks.knockback.minimum-observed-displacement", 0.08));
+            if (displacement < minimumDisplacement || projection < threshold) {
                 violations.add(player, "knockback",
                         plugin.getConfig().getDouble("checks.knockback.violation-add", 1.0),
                         String.format(java.util.Locale.ROOT,
-                                "low movement projection %.3f along server velocity within %dms; review ping/collisions/input",
-                                projection, age));
+                                "low movement projection %.3f / displacement %.3f (minimum %.3f) along server velocity within %dms; review ping/collisions/input",
+                                projection, displacement, minimumDisplacement, age));
             }
             pending.remove(player.getUniqueId());
         }
