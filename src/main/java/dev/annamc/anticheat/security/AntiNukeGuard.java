@@ -12,6 +12,7 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayDeque;
@@ -72,7 +73,7 @@ public final class AntiNukeGuard implements Listener {
 
     private boolean isDestructiveBulkCommand(String raw) {
         String value = SPACE.matcher(raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT)).replaceAll(" ");
-        if (value.startsWith("/")) value = value.substring(1);
+        if (value.startsWith("/") && !value.startsWith("//")) value = value.substring(1);
         if (value.isEmpty()) return false;
         for (String configured : plugin.getConfig().getStringList("security.antinuke.protected-bulk-command-labels")) {
             if (configured == null || configured.isBlank()) continue;
@@ -83,6 +84,18 @@ public final class AntiNukeGuard implements Listener {
                     "(?:^|\\s)(?:minecraft:)?"+Pattern.quote(label)+"(?:\\s|$)").matcher(value).find()) return true;
         }
         return false;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onConsoleCommand(ServerCommandEvent event) {
+        if (!plugin.getConfig().getBoolean("security.antinuke.enabled", true)
+                || !plugin.getConfig().getBoolean("security.antinuke.audit-console-bulk-commands", true)) return;
+        String command = event.getCommand();
+        if (isDestructiveBulkCommand(command)) {
+            report("anti-nuke-console-audit", "CONSOLE",
+                    "console issued a bulk/destructive command (audited, not blocked): " + safeCommand(command),
+                    new UUID(0L, 0L));
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
