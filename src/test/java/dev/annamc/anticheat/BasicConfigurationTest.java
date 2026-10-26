@@ -7,7 +7,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BasicConfigurationTest {
     private String config() throws Exception {
-        // Ignore explanatory YAML comments so assertions verify the actual option structure.\n        return Files.readAllLines(Path.of("src/main/resources/config.yml")).stream()\n                .filter(line -> !line.stripLeading().startsWith("#"))\n                .collect(java.util.stream.Collectors.joining("\\n"));
+        // Ignore explanatory comments and indentation so assertions test YAML keys, not formatting.
+        return Files.readAllLines(Path.of("src/main/resources/config.yml")).stream()
+                .filter(line -> !line.stripLeading().startsWith("#"))
+                .map(String::strip)
+                .collect(java.util.stream.Collectors.joining("\n"));
     }
 
     @Test void checksExposeThresholdDecayAndCooldownControls() throws Exception {
