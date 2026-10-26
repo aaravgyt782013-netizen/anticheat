@@ -1,8 +1,43 @@
+# Legacy compatibility file. Current punishment controls are read from config.yml.
+# Keep every action disabled until the matching detector passes staging validation.
 actions:
   movement:
-    enabled: true
+    enabled: false
+    type: KICK
+    require-repeated-violations: true
+  movement-physics:
+    enabled: false
+    type: KICK
+    require-repeated-violations: true
+  timer:
+    enabled: false
+    type: KICK
+    require-repeated-violations: true
+  knockback:
+    enabled: false
+    type: KICK
+    require-repeated-violations: true
+  reach:
+    enabled: false
+    type: KICK
+    require-repeated-violations: true
+  click-rate:
+    enabled: false
+    type: KICK
+    require-repeated-violations: true
+  combat-pattern:
+    enabled: false
+    type: KICK
+    require-repeated-violations: true
+  scaffold-signal:
+    enabled: false
+    type: KICK
+    require-repeated-violations: true
+  no-fall:
+    enabled: false
     type: KICK
     require-repeated-violations: true
   packet-rate:
     enabled: false
-    type: ALERT
+    type: KICK
+    require-repeated-violations: true
