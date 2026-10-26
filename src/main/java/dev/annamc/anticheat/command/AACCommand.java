@@ -73,11 +73,31 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                 boolean forceOpEnabled = plugin.getConfig().getBoolean("checks.force-op.enabled", true);
                 sender.sendMessage(messages.get("commands.status-force-op", java.util.Map.of(
                         "status", forceOpEnabled ? "enabled" : "disabled")));
+                boolean antiNukeEnabled = plugin.getConfig().getBoolean("security.antinuke.enabled", true);
+                boolean pluginMonitorEnabled = plugin.getConfig().getBoolean("security.plugin-monitor.enabled", true);
+                sender.sendMessage(messages.get("commands.status-antinuke", java.util.Map.of(
+                        "status", antiNukeEnabled ? "enabled" : "disabled")));
+                sender.sendMessage(messages.get("commands.status-plugin-monitor", java.util.Map.of(
+                        "status", pluginMonitorEnabled ? "enabled" : "disabled")));
                 sender.sendMessage(messages.get("commands.status-punishments", java.util.Map.of(
                         "status", enabledActions == 0 ? "disabled (safe mode)" : "enabled for " + enabledActions + " check(s)")));
                 for (String note : ConfigurationDiagnostics.inspect(plugin)) {
                     sender.sendMessage(AlertService.color("&8» &e" + note));
                 }
+            }
+            case "securityscan" -> {
+                if (!sender.hasPermission("annaac.admin")) return deny(sender);
+                if (!(plugin instanceof AnnaACPlugin annaAc)
+                        || annaAc.getPluginIntegrityMonitor() == null) {
+                    sender.sendMessage(AlertService.color("&cPlugin security monitor is unavailable."));
+                    return true;
+                }
+                if (!plugin.getConfig().getBoolean("security.plugin-monitor.enabled", true)) {
+                    sender.sendMessage(AlertService.color("&cPlugin integrity monitoring is disabled in security.yml."));
+                    return true;
+                }
+                annaAc.getPluginIntegrityMonitor().scanNow("manual");
+                sender.sendMessage(messages.get("commands.security-scan-started"));
             }
             case "check" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
@@ -158,7 +178,7 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("alerts", "status", "check", "history", "reload", "debug", "testdiscord").stream()
+        if (args.length == 1) return List.of("alerts", "status", "securityscan", "check", "history", "reload", "debug", "testdiscord").stream()
                 .filter(s -> s.startsWith(args[0].toLowerCase(java.util.Locale.ROOT))).toList();
         if (args.length == 2 && List.of("check", "history", "debug").contains(args[0].toLowerCase(java.util.Locale.ROOT)))
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
