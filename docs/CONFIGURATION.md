@@ -2,7 +2,7 @@
 
 ## Main files
 
-- `plugins/ANNA-AC/config.yml`: prefix, language, alerts/Discord, detector thresholds, bypasses, and kick thresholds.
+- `plugins/ANNA-AC/config.yml`: prefix, language, detector thresholds, Discord settings, evidence limits, and punishment controls. Every YAML option has a nearby explanatory comment.
 - `plugins/ANNA-AC/messages_en.yml`: English messages.
 - `plugins/ANNA-AC/messages_hi.yml`: Hindi messages.
 - `plugins/ANNA-AC/evidence/<uuid>.jsonl`: recorded detector/security evidence.
@@ -23,6 +23,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 - Leave experimental detector `checks.<check>.enabled` values false on the live public server until staging tests pass.
 - Keep `punishments.actions.<check>.enabled: false` for all checks initially. Alert first, review evidence, then enable one action only after measuring false positives.
 - Keep `punishments.enabled: true` if you want the global master switch available; per-check action flags remain the second gate.
+- Keep `punishments.require-independent-families: true` on a public server. By default, an automatic kick requires violations from at least two distinct detector families inside `correlation-window-ms`. If you enable only one family, the plugin will warn that kicks cannot trigger until you lower the family threshold or enable a second family.
 - Keep creative and spectator exemptions, and add any server-specific worlds/permissions to ignored lists only after reviewing the effect.
 - Install the compatible PacketEvents build if you want the optional packet-rate/timer telemetry. Without it, packet telemetry is unavailable.
 - Force OP auditing is enabled by default, but the command-prefix list must match the permission plugins and aliases actually installed. It cannot prevent host-panel/file/console compromise or malicious plugins.
@@ -35,6 +36,9 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `movement-physics` | Repeated movement-envelope outlier heuristic | Disabled |
 | `knockback` | Movement after server velocity | Disabled |
 | `reach` | Approximate target hitbox distance | Disabled |
+| `wall-hit` | Multi-point hitbox occlusion signal; not latency-compensated | Disabled |
+| `fast-break` | Paper break-progress estimate versus observed mining time | Disabled |
+| `nuker-burst` | Repeated rolling-window block-break burst | Disabled |
 | `click-rate` | Arm-swing rate telemetry | Disabled |
 | `combat-pattern` | Rotation/hit-pattern telemetry | Disabled |
 | `scaffold-signal` | Repeated placement-angle pattern | Disabled |
@@ -47,6 +51,7 @@ These are signals, not guaranteed identification of Meteor, Wurst, Baritone, or 
 
 ## Reload and permissions
 
+- `/annaac status`: show enabled detectors, PacketEvents availability, Discord configuration, automatic-kick state, and configuration warnings; requires `annaac.admin`.
 - `/annaac alerts`: toggle your own staff alerts; requires `annaac.alerts`.
 - `/annaac check <player> [check]`: view violation level; requires `annaac.admin`.
 - `/annaac history <player>`: inspect recent online-player evidence; requires `annaac.admin`.
