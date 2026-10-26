@@ -10,9 +10,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayDeque;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -137,9 +135,13 @@ public final class ViolationManager implements Listener {
             while (!signals.isEmpty() && signals.peekFirst().time < cutoff) signals.removeFirst();
             signals.addLast(new Signal(now, SignalCorrelation.familyFor(check)));
             while (signals.size() > maxSignals) signals.removeFirst();
-            Set<String> families = new HashSet<>();
-            for (Signal signal : signals) families.add(signal.family);
-            return families.size();
+            Map<String, Integer> familyCounts = new java.util.HashMap<>();
+            for (Signal signal : signals) familyCounts.merge(signal.family, 1, Integer::sum);
+            int minSignalsPerFamily = Math.max(1, Math.min(20,
+                    plugin.getConfig().getInt("punishments.minimum-signals-per-family", 2)));
+            return (int) familyCounts.values().stream()
+                    .filter(count -> count >= minSignalsPerFamily)
+                    .count();
         }
     }
 
