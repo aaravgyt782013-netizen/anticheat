@@ -34,7 +34,6 @@ checks:
     ignored-worlds: []
     ignored-permissions: []
     exempt-game-modes: [CREATIVE, SPECTATOR]
-    setback: false
     max-horizontal-distance-per-tick: 1.25
     violation-add: 1.0
     violation-decay-per-second: 0.25
