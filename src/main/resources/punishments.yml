@@ -20,51 +20,194 @@ punishments:
     movement:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 12.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Experimental movement-envelope heuristic; may flag legitimate movement and is disabled by default.
     movement-physics:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 12.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Packet-rate timing signal, not a validated simulation of client timer mechanics.
     timer:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Experimental check for movement after server-applied velocity.
     knockback:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Approximate distance-to-target hitbox check; not full historical hitbox compensation.
     reach:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Configurable wall-occlusion signal. It can be affected by latency and attack geometry.
     wall-hit:
       # Keep this detector off until validated in your server's staging environment.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Block-break burst detector action, disabled until its thresholds pass staging tests.
     nuker-burst:
       # Keep automatic punishment disabled for this heuristic.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # FastBreak repeated timing signal action, disabled until validated on this server.
     fast-break:
       # Keep automatic punishment disabled until the detector passes mining/effects tests.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Arm-swing/click-rate signal. High CPS alone is not proof of cheating.
     click-rate:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Experimental rotation and hit-pattern signal; review evidence before punishment.
     combat-pattern:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Experimental repeated placement-angle signal; legitimate bridging can look similar.
     scaffold-signal:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # Correlates a large fall and landing with observed fall damage; protection plugins may affect results.
     no-fall:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
     # PacketEvents-based movement packet-rate signal. Requires compatible PacketEvents.
     packet-rate:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action; independently configurable per check.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
+      # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
+      commands: []
