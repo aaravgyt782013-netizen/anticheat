@@ -10,9 +10,13 @@ class BasicConfigurationTest {
         return Files.readString(Path.of("src/main/resources/config.yml"));
     }
 
-    @Test void movementThresholdAndDecayAreConfigurable() throws Exception {
+    @Test void checksExposeThresholdDecayAndCooldownControls() throws Exception {
         String yaml = config();
-        assertTrue(yaml.contains("max-horizontal-distance-per-tick"));
+        assertTrue(yaml.contains("base-horizontal-per-tick"));
+        assertTrue(yaml.contains("required-consecutive-outliers"));
+        assertTrue(yaml.contains("minimum-observed-displacement"));
+        assertTrue(yaml.contains("rotation-quantization-degrees"));
+        assertTrue(yaml.contains("max-movement-packets-per-second"));
         assertTrue(yaml.contains("violation-decay-per-second"));
         assertTrue(yaml.contains("kick-vl"));
         assertTrue(yaml.contains("alert-cooldown-ms"));
@@ -20,17 +24,34 @@ class BasicConfigurationTest {
 
     @Test void experimentalChecksAreDisabledByDefault() throws Exception {
         String yaml = config();
+        assertTrue(yaml.contains("movement-physics:\n    enabled: false"));
+        assertTrue(yaml.contains("knockback:\n    enabled: false"));
         assertTrue(yaml.contains("reach:\n    enabled: false"));
         assertTrue(yaml.contains("click-rate:\n    enabled: false"));
+        assertTrue(yaml.contains("combat-pattern:\n    enabled: false"));
         assertTrue(yaml.contains("scaffold-signal:\n    enabled: false"));
+        assertTrue(yaml.contains("no-fall:\n    enabled: false"));
         assertTrue(yaml.contains("packet-rate:\n    enabled: false"));
     }
 
-    @Test void eachImplementedCheckHasAnExplicitPunishmentToggle() throws Exception {
+    @Test void allPunishmentsAreIndividuallyConfigurableAndDisabledByDefault() throws Exception {
         String yaml = config();
-        assertTrue(yaml.contains("actions:\n    movement:\n      enabled: true"));
+        assertTrue(yaml.contains("actions:\n    movement:\n      enabled: false"));
+        assertTrue(yaml.contains("movement-physics:\n      enabled: false"));
+        assertTrue(yaml.contains("knockback:\n      enabled: false"));
         assertTrue(yaml.contains("reach:\n      enabled: false"));
         assertTrue(yaml.contains("click-rate:\n      enabled: false"));
+        assertTrue(yaml.contains("combat-pattern:\n      enabled: false"));
         assertTrue(yaml.contains("scaffold-signal:\n      enabled: false"));
+        assertTrue(yaml.contains("no-fall:\n      enabled: false"));
+        assertTrue(yaml.contains("packet-rate:\n      enabled: false"));
+    }
+
+    @Test void forceOpHasCommandBlockingAndAuditControls() throws Exception {
+        String yaml = config();
+        assertTrue(yaml.contains("cancel-player-op-commands: true"));
+        assertTrue(yaml.contains("detect-op-grants: true"));
+        assertTrue(yaml.contains("protected-command-prefixes:"));
+        assertTrue(yaml.contains("audit-console-op-commands: true"));
     }
 }
