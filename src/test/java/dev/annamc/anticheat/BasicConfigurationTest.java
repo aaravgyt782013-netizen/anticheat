@@ -54,6 +54,8 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("static-scan-enabled: true"));
         assertTrue(yaml.contains("minimum-risk-score: 5"));
         assertTrue(yaml.contains("alert-changed-plugin-jars: true"));
+        assertTrue(yaml.contains("flag-suspicious-filenames: true"));
+        assertTrue(yaml.contains("suspicious-filename-keywords:"));
     }
 
     @Test void experimentalChecksAreDisabledByDefault() throws Exception {
