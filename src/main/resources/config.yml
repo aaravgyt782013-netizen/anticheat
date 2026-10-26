@@ -70,6 +70,10 @@ punishments:
     reach:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
       enabled: false
+    # Configurable wall-occlusion signal. It can be affected by latency and attack geometry.
+    wall-hit:
+      # Keep this detector off until validated in your server's staging environment.
+      enabled: false
     # Arm-swing/click-rate signal. High CPS alone is not proof of cheating.
     click-rate:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
@@ -220,6 +224,36 @@ checks:
     violation-add: 1.0
     # How quickly this check's VL decreases over time.
     violation-decay-per-second: 0.35
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Samples the target hitbox and flags only when every sampled line is blocked by a solid block.
+  # This is a conservative signal, not latency-compensated ray tracing; keep disabled until tested.
+  wall-hit:
+    # Enable the wall-hit occlusion signal.
+    enabled: false
+    # Send staff alerts when the check meets the occlusion threshold.
+    alert: true
+    # Minimum milliseconds between repeated alerts for this player/check.
+    alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Maximum eye-to-sampled-hitbox distance considered by this check.
+    max-evaluation-distance: 6.0
+    # Require this ratio of sampled target points to be occluded before flagging (0.0–1.0).
+    minimum-occluded-sample-ratio: 1.0
+    # Ignore block hits closer than this margin to a target sample to reduce edge noise.
+    occlusion-margin: 0.15
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
     # VL at which alerts become eligible to be sent.
     alert-vl: 2.0
     # VL threshold for kicking, but only when the relevant punishment switches are enabled.
