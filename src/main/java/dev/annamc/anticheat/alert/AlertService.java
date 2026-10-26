@@ -98,10 +98,11 @@ public final class AlertService {
         payload.append("\"username\":").append(json(username == null ? "ANNA AC | Security Alerts" : username));
         if (avatar != null && !avatar.isBlank() && avatar.startsWith("https://"))
             payload.append(",\"avatar_url\":").append(json(avatar));
-        String content = roleId != null && roleId.matches("[0-9]{17,20}") ? "<@&" + roleId + ">" : "";
+        String mention = roleId != null && roleId.matches("[0-9]{17,20}") ? "<@&" + roleId + ">" : "";
+        String content = useEmbed ? mention : (mention.isEmpty() ? plain : mention + "\\n" + plain);
         payload.append(",\"content\":").append(json(content));
         payload.append(",\"allowed_mentions\":{\"parse\":[],\"roles\":")
-                .append(content.isEmpty() ? "[]" : "[" + json(roleId) + "]").append("}");
+                .append(mention.isEmpty() ? "[]" : "[" + json(roleId) + "]").append("}");
 
         if (useEmbed) {
             int color = plugin.getConfig().getInt("alerts.discord-embed-color", 3447003);
