@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class EvidenceStoreJsonTest {
     @Test
     void escapesQuotesBackslashesAndControlCharactersForJsonStrings() {
-        String input = "quote=\" slash=\\ line1\nline2\ttab\u0001";
+        String input = "quote=\" slash=\\ line1\nline2\ttab" + (char) 1;
         String escaped = EvidenceStore.escapeJson(input);
 
         assertEquals("quote=\\\" slash=\\\\ line1\\nline2\\ttab\\u0001", escaped);
