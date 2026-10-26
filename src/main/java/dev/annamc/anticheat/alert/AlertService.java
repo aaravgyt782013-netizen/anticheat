@@ -64,7 +64,22 @@ public final class AlertService {
         evidence.record(player.getUniqueId(), player.getName(), check, vl, detail);
     }
 
-    public void sendSecurityAlert(String playerName, UUID playerId, String check, String detail) {\n        String safeDetail = detail == null ? "" : detail;\n        String message = messages.get("alerts.security-detail", Map.of("player", playerName, "detail", safeDetail));\n        String plain = ChatColor.stripColor(message);\n        if (plugin.getConfig().getBoolean("alerts.console", true)) plugin.getLogger().warning(plain);\n        if (plugin.getConfig().getBoolean("alerts.staff-chat", true)) {\n            for (Player staff : Bukkit.getOnlinePlayers()) {\n                if (staff.hasPermission("annaac.alerts") && !staff.hasPermission("annaac.bypass")\n                        && staffAlertsEnabled(staff)) staff.sendMessage(message);\n            }\n        }\n        sendDiscord(playerName, playerId, check, 0.0, safeDetail, plain);\n        evidence.record(playerId, playerName, check, 0.0, safeDetail);\n    }\n\n    private void sendDiscord(String playerName, UUID playerId, String check, double vl, String detail, String plain) {
+    public void sendSecurityAlert(String playerName, UUID playerId, String check, String detail) {
+        String safeDetail = detail == null ? "" : detail;
+        String message = messages.get("alerts.security-detail", Map.of("player", playerName, "detail", safeDetail));
+        String plain = ChatColor.stripColor(message);
+        if (plugin.getConfig().getBoolean("alerts.console", true)) plugin.getLogger().warning(plain);
+        if (plugin.getConfig().getBoolean("alerts.staff-chat", true)) {
+            for (Player staff : Bukkit.getOnlinePlayers()) {
+                if (staff.hasPermission("annaac.alerts") && !staff.hasPermission("annaac.bypass")
+                        && staffAlertsEnabled(staff)) staff.sendMessage(message);
+            }
+        }
+        sendDiscord(playerName, playerId, check, 0.0, safeDetail, plain);
+        evidence.record(playerId, playerName, check, 0.0, safeDetail);
+    }
+
+    private void sendDiscord(String playerName, UUID playerId, String check, double vl, String detail, String plain) {
         if (!plugin.getConfig().getBoolean("alerts.discord-enabled", false)) return;
         String webhook = plugin.getConfig().getString("alerts.discord-webhook", "");
         if (webhook == null || webhook.isBlank()) return;
