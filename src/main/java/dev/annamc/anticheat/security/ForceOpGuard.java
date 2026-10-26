@@ -1,6 +1,7 @@
 package dev.annamc.anticheat.security;
 
 import dev.annamc.anticheat.evidence.EvidenceStore;
+import dev.annamc.anticheat.alert.AlertService;
 import dev.annamc.anticheat.lang.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -32,13 +33,15 @@ public final class ForceOpGuard implements Listener {
     private final JavaPlugin plugin;
     private final EvidenceStore evidence;
     private final Messages messages;
+    private final AlertService alerts;
     private final Set<UUID> knownOperators = ConcurrentHashMap.newKeySet();
     private final Path baselinePath;
 
-    public ForceOpGuard(JavaPlugin plugin, EvidenceStore evidence, Messages messages) {
+    public ForceOpGuard(JavaPlugin plugin, EvidenceStore evidence, Messages messages, AlertService alerts) {
         this.plugin = plugin;
         this.evidence = evidence;
         this.messages = messages;
+        this.alerts = alerts;
         this.baselinePath = plugin.getDataFolder().toPath().resolve("operator-baseline.txt");
         Set<UUID> current = readCurrentOperators();
         Set<UUID> persisted = loadBaseline();
