@@ -8,6 +8,8 @@ punishments:
   require-independent-families: true
   # Number of independent families required when require-independent-families is true (1–4).
   minimum-independent-families: 2
+  # Minimum distinct flags required within each family in the correlation window (1–20).
+  minimum-signals-per-family: 2
   # Time window in milliseconds used to correlate distinct detector families (effective range 1000–120000).
   correlation-window-ms: 12000
   # Maximum recent signals retained per player for correlation, protecting memory use.
