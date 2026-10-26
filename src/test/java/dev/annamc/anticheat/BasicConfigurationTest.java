@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BasicConfigurationTest {
     private String config() throws Exception {
-        return Files.readString(Path.of("src/main/resources/config.yml"));
+        // Ignore explanatory YAML comments so assertions verify the actual option structure.\n        return Files.readAllLines(Path.of("src/main/resources/config.yml")).stream()\n                .filter(line -> !line.stripLeading().startsWith("#"))\n                .collect(java.util.stream.Collectors.joining("\\n"));
     }
 
     @Test void checksExposeThresholdDecayAndCooldownControls() throws Exception {
