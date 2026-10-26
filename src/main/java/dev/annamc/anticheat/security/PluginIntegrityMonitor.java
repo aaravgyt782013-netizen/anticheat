@@ -199,7 +199,7 @@ public final class PluginIntegrityMonitor implements Listener {
                     totalBytes += bytes.length;
                     if (totalBytes >= maxBytes) break;
                     String text = new String(bytes, StandardCharsets.ISO_8859_1).toLowerCase(Locale.ROOT);
-                    evaluateIndicators(text, indicators);
+                    PluginRiskHeuristics.collectFromClassText(text, indicators);
                 }
             }
         } catch (IOException ex) {
@@ -208,12 +208,12 @@ public final class PluginIntegrityMonitor implements Listener {
             return;
         }
 
-        addCorrelatedIndicators(indicators);
-        int score = score(indicators);
+        Set<String> evidenceIndicators = PluginRiskHeuristics.withCorrelations(indicators);
+        int score = PluginRiskHeuristics.score(evidenceIndicators);
         int threshold = (int) clamp(plugin.getConfig().getLong(
                 "security.plugin-monitor.minimum-risk-score", 5L), 3L, 100L);
         if (score >= threshold) {
-            List<String> evidence = new ArrayList<>(indicators);
+            List<String> evidence = new ArrayList<>(evidenceIndicators);
             evidence.sort(String::compareTo);
             String detail = "STATIC REVIEW REQUIRED (heuristic only): " + fileName + " SHA-256=" + hash
                     + " risk-score=" + score + " threshold=" + threshold
@@ -221,60 +221,6 @@ public final class PluginIntegrityMonitor implements Listener {
                     + ". This is not a malware verdict; review the source and origin before action.";
             reportState("risk:" + fileName + ":" + hash + ":" + score, detail);
         }
-    }
-
-    private static void evaluateIndicators(String data, Set<String> found) {
-        // Capabilities are collected across the whole JAR because a plugin can split
-        // related behavior across multiple classes. Capability strings alone are weak evidence.
-        if (has(data, "java/lang/processbuilder") || has(data, "java/lang/runtime") && has(data, "exec"))
-            found.add("process-execution-capability");
-        if (has(data, "java/net/socket", "java/net/http/httpclient", "java/net/httpurlconnection", "java/net/url"))
-            found.add("network-capability");
-        if (has(data, "java/nio/file/files", "deleteifexists") || has(data, "java/io/file", "delete"))
-            found.add("file-delete-capability");
-        if (has(data, "org/bukkit/bukkit", "dispatchcommand") || has(data, "org/bukkit/server", "dispatchcommand"))
-            found.add("server-command-dispatch-capability");
-        if (has(data, "org/bukkit/plugin/pluginmanager", "disableplugin"))
-            found.add("plugin-management-capability");
-        if (has(data, "setop") || has(data, "minecraft:op") || has(data, "bukkit:op"))
-            found.add("operator-management-strings");
-        if (has(data, "worlds/", "level.dat") || has(data, "region/r."))
-            found.add("world-file-path-strings");
-    }
-
-    private static void addCorrelatedIndicators(Set<String> found) {
-        if (found.contains("process-execution-capability") && found.contains("network-capability"))
-            found.add("network-plus-process-execution");
-        if (found.contains("network-capability") && found.contains("server-command-dispatch-capability")
-                && found.contains("file-delete-capability"))
-            found.add("network-plus-command-plus-file-delete-capability");
-        if (found.contains("plugin-management-capability") && found.contains("process-execution-capability"))
-            found.add("plugin-management-plus-process-execution");
-        if (found.contains("network-capability") && found.contains("server-command-dispatch-capability")
-                && found.contains("operator-management-strings"))
-            found.add("network-plus-command-dispatch-plus-op-strings");
-        if (found.contains("file-delete-capability") && found.contains("world-file-path-strings")
-                && found.contains("process-execution-capability"))
-            found.add("world-file-delete-plus-process-execution");
-    }
-
-    private static boolean has(String haystack, String... needles) {
-        for (String needle : needles) if (haystack.contains(needle)) return true;
-        return false;
-    }
-
-    private static int score(Set<String> indicators) {
-        int score = 0;
-        for (String indicator : indicators) {
-            score += switch (indicator) {
-                case "network-plus-process-execution", "network-plus-command-plus-file-delete-capability",
-                        "world-file-delete-plus-process-execution" -> 5;
-                case "plugin-management-plus-process-execution", "network-plus-command-dispatch-plus-op-strings" -> 4;
-                case "process-execution-capability" -> 2;
-                default -> 1;
-            };
-        }
-        return score;
     }
 
     private static byte[] readBounded(InputStream in, int max) throws IOException {
