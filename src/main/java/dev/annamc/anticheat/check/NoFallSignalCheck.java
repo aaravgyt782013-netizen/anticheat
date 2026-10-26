@@ -50,7 +50,7 @@ public final class NoFallSignalCheck implements Listener {
             return;
         }
         if (fall != null && fall.airborne && !fall.landingScheduled
-                && System.currentTimeMillis() - fall.startedAt <= 1500) {
+                && System.currentTimeMillis() - fall.startedAt <= plugin.getConfig().getLong("checks.no-fall.landing-observation-window-ms", 1500L)) {
             Fall scheduled = new Fall(true, fall.damageObserved, fall.startedAt, true);
             falls.put(p.getUniqueId(), scheduled);
             UUID id = p.getUniqueId();
@@ -63,7 +63,7 @@ public final class NoFallSignalCheck implements Listener {
                             "landed after a significant fall without observed fall damage; review protection plugins");
                 }
                 falls.remove(id);
-            }, 2L);
+            }, Math.max(1L, plugin.getConfig().getLong("checks.no-fall.landing-delay-ticks", 2L)));
         }
     }
 
