@@ -133,6 +133,21 @@ public final class PluginIntegrityMonitor implements Listener {
                 String previous = baselineHashes.get(name);
                 boolean ignored = plugin.getConfig().getStringList("security.plugin-monitor.ignore-plugin-files")
                         .stream().anyMatch(n -> name.equalsIgnoreCase(n));
+                if (!ignored && plugin.getConfig().getBoolean(
+                        "security.plugin-monitor.flag-suspicious-filenames", true)) {
+                    String lowerName = name.toLowerCase(Locale.ROOT);
+                    List<String> keywords = plugin.getConfig().getStringList(
+                            "security.plugin-monitor.suspicious-filename-keywords");
+                    for (String keyword : keywords) {
+                        if (keyword != null && !keyword.isBlank()
+                                && lowerName.contains(keyword.toLowerCase(Locale.ROOT))) {
+                            reportState("suspicious-name:" + name,
+                                    "Plugin JAR filename contains configured review keyword '" + keyword
+                                            + "': " + name + ". This is a weak indicator only; inspect the source and origin.");
+                            break;
+                        }
+                    }
+                }
                 if (!ignored && integrityEnabled && hasBaseline) {
                     if ((previous == null || previous.isBlank())
                             && plugin.getConfig().getBoolean("security.plugin-monitor.alert-new-plugin-jars", true)) {
