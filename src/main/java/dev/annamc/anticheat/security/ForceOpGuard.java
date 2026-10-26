@@ -1,6 +1,7 @@
 package dev.annamc.anticheat.security;
 
 import dev.annamc.anticheat.evidence.EvidenceStore;
+import dev.annamc.anticheat.lang.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -30,12 +31,14 @@ import java.util.logging.Level;
 public final class ForceOpGuard implements Listener {
     private final JavaPlugin plugin;
     private final EvidenceStore evidence;
+    private final Messages messages;
     private final Set<UUID> knownOperators = ConcurrentHashMap.newKeySet();
     private final Path baselinePath;
 
-    public ForceOpGuard(JavaPlugin plugin, EvidenceStore evidence) {
+    public ForceOpGuard(JavaPlugin plugin, EvidenceStore evidence, Messages messages) {
         this.plugin = plugin;
         this.evidence = evidence;
+        this.messages = messages;
         this.baselinePath = plugin.getDataFolder().toPath().resolve("operator-baseline.txt");
         Set<UUID> current = readCurrentOperators();
         Set<UUID> persisted = loadBaseline();
@@ -67,10 +70,10 @@ public final class ForceOpGuard implements Listener {
 
         if (!trusted && plugin.getConfig().getBoolean("checks.force-op.cancel-player-op-commands", true)) {
             event.setCancelled(true);
-            actor.sendMessage("§cANNA AC §7» This privileged command is blocked by server security.");
+            actor.sendMessage(messages.get("commands.privileged-command-blocked"));
             if (plugin.getConfig().getBoolean("checks.force-op.kick-player-on-attempt", false)) {
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    if (actor.isOnline()) actor.kickPlayer("Unauthorized privileged command attempt.");
+                    if (actor.isOnline()) actor.kickPlayer(messages.get("commands.kick-unauthorized-command"));
                 });
             }
         }
@@ -82,7 +85,7 @@ public final class ForceOpGuard implements Listener {
                 || !plugin.getConfig().getBoolean("checks.force-op.audit-console-op-commands", true)) return;
         String command = normalize(event.getCommand());
         if (isProtectedCommand(command)) {
-            plugin.getLogger().warning("[ANNA AC SECURITY] Console issued a privileged command. Confirm this action was authorized: " + command);
+            plugin.getLogger().warning(org.bukkit.ChatColor.stripColor(messages.get("alerts.console-command", java.util.Map.of("command", command))));
             evidence.record(new UUID(0L, 0L), "CONSOLE", "force-op-console-audit", 0.0, command);
         }
     }
@@ -164,7 +167,7 @@ public final class ForceOpGuard implements Listener {
     }
 
     private void alert(UUID id, String name, String detail, Player player) {
-        String message = "§cANNA AC SECURITY §8» §f" + name + " §7" + detail;
+        String message = messages.get("alerts.security-detail", java.util.Map.of("player", name, "detail", detail));
         plugin.getLogger().warning(message.replaceAll("§[0-9A-FK-ORa-fk-or]", ""));
         if (plugin.getConfig().getBoolean("checks.force-op.alert", true)) {
             for (Player staff : Bukkit.getOnlinePlayers()) {
