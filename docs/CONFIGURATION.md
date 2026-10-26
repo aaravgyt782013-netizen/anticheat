@@ -72,6 +72,7 @@ Automatic kicks additionally require the configured number of independent detect
 
 - `/annaac status`: show enabled detectors, PacketEvents availability, Discord configuration, anti-nuke/plugin-monitor switches, automatic-action state, and configuration warnings; requires `annaac.admin`.
 - `/annaac securityscan`: run a manual plugin JAR hash and static-risk scan; requires `annaac.admin`.
+- `/annaac securityhistory`: view the latest ten system-level anti-nuke/plugin integrity evidence records; requires `annaac.admin`.
 - `/annaac securityscan approve`: replace the plugin hash baseline after manual review. Console/RCON can run it; a player needs both `annaac.admin` and `annaac.security.baseline-approve`.
 - `/annaac alerts`: toggle your own staff alerts; requires `annaac.alerts`.
 - `/annaac check <player> [check]`: view violation level; requires `annaac.admin`.
