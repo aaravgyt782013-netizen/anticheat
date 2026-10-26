@@ -2,6 +2,7 @@ package dev.annamc.anticheat.config;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import dev.annamc.anticheat.check.SignalCorrelation;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -26,16 +27,28 @@ public final class ConfigurationDiagnostics {
         int enabledChecks = 0;
         int enabledActions = 0;
         boolean packetRequired = false;
+        java.util.Set<String> activeFamilies = new java.util.HashSet<>();
         for (String check : DETECTORS) {
             boolean enabled = plugin.getConfig().getBoolean("checks." + check + ".enabled", false);
             boolean action = plugin.getConfig().getBoolean("punishments.enabled", true)
                     && plugin.getConfig().getBoolean("punishments.actions." + check + ".enabled", false);
-            if (enabled) enabledChecks++;
+            if (enabled) {
+                enabledChecks++;
+                activeFamilies.add(SignalCorrelation.familyFor(check));
+            }
             if (action) enabledActions++;
             if (action && !enabled) {
                 notes.add("Punishment action '" + check + "' is enabled while its detector is disabled; it cannot trigger.");
             }
             if (("packet-rate".equals(check) || "timer".equals(check)) && enabled) packetRequired = true;
+        }
+
+        boolean requireFamilies = plugin.getConfig().getBoolean("punishments.require-independent-families", true);
+        int minimumFamilies = Math.max(1, Math.min(4,
+                plugin.getConfig().getInt("punishments.minimum-independent-families", 2)));
+        if (enabledActions > 0 && requireFamilies && activeFamilies.size() < minimumFamilies) {
+            notes.add("Automatic kicks require " + minimumFamilies + " independent signal families, but only "
+                    + activeFamilies.size() + " family/families are enabled; kicks cannot currently trigger.");
         }
 
         if (enabledChecks == 0) notes.add("No detection checks are enabled; ANNA AC is currently not analysing gameplay.");
