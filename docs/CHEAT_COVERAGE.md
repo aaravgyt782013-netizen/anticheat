@@ -15,6 +15,7 @@ Legend:
 | KillAura / automated attacks | Meteor, Wurst, custom clients | **Current signal:** combat-pattern and reach heuristics. Not proof; needs stronger packet/history analysis. |
 | Aim assist / aim bot | Meteor add-ons, custom clients | **Current signal:** weak repeated-rotation / hit-angle pattern. Needs calibrated multi-signal analysis; legitimate aim can look similar. |
 | Reach | extended attack distance | **Current signal:** approximate hitbox-distance check; lacks complete historical hitbox/interpolation compensation. |
+| Wall hits / attacks through blocks | attack while target is occluded | **Current signal:** samples target hitbox sight lines and flags only if the configured ratio is blocked. No full packet-history or latency compensation; keep disabled until staging-tested. |
 | AutoClicker / TriggerBot | automated clicks or attack timing | **Current signal:** arm-swing rate only. Needs attack packet timing and statistical analysis; CPS alone is not proof. |
 | Velocity / Anti-knockback | reduced or ignored knockback | **Current signal:** observed displacement after velocity. Needs robust collision, input, and latency modelling. |
 | Speed / Fly / AirWalk / Jesus / Spider / Step | abnormal movement | **Current signal:** conservative movement heuristics. Needs version-specific physics and block/liquid/vehicle states. |
