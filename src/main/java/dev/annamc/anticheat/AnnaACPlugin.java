@@ -1,0 +1,43 @@
+package dev.annamc.anticheat;
+
+import dev.annamc.anticheat.alert.AlertService;
+import dev.annamc.anticheat.check.MovementCheck;
+import dev.annamc.anticheat.check.ViolationManager;
+import dev.annamc.anticheat.command.AACCommand;
+import dev.annamc.anticheat.evidence.EvidenceStore;
+import dev.annamc.anticheat.packet.PacketEventsBridge;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public final class AnnaACPlugin extends JavaPlugin {
+    private EvidenceStore evidenceStore;
+    private PacketEventsBridge packetBridge;
+
+    @Override public void onEnable() {
+        saveDefaultConfig();
+        saveResource("messages.yml", false);
+        saveResource("punishments.yml", false);
+        evidenceStore = new EvidenceStore(this);
+        AlertService alerts = new AlertService(this, evidenceStore);
+        ViolationManager violations = new ViolationManager(this, alerts);
+        getServer().getPluginManager().registerEvents(new MovementCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(violations, this);
+        AACCommand command = new AACCommand(this, violations, evidenceStore);
+        if (getCommand("annaac") != null) {
+            getCommand("annaac").setExecutor(command);
+            getCommand("annaac").setTabCompleter(command);
+        }
+        if (Bukkit.getPluginManager().getPlugin("packetevents") != null) {
+            packetBridge = new PacketEventsBridge(this, violations);
+            packetBridge.register();
+            getLogger().info("PacketEvents detected; packet timing telemetry registered.");
+        } else {
+            getLogger().warning("PacketEvents is not installed. Packet telemetry is unavailable.");
+        }
+        getLogger().info("ANNA AC enabled. Only implemented checks are active.");
+    }
+    @Override public void onDisable() {
+        if (packetBridge != null) packetBridge.unregister();
+        if (evidenceStore != null) evidenceStore.close();
+    }
+}
