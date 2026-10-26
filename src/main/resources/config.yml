@@ -10,6 +10,10 @@ settings:
   evidence-retention-days: 7
   # Configured cap for evidence records per player.
   max-evidence-records-per-player: 5000
+  # Maximum characters retained from a detector evidence detail string.
+  max-evidence-detail-length: 1200
+  # Keep in-memory violation levels across reconnects for this many idle hours.
+  violation-retention-hours: 24
   # World names where checks should not run. Empty means no worlds are ignored.
   ignored-worlds: []
 
