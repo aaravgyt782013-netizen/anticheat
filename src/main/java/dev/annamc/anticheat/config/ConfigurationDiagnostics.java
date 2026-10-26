@@ -66,11 +66,11 @@ public final class ConfigurationDiagnostics {
             notes.add("Discord alerts are enabled but alerts.discord-webhook is not a valid HTTPS Discord webhook URL.");
         }
 
-        long retentionHours = plugin.getConfig().getLong("settings.violation-retention-hours", 24L);
-        if (retentionHours < 1) notes.add("settings.violation-retention-hours must be at least 1; ANNA AC uses a minimum of 1 hour.");
+        long retentionHours = plugin.getConfig().getLong("database.violation-retention-hours", 24L);
+        if (retentionHours < 1) notes.add("database.violation-retention-hours must be at least 1; ANNA AC uses a minimum of 1 hour.");
 
-        int evidenceLimit = plugin.getConfig().getInt("settings.max-evidence-detail-length", 1200);
-        if (evidenceLimit < 64) notes.add("settings.max-evidence-detail-length is below 64; the storage layer enforces a 64-character minimum.");
+        int evidenceLimit = plugin.getConfig().getInt("database.max-detail-length", 1200);
+        if (evidenceLimit < 64) notes.add("database.max-detail-length is below 64; the storage layer enforces a 64-character minimum.");
 
         return List.copyOf(notes);
     }
