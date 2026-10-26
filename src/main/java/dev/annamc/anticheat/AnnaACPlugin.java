@@ -47,7 +47,7 @@ public final class AnnaACPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(violations, this);
         getServer().getPluginManager().registerEvents(new ForceOpGuard(this, evidenceStore, messages), this);
 
-        AACCommand command = new AACCommand(this, violations, evidenceStore, alerts);
+        AACCommand command = new AACCommand(this, violations, evidenceStore, alerts, messages);
         if (getCommand("annaac") != null) {
             getCommand("annaac").setExecutor(command);
             getCommand("annaac").setTabCompleter(command);
