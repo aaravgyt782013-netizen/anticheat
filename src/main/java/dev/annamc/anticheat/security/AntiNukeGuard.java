@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 /**
  * Configurable anti-nuke/anti-grief guard. It does not run server commands or
@@ -30,7 +29,6 @@ import java.util.regex.Pattern;
  * available but are outside the guard's enforcement boundary.
  */
 public final class AntiNukeGuard implements Listener {
-    private static final Pattern SPACE = Pattern.compile("\\s+");
     private final JavaPlugin plugin;
     private final AlertService alerts;
     private final Map<UUID, Deque<Long>> breakEvents = new HashMap<>();
@@ -72,18 +70,8 @@ public final class AntiNukeGuard implements Listener {
     }
 
     private boolean isDestructiveBulkCommand(String raw) {
-        String value = SPACE.matcher(raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT)).replaceAll(" ");
-        if (value.startsWith("/") && !value.startsWith("//")) value = value.substring(1);
-        if (value.isEmpty()) return false;
-        for (String configured : plugin.getConfig().getStringList("security.antinuke.protected-bulk-command-labels")) {
-            if (configured == null || configured.isBlank()) continue;
-            String label = configured.toLowerCase(Locale.ROOT).trim();
-            if (value.equals(label) || value.startsWith(label + " ")) return true;
-            // Also detect vanilla execute chains, e.g. /execute ... run minecraft:fill ...
-            if (value.startsWith("execute ") && Pattern.compile(
-                    "(?:^|\\s)(?:minecraft:)?"+Pattern.quote(label)+"(?:\\s|$)").matcher(value).find()) return true;
-        }
-        return false;
+        return BulkCommandMatcher.matches(raw,
+                plugin.getConfig().getStringList("security.antinuke.protected-bulk-command-labels"));
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
