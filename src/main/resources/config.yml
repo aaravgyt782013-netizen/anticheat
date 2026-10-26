@@ -49,7 +49,7 @@ checks:
     kick-vl: 12.0
 
   movement-physics:
-    enabled: true
+    enabled: false
     alert: true
     alert-cooldown-ms: 3000
     ignored-worlds: []
@@ -163,6 +163,7 @@ checks:
     minimum-interval-ms: 5
     sample-window: 40
     max-movement-packets-per-second: 45
+    flag-cooldown-ms: 3000
     violation-add: 1.0
     violation-decay-per-second: 0.5
     alert-vl: 2.0
@@ -175,3 +176,4 @@ checks:
     kick-player-on-attempt: false
     detect-op-grants: true
     audit-console-op-commands: true
+    protected-command-prefixes: [op, deop, minecraft:op, minecraft:deop, bukkit:op, bukkit:deop, lp, luckperms, lpv, pex, permissions, manuadd]
