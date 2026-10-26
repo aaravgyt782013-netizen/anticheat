@@ -19,7 +19,7 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 - **Timer telemetry:** a separate sustained movement-packet-rate signal with a configurable sample duration and ping/proxy caveat. It is not a deterministic client-tick simulator; disabled by default.
 - **Force OP guard:** blocks configured privilege-management commands from players lacking annaac.admin, audits console commands, and monitors operator-list changes and can compare a saved operator baseline across restarts. It cannot prevent malicious plugins, direct server-file edits, console compromise, or every permission-plugin alias.
 
-Shared features: startup/reload configuration diagnostics, `/annaac status` system summary, per-check violation levels/decay across reconnects with bounded retention, alert throttling, console/staff/Discord alerts, JSONL evidence with retention caps, per-staff alert toggles, admin commands, pure detection-math unit tests, config regression tests, and GitHub Actions build/tests.
+Shared features: startup/reload configuration diagnostics, `/annaac status` system summary, per-check violation levels/decay across reconnects with bounded retention, alert throttling, console/staff/Discord alerts, JSONL evidence with retention caps, per-staff alert toggles, admin commands, pure detection-math and plugin-risk tests, YAML syntax/config regression tests, and GitHub Actions build/tests. The separate security subsystem adds anti-nuke bulk-command protection, configurable explosion-block caps, optional mining-rate limits, SHA-256 plugin JAR inventory, plugin lifecycle audits, and a bounded static plugin-risk scan.
 
 ## Anti-Xray and cheat coverage
 
@@ -30,15 +30,16 @@ Anti-Xray is provided by Paper's block obfuscation, not by a client-brand detect
 
 ## Configuration, languages, and Discord
 
-- [Full configuration guide](docs/CONFIGURATION.md): prefix, English/Hindi language selection, permissions, detector defaults, and safe rollout.
+- [Full configuration guide](docs/CONFIGURATION.md): modular settings, English/Hindi language selection, permissions, detector defaults, and safe rollout.
+- [Anti-nuke and plugin security guide](docs/SECURITY_PROTECTION.md): destructive-command restrictions, explosion caps, plugin hash baselines, static malware-risk heuristics, admin scan commands, and limitations.
 - [Discord webhook setup](docs/DISCORD_SETUP.md): secure outbound staff alerts, embeds, optional role mentions, and troubleshooting.
 - The webhook URL is intentionally not committed; the server owner must create a private Discord channel webhook and enter it in the server's local config.
 
 ## Configuration
 
-Configuration is split into dedicated files: `config.yml` (global settings), `checks.yml` (per-detector options), `discord.yml` (Discord/staff alert delivery), `database.yml` (evidence storage and retention), `punishments.yml` (actions and correlation controls), and `messages_en.yml` / `messages_hi.yml` (languages). Every YAML option has an explanatory comment directly above it. In `checks.yml`, each detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. The wall-hit signal also exposes its sampling distance, occlusion ratio, and geometry margin. The Nuker burst signal exposes its rolling-window length, block threshold, evaluation interval, repeated-window requirement, and ignored material list. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`, with a per-check `type` (`KICK`, `WARN`, `COMMAND`, `NONE`), threshold, cooldown, message, and optional console command list. All action toggles default to off; command execution requires deliberate owner configuration.
+Configuration is split into dedicated files: `config.yml` (global settings), `checks.yml` (per-detector options), `discord.yml` (Discord/staff alert delivery), `database.yml` (evidence storage and retention), `punishments.yml` (actions and correlation controls), `security.yml` (anti-nuke and plugin integrity scans), and `messages_en.yml` / `messages_hi.yml` (languages). Every YAML option has an explanatory comment directly above it. In `checks.yml`, each detector has independent enablement, alerts, cooldown, violation addition, decay, alert threshold, kick threshold, ignored worlds, ignored permissions, and exempt game modes. The wall-hit signal also exposes its sampling distance, occlusion ratio, and geometry margin. The Nuker burst signal exposes its rolling-window length, block threshold, evaluation interval, repeated-window requirement, and ignored material list. Each check's thresholds and observation windows are in its own section. Punishments are independently controlled under `punishments.actions.<check>.enabled`, with a per-check `type` (`KICK`, `WARN`, `COMMAND`, `NONE`), threshold, cooldown, message, and optional console command list. All action toggles default to off; command execution requires deliberate owner configuration.
 
-All experimental detection checks and all automatic kick actions are disabled by default. Leave them that way until they pass staging validation. The legacy movement heuristic is also disabled by default.
+All experimental detection checks and all automatic kick actions are disabled by default. Anti-nuke bulk-command protection and the explosion-block cap are enabled; the optional block-break rate limiter is disabled. Leave them that way until they pass staging validation. The legacy movement heuristic is also disabled by default.
 
 Force OP controls include `checks.force-op.cancel-player-op-commands`, `kick-player-on-attempt`, `detect-op-grants`, `audit-console-op-commands`, `persist-operator-baseline`, and a configurable `protected-command-prefixes` list. Review this list for the permission plugins and aliases actually installed on your server.
 
@@ -53,6 +54,10 @@ JDK 21 and Gradle 8.14+:
     gradle clean test build
 
 The output should be `build/libs/ANNA-AC-0.1.0-SNAPSHOT.jar`. Verify a successful GitHub Actions run for the exact latest commit before installing.
+
+## Anti-nuke and plugin integrity
+
+Read [docs/SECURITY_PROTECTION.md](docs/SECURITY_PROTECTION.md) before enabling these controls on a live server. Plugin hashing detects JAR changes; the static scan is heuristic and can miss obfuscated/runtime-only malware or flag legitimate plugins. It never automatically deletes or disables a plugin. The initial JAR hash inventory must be reviewed rather than blindly trusted.
 
 ## Staging validation required
 
