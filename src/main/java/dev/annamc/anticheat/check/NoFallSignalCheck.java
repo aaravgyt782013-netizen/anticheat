@@ -9,15 +9,15 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.Bukkit;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Detects a narrow no-fall signal: a significant fall followed by a landing
- * without a server-side fall-damage event. Other plugins, water, blocks and
- * gameplay effects can produce the same pattern, so it is disabled by default.
+ * Low-confidence no-fall signal. Landing is evaluated after a short delay so
+ * Bukkit and other plugins can process fall damage first. Disabled by default.
  */
 public final class NoFallSignalCheck implements Listener {
     private final JavaPlugin plugin;
@@ -44,26 +44,35 @@ public final class NoFallSignalCheck implements Listener {
         if (to == null) return;
         Fall fall = falls.get(p.getUniqueId());
         if (!p.isOnGround()) {
-            double max = plugin.getConfig().getDouble("checks.no-fall.minimum-fall-distance", 4.0);
-            if (p.getFallDistance() >= max && (fall == null || !fall.airborne))
-                falls.put(p.getUniqueId(), new Fall(true, false, System.currentTimeMillis()));
+            double minimum = plugin.getConfig().getDouble("checks.no-fall.minimum-fall-distance", 4.0);
+            if (p.getFallDistance() >= minimum && (fall == null || !fall.airborne))
+                falls.put(p.getUniqueId(), new Fall(true, false, System.currentTimeMillis(), false));
             return;
         }
-        if (fall != null && fall.airborne && !fall.damageObserved
-                && System.currentTimeMillis() - fall.startedAt <= 1000) {
-            violations.add(p, "no-fall",
-                    plugin.getConfig().getDouble("checks.no-fall.violation-add", 1.0),
-                    "landed after a significant fall without observed fall damage; review protection plugins");
-            falls.remove(p.getUniqueId());
-        } else if (fall != null && p.isOnGround()) falls.remove(p.getUniqueId());
+        if (fall != null && fall.airborne && !fall.landingScheduled
+                && System.currentTimeMillis() - fall.startedAt <= 1500) {
+            Fall scheduled = new Fall(true, fall.damageObserved, fall.startedAt, true);
+            falls.put(p.getUniqueId(), scheduled);
+            UUID id = p.getUniqueId();
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                Fall latest = falls.get(id);
+                if (latest == null || latest.startedAt != scheduled.startedAt) return;
+                if (!latest.damageObserved && p.isOnline()) {
+                    violations.add(p, "no-fall",
+                            plugin.getConfig().getDouble("checks.no-fall.violation-add", 1.0),
+                            "landed after a significant fall without observed fall damage; review protection plugins");
+                }
+                falls.remove(id);
+            }, 2L);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player p) || event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
         Fall f = falls.get(p.getUniqueId());
-        if (f != null) falls.put(p.getUniqueId(), new Fall(f.airborne, true, f.startedAt));
+        if (f != null) falls.put(p.getUniqueId(), new Fall(f.airborne, true, f.startedAt, f.landingScheduled));
     }
 
-    private record Fall(boolean airborne, boolean damageObserved, long startedAt) {}
+    private record Fall(boolean airborne, boolean damageObserved, long startedAt, boolean landingScheduled) {}
 }
