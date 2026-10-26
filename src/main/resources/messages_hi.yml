@@ -2,6 +2,7 @@ prefix: "%prefix%"
 alerts:
   movement: "%prefix%&f%player% &7par &b%check% &7check flag hua &8(VL: &f%vl%&8) &7%detail%"
   op-grant: "%prefix%&cSECURITY &8» &f%player% &7ka OP status badla hai. Actor ka pata nahi ho sakta."
+  security-detail: "%prefix%&cSECURITY &8» &f%player% &7%detail%"
   console-command: "%prefix%&cSECURITY &8» &7Console ne protected privilege command chalaya: &f%command%"
 commands:
   no-permission: "%prefix%&cAapke paas permission nahi hai."
