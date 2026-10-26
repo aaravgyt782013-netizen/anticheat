@@ -1,5 +1,6 @@
 settings:
   prefix: "&8[&bANNA AC&8] &r"
+  language: "en" # Supported: en, hi
   debug: false
   evidence-retention-days: 7
   max-evidence-records-per-player: 5000
@@ -8,8 +9,18 @@ settings:
 alerts:
   console: true
   staff-chat: true
-  discord-webhook: ""
+  # Create a Discord channel webhook and paste its URL here. Never publish it or share it in screenshots.
   discord-enabled: false
+  discord-webhook: ""
+  discord-username: "ANNA AC | Security Alerts"
+  discord-avatar-url: ""
+  discord-embed-enabled: true
+  discord-embed-color: 3447003
+  discord-include-player-uuid: false
+  discord-include-detail: true
+  # Keep empty to avoid mentioning a role. If set, this role ID is explicitly mentioned.
+  discord-role-mention-id: ""
+  discord-timeout-seconds: 6
 
 punishments:
   enabled: true
