@@ -14,7 +14,7 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 - **No-fall signal:** checks a narrow pattern of landing after a significant fall without observed fall damage. Protection plugins and gameplay effects can create the same pattern; disabled by default.
 - **Packet rate:** optional PacketEvents rolling packet-rate and short-interval telemetry; disabled by default.
 - **Timer telemetry:** a separate sustained movement-packet-rate signal with a configurable sample duration and ping/proxy caveat. It is not a deterministic client-tick simulator; disabled by default.
-- **Force OP guard:** blocks configured privilege-management commands from players lacking annaac.admin, audits console commands, and monitors operator-list changes. It cannot prevent malicious plugins, direct server-file edits, console compromise, or every permission-plugin alias.
+- **Force OP guard:** blocks configured privilege-management commands from players lacking annaac.admin, audits console commands, and monitors operator-list changes and can compare a saved operator baseline across restarts. It cannot prevent malicious plugins, direct server-file edits, console compromise, or every permission-plugin alias.
 
 Shared features: per-check violation levels/decay, alert throttling, console/staff/Discord alerts, JSONL evidence with retention caps, per-staff alert toggles, admin commands, pure detection-math unit tests, config regression tests, and GitHub Actions build/tests.
 
@@ -24,7 +24,7 @@ In `plugins/ANNA-AC/config.yml`, each implemented detector has independent enabl
 
 All experimental detection checks and all automatic kick actions are disabled by default. Leave them that way until they pass staging validation. The legacy movement heuristic is also disabled by default.
 
-Force OP controls include `checks.force-op.cancel-player-op-commands`, `kick-player-on-attempt`, `detect-op-grants`, `audit-console-op-commands`, and a configurable `protected-command-prefixes` list. Review this list for the permission plugins and aliases actually installed on your server.
+Force OP controls include `checks.force-op.cancel-player-op-commands`, `kick-player-on-attempt`, `detect-op-grants`, `audit-console-op-commands`, `persist-operator-baseline`, and a configurable `protected-command-prefixes` list. Review this list for the permission plugins and aliases actually installed on your server.
 
 Discord: set `alerts.discord-enabled: true` and `alerts.discord-webhook` to a private HTTPS webhook. Keep it secret.
 
