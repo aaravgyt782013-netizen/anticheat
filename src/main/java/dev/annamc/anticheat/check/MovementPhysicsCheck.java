@@ -46,7 +46,11 @@ public final class MovementPhysicsCheck implements Listener {
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         Location to = event.getTo();
-        if (to == null || CheckUtil.shouldSkip(plugin, player, "movement-physics")) return;
+        if (to == null) return;
+        if (CheckUtil.shouldSkip(plugin, player, "movement-physics")) {
+            samples.remove(player.getUniqueId());
+            return;
+        }
         if (player.isInsideVehicle() || player.isFlying() || player.isGliding()
                 || player.isSwimming() || player.isRiptiding() || player.isInWater()
                 || player.isClimbing() || player.isSleeping()) {
