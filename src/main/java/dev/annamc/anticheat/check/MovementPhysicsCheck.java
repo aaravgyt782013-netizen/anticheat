@@ -75,7 +75,7 @@ public final class MovementPhysicsCheck implements Listener {
         double pingSlack = Math.min(plugin.getConfig().getDouble("checks.movement-physics.max-ping-slack", 0.75),
                 Math.max(0, player.getPing()) * plugin.getConfig().getDouble("checks.movement-physics.ping-slack-per-ms", 0.001));
         double allowance = base * ticks + pingSlack;
-        if (isOnSlipperyOrSpecialBlock(player)) allowance += 0.18 * ticks;
+        if (isOnSlipperyOrSpecialBlock(player)) allowance += plugin.getConfig().getDouble("checks.movement-physics.special-block-allowance-per-tick", 0.18) * ticks;
 
         double ratio = distance / Math.max(0.01, allowance);
         if (DetectionMath.isMovementOutlier(distance, allowance, plugin.getConfig().getDouble("checks.movement-physics.outlier-ratio", 2.2))) {
