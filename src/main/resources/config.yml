@@ -1,0 +1,34 @@
+settings:
+  prefix: "&8[&bANNA AC&8] &r"
+  debug: false
+  evidence-retention-days: 7
+  max-evidence-records-per-player: 5000
+alerts:
+  console: true
+  staff-chat: true
+  discord-webhook: ""
+  discord-enabled: false
+punishments:
+  enabled: true
+  movement-kick-vl: 12.0
+  kick-message: "&cUnfair advantage detected. If this is a mistake, contact staff."
+checks:
+  movement:
+    enabled: true
+    alert: true
+    setback: false
+    max-horizontal-distance-per-tick: 1.25
+    violation-add: 1.0
+    violation-decay-per-second: 0.25
+    alert-vl: 3.0
+    kick-vl: 12.0
+  packet-rate:
+    enabled: false
+    alert: true
+    minimum-interval-ms: 5
+    sample-window: 40
+  force-op:
+    enabled: true
+    alert: true
+    kick-player-on-attempt: false
+    detect-op-grants: true
