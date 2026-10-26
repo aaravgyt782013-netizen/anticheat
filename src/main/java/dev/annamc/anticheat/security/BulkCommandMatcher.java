@@ -2,6 +2,7 @@ package dev.annamc.anticheat.security;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /** Pure configurable matching for destructive player command patterns. */
 public final class BulkCommandMatcher {
@@ -36,6 +37,7 @@ public final class BulkCommandMatcher {
             }
         }
         return false;
+    }
 
     private static boolean matchesConfiguredRoot(String command, List<String> labels) {
         for (String configured : labels) {
@@ -44,6 +46,5 @@ public final class BulkCommandMatcher {
             if (command.equals(label) || command.startsWith(label + " ")) return true;
         }
         return false;
-    }
     }
 }
