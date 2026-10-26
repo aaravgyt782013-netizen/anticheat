@@ -4,15 +4,16 @@ Original modular anti-cheat foundation for Anna MC. Target: Paper 1.21.11 / Java
 
 ## Current implementation status
 
-Initial implementation targets:
+Implemented in this starter source:
 - Paper plugin lifecycle and configurable YAML files.
 - Conservative horizontal movement-displacement heuristic with violation level, decay, alerts and kick threshold.
 - JSON Lines evidence logging.
 - Console/staff alerts and optional Discord webhook notifications.
-- Basic admin commands.
+- Basic admin commands: alerts, check, history, reload, debug.
 - Optional PacketEvents movement-packet interval telemetry, disabled by default.
+- Basic Force OP auditing: visible OP-related command attempts and newly observed operator-status changes are logged and recorded. The actor may be unknown, and this does not detect every exploit path.
 
-Not implemented yet: full movement physics simulation, reach, KillAura, aim, autoclicker, scaffold, inventory, timer, no-fall, robust Force OP exploit detection, replay capture, web dashboard, cross-version simulation. Configuration placeholders are not detections.
+Not implemented yet: full movement physics simulation, reach, KillAura, aim, autoclicker, scaffold, inventory, timer, no-fall, robust Force OP exploit prevention, replay capture, web dashboard, cross-version simulation. A configuration entry is not proof a detection exists.
 
 ## Build
 
@@ -33,6 +34,6 @@ The plugin JAR is created under build/libs/ANNA-AC-0.1.0-SNAPSHOT.jar.
 
 ## Safety and limitations
 
-The first movement check is a simple horizontal-distance heuristic, not a Grim-style movement simulator. Tune it on a staging server for velocity, knockback, effects, vehicles, slime, ice and latency before enabling kicks on a live server. Packet timing is noisy and disabled by default. Evidence retention is configured but automatic pruning is not yet implemented. This is a starter release, not equivalent to Vulcan or Grim yet.
+The first movement check is a simple horizontal-distance heuristic, not a Grim-style movement simulator. Tune it on a staging server for velocity, knockback, effects, vehicles, slime, ice and latency before enabling kicks on a live server. Packet timing is noisy and disabled by default. OP audit events can be legitimate; review evidence before acting. Evidence retention is configured but automatic pruning is not yet implemented. This is a starter release, not equivalent to Vulcan or Grim yet.
 
 GitHub Actions builds and runs automated tests on pushes and pull requests. Wait for a green CI run before treating a release as verified.
