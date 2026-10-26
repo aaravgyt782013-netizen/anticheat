@@ -3,6 +3,7 @@ package dev.annamc.anticheat.command;
 import dev.annamc.anticheat.alert.AlertService;
 import dev.annamc.anticheat.check.ViolationManager;
 import dev.annamc.anticheat.evidence.EvidenceStore;
+import dev.annamc.anticheat.lang.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -19,12 +20,14 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
     private final ViolationManager violations;
     private final EvidenceStore evidence;
     private final AlertService alerts;
+    private final Messages messages;
 
-    public AACCommand(JavaPlugin plugin, ViolationManager violations, EvidenceStore evidence, AlertService alerts) {
+    public AACCommand(JavaPlugin plugin, ViolationManager violations, EvidenceStore evidence, AlertService alerts, Messages messages) {
         this.plugin = plugin;
         this.violations = violations;
         this.evidence = evidence;
         this.alerts = alerts;
+        this.messages = messages;
     }
 
     @Override
@@ -34,33 +37,30 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
             case "alerts" -> {
                 if (!(sender instanceof Player player) || !sender.hasPermission("annaac.alerts")) return deny(sender);
                 boolean enabled = alerts.toggleStaffAlerts(player);
-                sender.sendMessage(AlertService.color("&bANNA AC &7staff alerts are now "
-                        + (enabled ? "&aenabled" : "&cdisabled") + "&7 for you."));
+                sender.sendMessage(messages.get(enabled ? "commands.alerts-enabled" : "commands.alerts-disabled"));
             }
             case "check" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 if (args.length < 2) return usage(sender);
                 Player player = Bukkit.getPlayerExact(args[1]);
-                if (player == null) { sender.sendMessage("Player must be online."); return true; }
+                if (player == null) { sender.sendMessage(messages.get("commands.player-offline")); return true; }
                 double vl = args.length >= 3 ? violations.get(player, args[2]) : violations.get(player);
-                sender.sendMessage(AlertService.color("&bANNA AC &7" + player.getName()
-                        + (args.length >= 3 ? " &8[" + args[2] + "]" : " total")
-                        + " VL: &f" + String.format(java.util.Locale.ROOT, "%.2f", vl)));
+                sender.sendMessage(messages.get("commands.check-result", java.util.Map.of("player", player.getName(), "check", args.length >= 3 ? args[2] : "total", "vl", String.format(java.util.Locale.ROOT, "%.2f", vl))));
             }
             case "history" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 if (args.length < 2) return usage(sender);
                 Player player = Bukkit.getPlayerExact(args[1]);
                 if (player == null) {
-                    sender.sendMessage("Player must be online to resolve their UUID in this version.");
+                    sender.sendMessage(messages.get("commands.player-offline"));
                     return true;
                 }
                 var path = evidence.file(player.getUniqueId());
                 if (!Files.exists(path)) {
-                    sender.sendMessage(AlertService.color("&7No evidence recorded for &f" + player.getName() + "&7."));
+                    sender.sendMessage(messages.get("commands.no-evidence", java.util.Map.of("player", player.getName())));
                     return true;
                 }
-                sender.sendMessage(AlertService.color("&bANNA AC &7Loading recent evidence for &f" + player.getName() + "&7..."));
+                sender.sendMessage(messages.get("commands.loading-history", java.util.Map.of("player", player.getName())));
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                     List<String> lines;
                     try {
@@ -68,13 +68,13 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
                     } catch (Exception ex) {
                         plugin.getLogger().warning("Could not read evidence for " + player.getUniqueId() + ": " + ex.getMessage());
                         Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(
-                                AlertService.color("&cCould not read this evidence file.")));
+                                messages.get("commands.evidence-read-error")));
                         return;
                     }
                     int start = Math.max(0, lines.size() - 5);
                     List<String> recent = lines.subList(start, lines.size());
                     Bukkit.getScheduler().runTask(plugin, () -> {
-                        sender.sendMessage(AlertService.color("&bANNA AC &7Recent evidence lines: &f" + recent.size()));
+                        sender.sendMessage(messages.get("commands.history-count", java.util.Map.of("count", recent.size())));
                         for (String line : recent) sender.sendMessage(AlertService.color("&8» &7" + line));
                     });
                 });
@@ -82,16 +82,15 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
             case "reload" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 plugin.reloadConfig();
-                sender.sendMessage(AlertService.color("&aANNA AC configuration reloaded."));
+                messages.reload();
+                sender.sendMessage(messages.get("commands.reloaded"));
             }
             case "debug" -> {
                 if (!sender.hasPermission("annaac.admin")) return deny(sender);
                 if (args.length < 2) return usage(sender);
                 Player player = Bukkit.getPlayerExact(args[1]);
                 sender.sendMessage(player == null ? "Player is not online." :
-                        AlertService.color("&7Debug &f" + player.getName() + " &7VL=&f"
-                                + violations.get(player) + " &7world=&f" + player.getWorld().getName()
-                                + " &7ping=&f" + player.getPing()));
+                        messages.get("commands.debug-result", java.util.Map.of("player", player.getName(), "vl", String.format(java.util.Locale.ROOT, "%.2f", violations.get(player)), "world", player.getWorld().getName(), "ping", player.getPing())));
             }
             default -> { return usage(sender); }
         }
@@ -99,12 +98,12 @@ public final class AACCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean deny(CommandSender sender) {
-        sender.sendMessage(AlertService.color("&cYou do not have permission."));
+        sender.sendMessage(messages.get("commands.no-permission"));
         return true;
     }
 
     private boolean usage(CommandSender sender) {
-        sender.sendMessage(AlertService.color("&bANNA AC &7/annaac <alerts|check <player> [check]|history <player>|reload|debug <player>>"));
+        sender.sendMessage(messages.get("commands.usage"));
         return true;
     }
 
