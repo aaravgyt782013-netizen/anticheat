@@ -38,7 +38,7 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("require-independent-families: true"));
         assertTrue(yaml.contains("minimum-independent-families: 2"));
         assertTrue(yaml.contains("correlation-window-ms: 12000"));
-        assertTrue(yaml.contains("max-evidence-detail-length: 1200"));
+        assertTrue(yaml.contains("max-detail-length: 1200"));
         assertTrue(yaml.contains("violation-retention-hours: 24"));
     }
 
