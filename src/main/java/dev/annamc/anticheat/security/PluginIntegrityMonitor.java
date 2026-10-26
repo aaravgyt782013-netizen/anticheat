@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
@@ -340,8 +339,7 @@ public final class PluginIntegrityMonitor implements Listener {
     private static void writeBaselineHashes(YamlConfiguration yaml, Map<String, String> hashes) {
         yaml.set("hashes", null);
         for (Map.Entry<String, String> entry : hashes.entrySet()) {
-            String id = Base64.getUrlEncoder().withoutPadding()
-                    .encodeToString(entry.getKey().getBytes(StandardCharsets.UTF_8));
+            String id = PluginHashKey.forFileName(entry.getKey());
             yaml.set("hashes." + id + ".file", entry.getKey());
             yaml.set("hashes." + id + ".sha256", entry.getValue());
         }
