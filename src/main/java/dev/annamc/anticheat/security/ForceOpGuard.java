@@ -111,6 +111,7 @@ public final class ForceOpGuard implements Listener {
         if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)
                 || !plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true)) return;
         Set<UUID> current = readCurrentOperators();
+        boolean changed = !current.equals(knownOperators);
         for (UUID id : current) {
             if (knownOperators.add(id)) {
                 OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
@@ -118,7 +119,7 @@ public final class ForceOpGuard implements Listener {
                 alert(id, name, "operator status changed to enabled; granting actor is unknown", Bukkit.getPlayer(id));
             }
         }
-        if (!current.equals(knownOperators)) {
+        if (changed) {
             knownOperators.clear();
             knownOperators.addAll(current);
             saveBaseline(current);
