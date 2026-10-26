@@ -36,7 +36,8 @@ public final class KnockbackPredictionCheck implements Listener {
         if (event.getEntity() instanceof Player victim
                 && event.getDamager() instanceof Player attacker
                 && !victim.equals(attacker)
-                && plugin.getConfig().getBoolean("checks.knockback.enabled", false)) {
+                && plugin.getConfig().getBoolean("checks.knockback.enabled", false)
+                && !CheckUtil.shouldSkip(plugin, victim, "knockback")) {
             pending.put(victim.getUniqueId(), new Pending(victim.getLocation().clone(),
                     System.currentTimeMillis(), 0, attacker.getUniqueId()));
         }
@@ -44,8 +45,12 @@ public final class KnockbackPredictionCheck implements Listener {
 
     @EventHandler
     public void onVelocity(PlayerVelocityEvent event) {
-        if (!plugin.getConfig().getBoolean("checks.knockback.enabled", false)) return;
         Player player = event.getPlayer();
+        if (!plugin.getConfig().getBoolean("checks.knockback.enabled", false)
+                || CheckUtil.shouldSkip(plugin, player, "knockback")) {
+            pending.remove(player.getUniqueId());
+            return;
+        }
         Vector velocity = event.getVelocity();
         double horizontal = Math.hypot(velocity.getX(), velocity.getZ());
         double min = plugin.getConfig().getDouble("checks.knockback.minimum-horizontal-velocity", 0.25);
