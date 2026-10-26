@@ -37,6 +37,8 @@ security:
     enabled: true
     # Audit plugins that enable or disable after ANNA AC starts.
     audit-plugin-lifecycle: true
+    # Suppress lifecycle alerts during normal server startup (effective range 0–3600 seconds).
+    lifecycle-audit-grace-seconds: 120
     # Detect new, changed, or missing JARs compared with the saved owner-reviewed hash baseline.
     integrity-hash-enabled: true
     # Alert when a new JAR appears after the first baseline was generated.
