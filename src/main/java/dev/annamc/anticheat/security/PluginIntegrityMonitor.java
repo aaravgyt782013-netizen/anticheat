@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
@@ -97,8 +96,10 @@ public final class PluginIntegrityMonitor implements Listener {
                 return;
             }
 
+            boolean integrityEnabled = plugin.getConfig().getBoolean(
+                    "security.plugin-monitor.integrity-hash-enabled", true);
             YamlConfiguration baseline = YamlConfiguration.loadConfiguration(baselinePath.toFile());
-            boolean hasBaseline = baseline.getConfigurationSection("hashes") != null
+            boolean hasBaseline = integrityEnabled && baseline.getConfigurationSection("hashes") != null
                     && !baseline.getConfigurationSection("hashes").getKeys(false).isEmpty();
             boolean baselineCreated = false;
             Map<String, String> current = new HashMap<>();
@@ -124,11 +125,13 @@ public final class PluginIntegrityMonitor implements Listener {
                 String previous = baseline.getString("hashes." + name, "");
                 boolean ignored = plugin.getConfig().getStringList("security.plugin-monitor.ignore-plugin-files")
                         .stream().anyMatch(n -> name.equalsIgnoreCase(n));
-                if (!ignored && hasBaseline) {
-                    if (previous == null || previous.isBlank()) {
+                if (!ignored && integrityEnabled && hasBaseline) {
+                    if ((previous == null || previous.isBlank())
+                            && plugin.getConfig().getBoolean("security.plugin-monitor.alert-new-plugin-jars", true)) {
                         reportState("new:" + name + ":" + hash,
                                 "New plugin JAR found since the approved baseline: " + name + " SHA-256=" + hash);
-                    } else if (!previous.equalsIgnoreCase(hash)) {
+                    } else if (previous != null && !previous.isBlank() && !previous.equalsIgnoreCase(hash)
+                            && plugin.getConfig().getBoolean("security.plugin-monitor.alert-changed-plugin-jars", true)) {
                         reportState("changed:" + name + ":" + hash,
                                 "Plugin JAR hash changed since the approved baseline: " + name
                                         + " old=" + previous + " current=" + hash);
@@ -137,10 +140,11 @@ public final class PluginIntegrityMonitor implements Listener {
                 if (plugin.getConfig().getBoolean("security.plugin-monitor.static-scan-enabled", true) && !ignored) {
                     scanForRisk(jar, name, hash);
                 }
-                if (!hasBaseline) baseline.set("hashes." + name, hash);
+                if (integrityEnabled && !hasBaseline) baseline.set("hashes." + name, hash);
             }
 
-            if (hasBaseline) {
+            if (integrityEnabled && hasBaseline
+                    && plugin.getConfig().getBoolean("security.plugin-monitor.alert-removed-plugin-jars", true)) {
                 for (String oldName : baseline.getConfigurationSection("hashes").getKeys(false)) {
                     if (!seen.contains(oldName)
                             && !plugin.getConfig().getStringList("security.plugin-monitor.ignore-plugin-files")
@@ -148,22 +152,23 @@ public final class PluginIntegrityMonitor implements Listener {
                         reportState("removed:" + oldName, "Plugin JAR from the approved baseline is missing: " + oldName);
                     }
                 }
-            } else {
+            } else if (integrityEnabled && !hasBaseline) {
                 baseline.set("meta.created-at", java.time.Instant.now().toString());
                 baseline.set("meta.baseline-note", "Generated automatically on first scan. Review this file and rerun the scan after verifying plugins.");
                 baselineCreated = true;
             }
 
-            if (baselineCreated || !Files.exists(baselinePath)) {
+            if (integrityEnabled && (baselineCreated || !Files.exists(baselinePath))) {
                 try {
                     baseline.save(baselinePath.toFile());
-                    reportState("baseline-created", "Plugin JAR integrity baseline created. Review plugins/plugin-hashes.yml before trusting all entries.");
+                    reportState("baseline-created", "Plugin JAR integrity baseline created at plugins/ANNA-AC/plugin-hashes.yml. Review and approve every entry before trusting it.");
                 } catch (IOException ex) {
                     reportState("baseline-save-failed", "Could not save plugin integrity baseline: " + ex.getClass().getSimpleName());
                 }
             }
 
-            if (plugin.getConfig().getBoolean("security.plugin-monitor.report-scan-summary", true)) {
+            if (reason.equalsIgnoreCase("manual")
+                    || plugin.getConfig().getBoolean("security.plugin-monitor.report-scan-summary", false)) {
                 reportState("scan-summary:" + java.time.Instant.now().getEpochSecond(),
                         "Plugin integrity scan finished (" + reason + "): JARs=" + current.size()
                                 + ", baseline=" + (hasBaseline ? "present" : "initialised")
