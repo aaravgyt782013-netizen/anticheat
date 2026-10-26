@@ -6,6 +6,7 @@ import dev.annamc.anticheat.check.ViolationManager;
 import dev.annamc.anticheat.command.AACCommand;
 import dev.annamc.anticheat.evidence.EvidenceStore;
 import dev.annamc.anticheat.packet.PacketEventsBridge;
+import dev.annamc.anticheat.security.ForceOpGuard;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,6 +23,7 @@ public final class AnnaACPlugin extends JavaPlugin {
         ViolationManager violations = new ViolationManager(this, alerts);
         getServer().getPluginManager().registerEvents(new MovementCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(violations, this);
+        getServer().getPluginManager().registerEvents(new ForceOpGuard(this, evidenceStore), this);
         AACCommand command = new AACCommand(this, violations, evidenceStore);
         if (getCommand("annaac") != null) {
             getCommand("annaac").setExecutor(command);
