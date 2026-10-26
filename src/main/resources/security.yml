@@ -8,7 +8,7 @@ security:
     # Player permissions allowed to use protected bulk-edit commands. Keep this list narrow.
     allow-bulk-command-permissions: [annaac.security.bypass]
     # Destructive command labels that are blocked for untrusted players (case-insensitive).
-    protected-bulk-command-labels: [fill, minecraft:fill, setblock, minecraft:setblock, clone, minecraft:clone, //set, //replace, //regen, //paste, //cut, //move, //stack, //overlay, //naturalize, //flora, //drain]
+    protected-bulk-command-labels: [fill, minecraft:fill, setblock, minecraft:setblock, clone, minecraft:clone, //set, //replace, //regen, //paste, //cut, //move, //stack, //overlay, //naturalize, //flora, //drain, kill, minecraft:kill, summon, plugman, bukkit:reload, paper:reload, reload]
     # Optionally kick a player after a blocked bulk command. Disabled to avoid punishment from typos.
     kick-on-blocked-bulk-command: false
     # Message used only when kick-on-blocked-bulk-command is enabled.
