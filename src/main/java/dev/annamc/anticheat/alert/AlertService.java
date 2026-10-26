@@ -113,7 +113,7 @@ public final class AlertService {
         if (avatar != null && !avatar.isBlank() && avatar.startsWith("https://"))
             payload.append(",\"avatar_url\":").append(json(avatar));
         String mention = roleId != null && roleId.matches("[0-9]{17,20}") ? "<@&" + roleId + ">" : "";
-        String content = useEmbed ? mention : (mention.isEmpty() ? plain : mention + "\\n" + plain);
+        String content = useEmbed ? mention : (mention.isEmpty() ? plain : mention + "\n" + plain);
         payload.append(",\"content\":").append(json(content));
         payload.append(",\"allowed_mentions\":{\"parse\":[],\"roles\":")
                 .append(mention.isEmpty() ? "[]" : "[" + json(roleId) + "]").append("}");
