@@ -7,8 +7,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BasicConfigurationTest {
     private String config() throws Exception {
-        // Ignore explanatory comments and indentation so assertions test YAML keys, not formatting.
-        return Files.readAllLines(Path.of("src/main/resources/config.yml")).stream()
+        // Read all modular configuration files and ignore comments/indentation so tests assert active option names.
+        return java.util.stream.Stream.of(
+                        "config.yml", "checks.yml", "discord.yml", "database.yml", "punishments.yml")
+                .flatMap(name -> {
+                    try {
+                        return Files.readAllLines(Path.of("src/main/resources", name)).stream();
+                    } catch (Exception ex) {
+                        throw new java.io.UncheckedIOException(new java.io.IOException("Could not read " + name, ex));
+                    }
+                })
                 .filter(line -> !line.stripLeading().startsWith("#"))
                 .map(String::strip)
                 .collect(java.util.stream.Collectors.joining("\n"));
