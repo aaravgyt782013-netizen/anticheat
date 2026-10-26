@@ -11,7 +11,7 @@ ANNA AC sends anti-cheat and security alerts to a Discord webhook. It does not n
 
 ## 2. Configure ANNA AC
 
-Stop the server before editing the file, then open `plugins/ANNA-AC/config.yml`. Set these values:
+Open `plugins/ANNA-AC/discord.yml`. Keep the global prefix and language in `config.yml`. Set the following values inside the existing `alerts:` section in `discord.yml`:
 
     settings:
       prefix: "&8[&bANNA AC&8] &r"
