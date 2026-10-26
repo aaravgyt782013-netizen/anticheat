@@ -12,6 +12,7 @@ import dev.annamc.anticheat.check.ScaffoldSignalCheck;
 import dev.annamc.anticheat.check.ViolationManager;
 import dev.annamc.anticheat.command.AACCommand;
 import dev.annamc.anticheat.evidence.EvidenceStore;
+import dev.annamc.anticheat.lang.Messages;
 import dev.annamc.anticheat.packet.PacketEventsBridge;
 import dev.annamc.anticheat.security.ForceOpGuard;
 import org.bukkit.Bukkit;
@@ -20,15 +21,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class AnnaACPlugin extends JavaPlugin {
     private EvidenceStore evidenceStore;
     private PacketEventsBridge packetBridge;
+    private Messages messages;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         saveResource("messages.yml", false);
         saveResource("punishments.yml", false);
+        saveResource("messages_en.yml", false);
+        saveResource("messages_hi.yml", false);
 
+        messages = new Messages(this);
         evidenceStore = new EvidenceStore(this);
-        AlertService alerts = new AlertService(this, evidenceStore);
+        AlertService alerts = new AlertService(this, evidenceStore, messages);
         ViolationManager violations = new ViolationManager(this, alerts);
 
         getServer().getPluginManager().registerEvents(new MovementCheck(this, violations), this);
@@ -40,7 +45,7 @@ public final class AnnaACPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ScaffoldSignalCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new NoFallSignalCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(violations, this);
-        getServer().getPluginManager().registerEvents(new ForceOpGuard(this, evidenceStore), this);
+        getServer().getPluginManager().registerEvents(new ForceOpGuard(this, evidenceStore, messages), this);
 
         AACCommand command = new AACCommand(this, violations, evidenceStore, alerts);
         if (getCommand("annaac") != null) {
