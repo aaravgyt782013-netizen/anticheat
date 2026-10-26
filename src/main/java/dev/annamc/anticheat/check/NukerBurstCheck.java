@@ -40,9 +40,11 @@ public final class NukerBurstCheck implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
+        UUID id = player.getUniqueId();
         if (CheckUtil.shouldSkip(plugin, player, "nuker-burst")
                 || player.getGameMode() == GameMode.CREATIVE
                 || player.getGameMode() == GameMode.SPECTATOR) {
+            clear(id);
             return;
         }
 
@@ -50,7 +52,6 @@ public final class NukerBurstCheck implements Listener {
         List<String> ignored = plugin.getConfig().getStringList("checks.nuker-burst.ignored-materials");
         if (ignored.stream().anyMatch(name -> name.equalsIgnoreCase(materialName))) return;
 
-        UUID id = player.getUniqueId();
         long now = System.currentTimeMillis();
         long windowMs = Math.max(250L,
                 plugin.getConfig().getLong("checks.nuker-burst.sample-window-ms", 1000L));
