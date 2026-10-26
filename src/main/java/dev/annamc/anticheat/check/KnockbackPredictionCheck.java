@@ -71,7 +71,10 @@ public final class KnockbackPredictionCheck implements Listener {
         if (!plugin.getConfig().getBoolean("checks.knockback.enabled", false)
                 || CheckUtil.shouldSkip(plugin, player, "knockback")
                 || player.isInsideVehicle() || player.isGliding() || player.isSwimming()
-                || player.isInWater()) return;
+                || player.isInWater()) {
+            pending.remove(player.getUniqueId());
+            return;
+        }
         Pending p = pending.get(player.getUniqueId());
         if (p == null) return;
         long age = System.currentTimeMillis() - p.startedAt;
