@@ -11,10 +11,16 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 /**
  * Defense-in-depth audit for OP and common permission-management command paths.
@@ -25,13 +31,25 @@ public final class ForceOpGuard implements Listener {
     private final JavaPlugin plugin;
     private final EvidenceStore evidence;
     private final Set<UUID> knownOperators = ConcurrentHashMap.newKeySet();
+    private final Path baselinePath;
 
     public ForceOpGuard(JavaPlugin plugin, EvidenceStore evidence) {
         this.plugin = plugin;
         this.evidence = evidence;
-        for (OfflinePlayer operator : Bukkit.getOperators()) {
-            if (operator.getUniqueId() != null) knownOperators.add(operator.getUniqueId());
+        this.baselinePath = plugin.getDataFolder().toPath().resolve("operator-baseline.txt");
+        Set<UUID> current = readCurrentOperators();
+        Set<UUID> persisted = loadBaseline();
+        if (persisted != null && plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true)) {
+            for (UUID id : current) {
+                if (!persisted.contains(id)) {
+                    OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
+                    String name = operator.getName() == null ? id.toString() : operator.getName();
+                    alert(id, name, "operator status appeared since the previous saved baseline; actor is unknown", Bukkit.getPlayer(id));
+                }
+            }
         }
+        knownOperators.addAll(current);
+        saveBaseline(current);
         Bukkit.getScheduler().runTaskTimer(plugin, this::auditOperatorList, 20L, 20L);
     }
 
@@ -92,17 +110,56 @@ public final class ForceOpGuard implements Listener {
     private void auditOperatorList() {
         if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)
                 || !plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true)) return;
-        Set<UUID> current = ConcurrentHashMap.newKeySet();
-        for (OfflinePlayer operator : Bukkit.getOperators()) {
-            UUID id = operator.getUniqueId();
-            if (id == null) continue;
-            current.add(id);
+        Set<UUID> current = readCurrentOperators();
+        for (UUID id : current) {
             if (knownOperators.add(id)) {
+                OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
                 String name = operator.getName() == null ? id.toString() : operator.getName();
                 alert(id, name, "operator status changed to enabled; granting actor is unknown", Bukkit.getPlayer(id));
             }
         }
-        knownOperators.removeIf(id -> !current.contains(id));
+        if (!current.equals(knownOperators)) {
+            knownOperators.clear();
+            knownOperators.addAll(current);
+            saveBaseline(current);
+        }
+    }
+
+    private Set<UUID> readCurrentOperators() {
+        Set<UUID> current = ConcurrentHashMap.newKeySet();
+        for (OfflinePlayer operator : Bukkit.getOperators()) {
+            UUID id = operator.getUniqueId();
+            if (id != null) current.add(id);
+        }
+        return current;
+    }
+
+    private Set<UUID> loadBaseline() {
+        if (!plugin.getConfig().getBoolean("checks.force-op.persist-operator-baseline", true)
+                || !Files.isRegularFile(baselinePath)) return null;
+        Set<UUID> result = ConcurrentHashMap.newKeySet();
+        try {
+            for (String line : Files.readAllLines(baselinePath, StandardCharsets.UTF_8)) {
+                try { result.add(UUID.fromString(line.trim())); }
+                catch (IllegalArgumentException ignored) { /* Ignore malformed baseline lines. */ }
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Could not read saved operator baseline", e);
+        }
+        return result;
+    }
+
+    private void saveBaseline(Set<UUID> operators) {
+        if (!plugin.getConfig().getBoolean("checks.force-op.persist-operator-baseline", true)) return;
+        try {
+            Files.createDirectories(baselinePath.getParent());
+            List<String> lines = new ArrayList<>();
+            for (UUID id : operators) lines.add(id.toString());
+            lines.sort(String::compareTo);
+            Files.write(baselinePath, lines, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Could not save operator baseline", e);
+        }
     }
 
     private void alert(UUID id, String name, String detail, Player player) {
