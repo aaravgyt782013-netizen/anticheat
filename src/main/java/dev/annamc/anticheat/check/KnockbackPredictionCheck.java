@@ -56,6 +56,9 @@ public final class KnockbackPredictionCheck implements Listener {
     @EventHandler
     public void onTeleport(PlayerTeleportEvent event) { pending.remove(event.getPlayer().getUniqueId()); }
 
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) { pending.remove(event.getPlayer().getUniqueId()); }
+
     @EventHandler(ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
