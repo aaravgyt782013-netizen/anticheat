@@ -5,15 +5,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Defense-in-depth audit for OP and common permission-management command paths.
+ * It cannot protect against malicious plugins, direct file edits, console abuse,
+ * or arbitrary code execution; those require host access control and plugin review.
+ */
 public final class ForceOpGuard implements Listener {
     private final JavaPlugin plugin;
     private final EvidenceStore evidence;
@@ -28,51 +35,74 @@ public final class ForceOpGuard implements Listener {
         Bukkit.getScheduler().runTaskTimer(plugin, this::auditOperatorList, 20L, 20L);
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)) return;
-        String command = event.getMessage().trim().toLowerCase(java.util.Locale.ROOT);
-        if (isOpGrantCommand(command) && !event.getPlayer().hasPermission("annaac.admin")) {
-            alert(event.getPlayer().getUniqueId(), event.getPlayer().getName(),
-                    "unauthorized player attempted an OP-related command", event.getPlayer());
+        String command = normalize(event.getMessage());
+        if (!isProtectedCommand(command)) return;
+
+        Player actor = event.getPlayer();
+        boolean trusted = actor.hasPermission("annaac.admin");
+        alert(actor.getUniqueId(), actor.getName(),
+                (trusted ? "authorized actor issued a protected privilege command: " : "blocked protected privilege command attempt: ")
+                        + command, actor);
+
+        if (!trusted && plugin.getConfig().getBoolean("checks.force-op.cancel-player-op-commands", true)) {
+            event.setCancelled(true);
+            actor.sendMessage("§cANNA AC §7» This privileged command is blocked by server security.");
             if (plugin.getConfig().getBoolean("checks.force-op.kick-player-on-attempt", false)) {
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    if (event.getPlayer().isOnline())
-                        event.getPlayer().kickPlayer("Unauthorized operator command attempt.");
+                    if (actor.isOnline()) actor.kickPlayer("Unauthorized privileged command attempt.");
                 });
             }
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onConsoleCommand(ServerCommandEvent event) {
-        if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)) return;
-        String command = event.getCommand().trim().toLowerCase(java.util.Locale.ROOT);
-        if (isOpGrantCommand(command)) {
-            plugin.getLogger().warning("[ANNA AC SECURITY] Console executed an OP-related command. Verify this was authorized.");
+        if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)
+                || !plugin.getConfig().getBoolean("checks.force-op.audit-console-op-commands", true)) return;
+        String command = normalize(event.getCommand());
+        if (isProtectedCommand(command)) {
+            plugin.getLogger().warning("[ANNA AC SECURITY] Console issued a privileged command. Confirm this action was authorized: " + command);
+            evidence.record(new UUID(0L, 0L), "CONSOLE", "force-op-console-audit", 0.0, command);
         }
     }
 
-    private boolean isOpGrantCommand(String command) {
-        String normalized = command.startsWith("/") ? command.substring(1) : command;
-        return normalized.equals("op") || normalized.startsWith("op ")
-                || normalized.equals("minecraft:op") || normalized.startsWith("minecraft:op ")
-                || normalized.equals("deop") || normalized.startsWith("deop ")
-                || normalized.equals("minecraft:deop") || normalized.startsWith("minecraft:deop ");
+    private String normalize(String raw) {
+        String command = raw.trim().toLowerCase(java.util.Locale.ROOT);
+        if (command.startsWith("/")) command = command.substring(1);
+        return command.replaceAll("\\s+", " ");
+    }
+
+    private boolean isProtectedCommand(String command) {
+        String label = command.contains(" ") ? command.substring(0, command.indexOf(' ')) : command;
+        List<String> configured = plugin.getConfig().getStringList("checks.force-op.protected-command-prefixes");
+        if (configured.isEmpty()) {
+            configured = List.of("op", "deop", "minecraft:op", "minecraft:deop", "bukkit:op", "bukkit:deop",
+                    "lp", "luckperms", "lpv", "pex", "permissions", "manuadd");
+        }
+        for (String candidate : configured) {
+            String prefix = candidate.toLowerCase(java.util.Locale.ROOT).trim();
+            if (!prefix.isEmpty() && (label.equals(prefix) || label.startsWith(prefix + ":"))) return true;
+        }
+        return false;
     }
 
     private void auditOperatorList() {
         if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)
                 || !plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true)) return;
+        Set<UUID> current = ConcurrentHashMap.newKeySet();
         for (OfflinePlayer operator : Bukkit.getOperators()) {
             UUID id = operator.getUniqueId();
-            if (id == null || knownOperators.contains(id)) continue;
-            knownOperators.add(id);
-            Player online = Bukkit.getPlayer(id);
-            String name = operator.getName() == null ? id.toString() : operator.getName();
-            alert(id, name, "operator status was newly observed; actor is unknown", online);
+            if (id == null) continue;
+            current.add(id);
+            if (knownOperators.add(id)) {
+                String name = operator.getName() == null ? id.toString() : operator.getName();
+                alert(id, name, "operator status changed to enabled; granting actor is unknown", Bukkit.getPlayer(id));
+            }
         }
-        knownOperators.removeIf(id -> !Bukkit.getOfflinePlayer(id).isOp());
+        knownOperators.removeIf(id -> !current.contains(id));
     }
 
     private void alert(UUID id, String name, String detail, Player player) {
@@ -80,7 +110,8 @@ public final class ForceOpGuard implements Listener {
         plugin.getLogger().warning(message.replaceAll("§[0-9A-FK-ORa-fk-or]", ""));
         if (plugin.getConfig().getBoolean("checks.force-op.alert", true)) {
             for (Player staff : Bukkit.getOnlinePlayers()) {
-                if (staff.hasPermission("annaac.alerts")) staff.sendMessage(message);
+                if (staff.hasPermission("annaac.alerts") && !staff.hasPermission("annaac.bypass"))
+                    staff.sendMessage(message);
             }
         }
         evidence.record(id, name, "force-op-audit", 0.0, detail);
