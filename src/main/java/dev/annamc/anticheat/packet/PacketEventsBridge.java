@@ -126,7 +126,8 @@ public final class PacketEventsBridge implements Listener {
                                 + "; review proxy, ping and client before action";
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             Player player = Bukkit.getPlayer(id);
-                            if (player != null) violations.add(player, "packet-rate", 1.0, detail);
+                            if (player != null) violations.add(player, "packet-rate",
+                                    CheckUtil.getVersionedDouble(plugin, player, "packet-rate", "violation-add", 1.0), detail);
                         });
                     }
                 }

@@ -260,8 +260,9 @@ class VersionedThresholdsTest {
                 checks:
                   packet-rate:
                     max-movement-packets-per-second: 45
+                    violation-add: 1.0
                     client-version-overrides:
-                      '1_8': { max-movement-packets-per-second: 35 }
+                      '1_8': { max-movement-packets-per-second: 35, violation-add: 1.5 }
                   click-rate:
                     max-attacks-per-window: 24
                     minimum-pattern-cps: 5.0
@@ -279,6 +280,8 @@ class VersionedThresholdsTest {
 
         assertEquals(35.0, VersionedThresholds.resolveForClient(config, "1.8",
                 "1.21.11", "packet-rate", "max-movement-packets-per-second", 40.0));
+        assertEquals(1.5, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "packet-rate", "violation-add", 1.0));
         assertEquals(27.0, VersionedThresholds.resolveForClient(config, "1.21.11",
                 "1.21.11", "click-rate", "max-attacks-per-window", 20.0));
         assertEquals(30.0, VersionedThresholds.resolveForClient(config, "1.8",
