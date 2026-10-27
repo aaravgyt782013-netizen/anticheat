@@ -149,18 +149,7 @@ public final class ModularConfigManager {
 
     private void copySelectedChecks(ConfigurationSection source, ConfigurationSection target,
                                     java.util.List<String> checkNames) {
-        for (String check : checkNames) {
-            String path = "checks." + check;
-            ConfigurationSection sourceSection = source.getConfigurationSection(path);
-            if (sourceSection == null) continue;
-            // Overlay the legacy value onto the bundled module defaults without deleting
-            // the resource comments. This preserves both existing tuning and readable docs.
-            for (String key : sourceSection.getKeys(true)) {
-                if (!sourceSection.isConfigurationSection(key)) {
-                    target.set(path + "." + key, sourceSection.get(key));
-                }
-            }
-        }
+        CheckConfigModules.copySelectedChecks(source, target, checkNames);
     }
 
     private void overlayCheckModules(Map<String, YamlConfiguration> modules, FileConfiguration target) {
