@@ -67,7 +67,7 @@ public final class MovementPhysicsCheck implements Listener {
         Sample previous = samples.get(player.getUniqueId());
         if (previous == null) { samples.put(player.getUniqueId(), new Sample(to.clone(), now)); return; }
         long elapsedMs = Math.max(1L, (now - previous.nanoTime) / 1_000_000L);
-        if (elapsedMs > plugin.getConfig().getLong("checks.movement-physics.max-sample-gap-ms", 250)) { samples.put(player.getUniqueId(), new Sample(to.clone(), now)); return; }
+        if (elapsedMs > Math.round(CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "max-sample-gap-ms", 250.0))) { samples.put(player.getUniqueId(), new Sample(to.clone(), now)); return; }
 
         double dx = to.getX() - previous.location.getX();
         double dz = to.getZ() - previous.location.getZ();
@@ -91,7 +91,7 @@ public final class MovementPhysicsCheck implements Listener {
         if (DetectionMath.isMovementOutlier(distance, allowance, CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "outlier-ratio", 2.2))) {
             int streak = previous.outlierStreak + 1;
             samples.put(player.getUniqueId(), new Sample(to.clone(), now, streak));
-            int required = plugin.getConfig().getInt("checks.movement-physics.required-consecutive-outliers", 3);
+            int required = (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "required-consecutive-outliers", 3.0));
             if (streak >= required) {
                 violations.add(player, "movement-physics",
                         CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "violation-add", 1.0),
