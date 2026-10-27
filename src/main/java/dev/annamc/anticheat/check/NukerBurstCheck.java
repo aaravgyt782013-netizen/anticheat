@@ -54,9 +54,9 @@ public final class NukerBurstCheck implements Listener {
 
         long now = System.currentTimeMillis();
         long windowMs = Math.max(250L,
-                plugin.getConfig().getLong("checks.nuker-burst.sample-window-ms", 1000L));
+                Math.round(CheckUtil.getVersionedDouble(plugin, player, "nuker-burst", "sample-window-ms", 1000.0)));
         long evaluationInterval = Math.max(100L,
-                plugin.getConfig().getLong("checks.nuker-burst.evaluation-interval-ms", 250L));
+                Math.round(CheckUtil.getVersionedDouble(plugin, player, "nuker-burst", "evaluation-interval-ms", 250.0)));
 
         Deque<Long> times = breakTimes.computeIfAbsent(id, ignoredId -> new ArrayDeque<>());
         times.addLast(now);
@@ -75,7 +75,7 @@ public final class NukerBurstCheck implements Listener {
         int requiredWindows = Math.max(1,
                 (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "nuker-burst", "required-over-limit-windows", 3.0)));
         long cooldown = Math.max(0L,
-                plugin.getConfig().getLong("checks.nuker-burst.flag-cooldown-ms", 5000L));
+                Math.round(CheckUtil.getVersionedDouble(plugin, player, "nuker-burst", "flag-cooldown-ms", 5000.0)));
         if (streak < requiredWindows || now - lastFlag.getOrDefault(id, 0L) < cooldown) return;
 
         lastFlag.put(id, now);
