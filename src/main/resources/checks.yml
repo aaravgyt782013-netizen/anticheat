@@ -130,14 +130,14 @@ checks:
     outlier-ratio: 2.2
     # Number of consecutive outlier samples required before flagging.
     required-consecutive-outliers: 3
-    # Optional exact-version or major.minor overrides; exact version takes priority.
-    # Optional exact-version or major.minor overrides; exact version takes priority.
+    # Optional exact-version or major.minor overrides; dots are replaced with underscores.
+    # Exact version takes priority over major.minor, then the regular setting.
     # Example:
     # version-overrides:
-    #   '1.21.11':
+    #   '1_21_11':
     #     base-horizontal-per-tick: 0.72
     #     sprint-multiplier: 1.3
-    #   '1.21':
+    #   '1_21':
     #     base-horizontal-per-tick: 0.72
     version-overrides: {}
     # Violation level (VL) added when this check flags.
