@@ -78,8 +78,8 @@ public final class KnockbackPredictionCheck implements Listener {
         Pending p = pending.get(player.getUniqueId());
         if (p == null) return;
         long age = System.currentTimeMillis() - p.startedAt;
-        int baseMaxAge = plugin.getConfig().getInt("checks.knockback.observation-window-ms", 350);
-        int pingExtension = (int) Math.min(plugin.getConfig().getInt("checks.knockback.max-ping-window-extension-ms", 200),
+        int baseMaxAge = (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "knockback", "observation-window-ms", 350.0));
+        int pingExtension = (int) Math.min((int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "knockback", "max-ping-window-extension-ms", 200.0)),
                 Math.max(0, player.getPing()) * CheckUtil.getVersionedDouble(plugin, player, "knockback", "ping-window-extension-per-ms", 0.5));
         int maxAge = baseMaxAge + pingExtension;
         if (age > maxAge) {
@@ -93,13 +93,13 @@ public final class KnockbackPredictionCheck implements Listener {
         int observations = p.observations + 1;
         Pending updated = p.withObservations(observations);
         pending.put(player.getUniqueId(), updated);
-        int required = plugin.getConfig().getInt("checks.knockback.minimum-observations", 4);
+        int required = (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "knockback", "minimum-observations", 4.0));
         double velocityLength = Math.hypot(p.velocity.getX(), p.velocity.getZ());
         if (velocityLength < CheckUtil.getVersionedDouble(plugin, player, "knockback", "minimum-horizontal-velocity", 0.25)) {
             pending.remove(player.getUniqueId());
             return;
         }
-        if (observations >= required && age >= plugin.getConfig().getInt("checks.knockback.minimum-age-ms", 120)) {
+        if (observations >= required && age >= (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "knockback", "minimum-age-ms", 120.0))) {
             double projection = (dx * p.velocity.getX() + dz * p.velocity.getZ()) / velocityLength;
             double threshold = CheckUtil.getVersionedDouble(plugin, player, "knockback", "minimum-forward-projection", 0.04);
             double minimumDisplacement = Math.max(0.0,
