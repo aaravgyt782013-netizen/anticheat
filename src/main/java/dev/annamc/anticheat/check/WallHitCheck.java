@@ -71,7 +71,7 @@ public final class WallHitCheck implements Listener {
         requiredRatio = Math.max(0.0, Math.min(1.0, requiredRatio));
         if (ratio >= requiredRatio && occluded > 0) {
             violations.add(player, "wall-hit",
-                    plugin.getConfig().getDouble("checks.wall-hit.violation-add", 1.0),
+                    CheckUtil.getVersionedDouble(plugin, player, "wall-hit", "violation-add", 1.0),
                     String.format(java.util.Locale.ROOT,
                             "occluded-hitbox-samples=%d/%d ratio=%.2f target=%s ping=%dms; inspect latency and geometry",
                             occluded, samplePoints.size(), ratio, target.getType().name(), player.getPing()));

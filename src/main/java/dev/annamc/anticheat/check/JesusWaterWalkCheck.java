@@ -84,7 +84,7 @@ public final class JesusWaterWalkCheck implements Listener {
         if (count >= required) {
             samples.put(id, new Sample(to, now, 0));
             violations.add(player, "jesus",
-                    plugin.getConfig().getDouble("checks.jesus.violation-add", 1.0),
+                    CheckUtil.getVersionedDouble(plugin, player, "jesus", "violation-add", 1.0),
                     String.format(java.util.Locale.ROOT,
                             "stable-liquid-surface movement samples=%d horizontal-step=%.3f vertical-step=%.3f",
                             count, horizontal, dy));

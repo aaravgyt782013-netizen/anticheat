@@ -290,6 +290,26 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void violationWeightCanBeTunedForOlderAndNewerClients() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  movement:
+                    violation-add: 1.0
+                    client-version-overrides:
+                      '1_8': { violation-add: 1.5 }
+                      '1_21': { violation-add: 0.75 }
+                """);
+
+        assertEquals(1.5, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "movement", "violation-add", 1.0));
+        assertEquals(0.75, VersionedThresholds.resolveForClient(config, "1.21.11",
+                "1.21.11", "movement", "violation-add", 1.0));
+        assertEquals(1.0, VersionedThresholds.resolveForClient(config, null,
+                "1.21.11", "movement", "violation-add", 1.0));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 

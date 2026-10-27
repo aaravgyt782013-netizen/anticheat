@@ -82,7 +82,7 @@ public final class SpiderClimbCheck implements Listener {
         if (count >= required) {
             samples.put(id, new Sample(to, now, 0));
             violations.add(player, "spider-signal",
-                    plugin.getConfig().getDouble("checks.spider-signal.violation-add", 1.0),
+                    CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "violation-add", 1.0),
                     String.format(java.util.Locale.ROOT,
                             "sustained-wall-ascent samples=%d vertical-step=%.3f horizontal-step=%.3f",
                             count, dy, horizontal));

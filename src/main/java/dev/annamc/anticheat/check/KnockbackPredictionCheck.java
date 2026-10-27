@@ -106,7 +106,7 @@ public final class KnockbackPredictionCheck implements Listener {
                     CheckUtil.getVersionedDouble(plugin, player, "knockback", "minimum-observed-displacement", 0.08));
             if (displacement < minimumDisplacement || projection < threshold) {
                 violations.add(player, "knockback",
-                        plugin.getConfig().getDouble("checks.knockback.violation-add", 1.0),
+                        CheckUtil.getVersionedDouble(plugin, player, "knockback", "violation-add", 1.0),
                         String.format(java.util.Locale.ROOT,
                                 "low movement projection %.3f / displacement %.3f (minimum %.3f) along server velocity within %dms; review ping/collisions/input",
                                 projection, displacement, minimumDisplacement, age));

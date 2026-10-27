@@ -40,7 +40,7 @@ public final class MovementCheck implements Listener {
         double horizontal = Math.sqrt(dx * dx + dz * dz);
         double max = CheckUtil.getVersionedDouble(plugin, player, "movement", "max-horizontal-distance-per-tick", 1.25);
         if (horizontal > max)
-            violations.add(player, "movement", plugin.getConfig().getDouble("checks.movement.violation-add", 1.0),
+            violations.add(player, "movement", CheckUtil.getVersionedDouble(plugin, player, "movement", "violation-add", 1.0),
                     String.format("horizontal=%.3f threshold=%.3f", horizontal, max));
     }
 }

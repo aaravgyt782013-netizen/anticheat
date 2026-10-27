@@ -82,7 +82,7 @@ public final class NukerBurstCheck implements Listener {
         lastFlag.put(id, now);
         overLimitWindows.put(id, 0);
         violations.add(player, "nuker-burst",
-                plugin.getConfig().getDouble("checks.nuker-burst.violation-add", 1.0),
+                CheckUtil.getVersionedDouble(plugin, player, "nuker-burst", "violation-add", 1.0),
                 String.format(Locale.ROOT,
                         "block-break burst=%d in %dms (limit=%d, repeated-windows=%d); validate tool, effects and server plugins",
                         count, windowMs, maxBreaks, streak));

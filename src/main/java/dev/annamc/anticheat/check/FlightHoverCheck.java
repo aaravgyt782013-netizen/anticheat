@@ -90,7 +90,7 @@ public final class FlightHoverCheck implements Listener {
         if (count >= required) {
             samples.put(id, new Sample(to, now, 0));
             violations.add(player, "flight",
-                    plugin.getConfig().getDouble("checks.flight.violation-add", 1.0),
+                    CheckUtil.getVersionedDouble(plugin, player, "flight", "violation-add", 1.0),
                     String.format(java.util.Locale.ROOT,
                             "sustained-air-hover samples=%d horizontal-step=%.3f vertical-step=%.3f",
                             count, horizontal, dy));

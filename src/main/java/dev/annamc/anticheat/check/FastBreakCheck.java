@@ -138,7 +138,7 @@ public final class FastBreakCheck implements Listener {
         times.clear();
 
         violations.add(player, "fast-break",
-                plugin.getConfig().getDouble("checks.fast-break.violation-add", 1.0),
+                CheckUtil.getVersionedDouble(plugin, player, "fast-break", "violation-add", 1.0),
                 String.format(Locale.ROOT,
                         "repeated fast block breaks=%d expected-ticks=%d observed-ms=%d conservative-threshold-ms=%.1f ping=%dms block=%s; review effects, tools and server plugins",
                         sampleCount, session.expectedTicks, elapsed, thresholdMs, player.getPing(),
