@@ -115,7 +115,9 @@ public final class ForceOpGuard implements Listener {
             configured = List.of("op", "deop", "minecraft:op", "minecraft:deop", "bukkit:op", "bukkit:deop",
                     "lp", "luckperms", "lpv", "pex", "permissions", "manuadd");
         }
-        return PrivilegeCommandMatcher.isProtected(command, configured);
+        return PrivilegeCommandMatcher.isProtected(command, configured)
+                || PrivilegeCommandMatcher.matchesAnyPattern(command,
+                plugin.getConfig().getStringList("checks.force-op.protected-command-patterns"));
     }
 
     private void auditOperatorList() {
