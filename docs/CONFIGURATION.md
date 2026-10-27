@@ -117,7 +117,7 @@ The principal controls are `max-absolute-coordinate`, `max-absolute-y`, `max-hor
 
 ## Configuration validation
 
-At startup and after `/annaac reload`, ANNA AC prints warnings for invalid numeric thresholds in the main check settings and in version-specific override maps. Examples include negative distances/cooldowns, non-finite values, out-of-range ratios, and degree values outside their supported range. Fix warnings in the relevant section of `checks.yml`; invalid values read through the version-aware resolver fall back to the code-defined threshold instead of being applied. Validation can only check known numeric conventions—run the staging matrix before enabling enforcement.
+At startup and after `/annaac reload`, ANNA AC prints warnings for invalid numeric thresholds in the main check settings and in version-specific override maps. Examples include negative distances/cooldowns, non-finite values, out-of-range ratios, coordinate sanity limits above 30000000 blocks, and degree values outside their supported range. Fix warnings in the relevant detector module file (such as `checks-packets.yml`); invalid values read through the version-aware resolver fall back to a valid configured value or the code-defined threshold instead of being applied. Validation can only check known numeric conventions—run the staging matrix before enabling enforcement.
 
 ## Per-version movement threshold tuning
 

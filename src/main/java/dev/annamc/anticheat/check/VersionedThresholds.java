@@ -144,7 +144,11 @@ public final class VersionedThresholds {
             return value < 1.0 || value > 128.0 ? "must be between 1 and 128 blocks per packet." : null;
         }
         if (key.equals("max-absolute-coordinate") || key.equals("max-absolute-y")) {
-            return value <= 0.0 ? "must be greater than 0." : null;
+            if (value <= 0.0) return "must be greater than 0.";
+            if (value > 30_000_000.0) {
+                return "must not exceed 30000000 blocks; larger limits can defeat coordinate sanity validation.";
+            }
+            return null;
         }
         if (key.equals("minimum-time-ratio") || key.equals("minimum-occluded-sample-ratio")) {
             return value < 0.0 || value > 1.0 ? "must be between 0 and 1." : null;

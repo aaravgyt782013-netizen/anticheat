@@ -398,6 +398,24 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void unsafeCoordinateLimitOverrideIsRejectedAndFallsBack() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  packet-sanity:
+                    max-absolute-coordinate: 30000000.0
+                    version-overrides:
+                      '1_21': { max-absolute-coordinate: 9.0E300 }
+                """);
+
+        assertEquals(30_000_000.0, VersionedThresholds.resolve(config, "1.21.11",
+                "packet-sanity", "max-absolute-coordinate", 1000.0));
+        assertTrue(VersionedThresholds.validateOverrides(config).stream()
+                .anyMatch(warning -> warning.contains("max-absolute-coordinate")
+                        && warning.contains("must not exceed 30000000")));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 
