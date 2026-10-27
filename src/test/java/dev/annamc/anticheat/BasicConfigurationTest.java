@@ -29,6 +29,8 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("minimum-observed-displacement"));
         assertTrue(yaml.contains("rotation-quantization-degrees"));
         assertTrue(yaml.contains("max-movement-packets-per-second"));
+        assertTrue(yaml.contains("base-damage-allowance: 10.0"));
+        assertTrue(yaml.contains("damage-per-fall-block-allowance: 4.5"));
         assertTrue(yaml.contains("attack-packets-enabled: true"));
         assertTrue(yaml.contains("max-attacks-per-window: 24"));
         assertTrue(yaml.contains("minimum-over-limit-windows: 3"));
@@ -63,6 +65,7 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("movement-physics:\nenabled: false"));
         assertTrue(yaml.contains("knockback:\nenabled: false"));
         assertTrue(yaml.contains("reach:\nenabled: false"));
+        assertTrue(yaml.contains("mace-damage:\nenabled: false"));
         assertTrue(yaml.contains("click-rate:\nenabled: false"));
         assertTrue(yaml.contains("combat-pattern:\nenabled: false"));
         assertTrue(yaml.contains("scaffold-signal:\nenabled: false"));
@@ -96,6 +99,7 @@ class BasicConfigurationTest {
         String yaml = config();
         assertTrue(yaml.contains("cancel-player-op-commands: true"));
         assertTrue(yaml.contains("detect-op-grants: true"));
+        assertTrue(yaml.contains("detect-op-removals: true"));
         assertTrue(yaml.contains("persist-operator-baseline: true"));
         assertTrue(yaml.contains("protected-command-prefixes:"));
         assertTrue(yaml.contains("audit-console-op-commands: true"));
