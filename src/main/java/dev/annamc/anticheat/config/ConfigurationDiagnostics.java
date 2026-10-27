@@ -27,6 +27,10 @@ public final class ConfigurationDiagnostics {
         for (String warning : dev.annamc.anticheat.check.VersionedThresholds.validateOverrides(plugin.getConfig())) {
             notes.add("Threshold override configuration: " + warning);
         }
+        for (String warning : dev.annamc.anticheat.check.VersionedThresholds
+                .validateConfiguredThresholds(plugin.getConfig())) {
+            notes.add("Threshold configuration: " + warning);
+        }
         if (dev.annamc.anticheat.check.VersionedThresholds.hasClientOverrides(plugin.getConfig())
                 && Bukkit.getPluginManager().getPlugin("packetevents") == null) {
             notes.add("Client-version overrides are configured, but PacketEvents is not installed; these overrides are inactive and server-version/default thresholds are used.");
