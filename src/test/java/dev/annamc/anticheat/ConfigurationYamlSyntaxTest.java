@@ -52,7 +52,7 @@ class ConfigurationYamlSyntaxTest {
         java.util.Set<String> expected = java.util.Set.of("movement", "movement-physics", "flight", "jesus",
                 "spider-signal", "knockback", "reach", "mace-damage", "wall-hit", "click-rate",
                 "combat-pattern", "block-reach", "nuker-burst", "fast-break", "container-steal", "container-move",
-                "scaffold-signal", "no-fall", "packet-rate", "timer", "force-op");
+                "scaffold-signal", "no-fall", "packet-sanity", "packet-rate", "timer", "force-op");
         assertEquals(expected, found);
         java.util.Set<String> diagnostics = new java.util.HashSet<>(ConfigurationDiagnostics.DETECTORS);
         java.util.Set<String> punishmentManagedChecks = new java.util.HashSet<>(expected);
