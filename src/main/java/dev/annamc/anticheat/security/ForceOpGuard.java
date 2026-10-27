@@ -125,14 +125,16 @@ public final class ForceOpGuard implements Listener {
                 || !plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true)) return;
         Set<UUID> current = readCurrentOperators();
         boolean changed = !current.equals(knownOperators);
+        boolean detectGrants = plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true);
+        boolean detectRemovals = plugin.getConfig().getBoolean("checks.force-op.detect-op-removals", true);
         for (UUID id : current) {
-            if (knownOperators.add(id)) {
+            if (knownOperators.add(id) && detectGrants) {
                 OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
                 String name = operator.getName() == null ? id.toString() : operator.getName();
                 alert(id, name, "operator status changed to enabled; granting actor is unknown", Bukkit.getPlayer(id));
             }
         }
-        if (plugin.getConfig().getBoolean("checks.force-op.detect-op-removals", true)) {
+        if (detectRemovals) {
             for (UUID id : new ArrayList<>(knownOperators)) {
                 if (!current.contains(id)) {
                     OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
