@@ -44,6 +44,10 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("base-damage-allowance: 10.0"));
         assertTrue(yaml.contains("damage-per-fall-block-allowance: 4.5"));
         assertTrue(yaml.contains("attack-packets-enabled: true"));
+        assertTrue(yaml.contains("pattern-detection-enabled: false"));
+        assertTrue(yaml.contains("container-steal:\nenabled: false"));
+        assertTrue(yaml.contains("max-transfers-per-window: 28"));
+        assertTrue(yaml.contains("ignored-inventory-types: [PLAYER, CRAFTING, CREATIVE]"));
         assertTrue(yaml.contains("max-attacks-per-window: 24"));
         assertTrue(yaml.contains("minimum-over-limit-windows: 3"));
         assertTrue(yaml.contains("pattern-detection-enabled: false"));
@@ -112,6 +116,7 @@ class BasicConfigurationTest {
         assertEquals(2, yaml.split("wall-hit:\\nenabled: false", -1).length - 1);
         assertEquals(2, yaml.split("nuker-burst:\\nenabled: false", -1).length - 1);
         assertEquals(2, yaml.split("fast-break:\\nenabled: false", -1).length - 1);
+        assertEquals(2, yaml.split("container-steal:\\nenabled: false", -1).length - 1);
     }
 
     @Test void forceOpHasCommandBlockingAndAuditControls() throws Exception {
