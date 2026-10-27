@@ -190,6 +190,33 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void baseThresholdValidationFindsInvalidRangesWithoutRejectingValidSettings() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  reach:
+                    enabled: false
+                    max-distance: -1.0
+                    violation-decay-per-second: -0.1
+                  wall-hit:
+                    minimum-occluded-sample-ratio: 1.5
+                    max-evaluation-distance: 6.0
+                    version-overrides: {}
+                  fast-break:
+                    minimum-time-ratio: 0.5
+                    minimum-required-time-ms: -1
+                """);
+
+        java.util.List<String> warnings = VersionedThresholds.validateConfiguredThresholds(config);
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("checks.reach.max-distance must not be negative")));
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("checks.reach.violation-decay-per-second must not be negative")));
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("minimum-occluded-sample-ratio must be between 0 and 1")));
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("minimum-required-time-ms must not be negative")));
+        assertFalse(warnings.stream().anyMatch(w -> w.contains("max-evaluation-distance")));
+        assertFalse(warnings.stream().anyMatch(w -> w.contains("minimum-time-ratio")));
+    }
+
+    @Test
     void resolverRejectsNegativeSampleAndTimingOverrides() throws Exception {
         YamlConfiguration config = new YamlConfiguration();
         config.loadFromString("""
