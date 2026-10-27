@@ -50,6 +50,24 @@ class PrivilegeCommandMatcherTest {
     }
 
     @Test
+    void matchesAdditionalTemporaryAndRemovalPermissionMutations() {
+        List<String> extended = List.of(
+                "lp user * permission settemp **",
+                "lp user * parent addtemp **",
+                "lp group * permission unsettemp **",
+                "pex user * group remove **",
+                "pex group * remove **");
+        assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
+                "/lp user Hacker permission settemp annaac.admin true 1h", extended));
+        assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
+                "luckperms:lp user Hacker parent addtemp admin 1h", extended));
+        assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
+                "/pex user Hacker group remove admin", extended));
+        assertFalse(PrivilegeCommandMatcher.matchesAnyPattern(
+                "/lp user Hacker permission check annaac.admin", extended));
+    }
+
+    @Test
     void wildcardsAreTokenBoundedAndSupportEmptyRemainder() {
         assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
                 "lp user Hacker permission clear", PERMISSION_MUTATIONS));
