@@ -73,7 +73,8 @@ public final class ConfigurationDiagnostics {
             }
             if (("packet-rate".equals(check) || "timer".equals(check)) && enabled) packetRequired = true;
             if ("click-rate".equals(check) && enabled
-                    && plugin.getConfig().getBoolean("checks.click-rate.attack-packets-enabled", true)) {
+                    && (plugin.getConfig().getBoolean("checks.click-rate.attack-packets-enabled", true)
+                    || plugin.getConfig().getBoolean("checks.click-rate.pattern-detection-enabled", false))) {
                 packetRequired = true;
             }
         }
