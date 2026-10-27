@@ -448,6 +448,48 @@ checks:
     # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Optional ChestStealer-like signal based on rapid shift-transfers from an open container.
+  # Legitimate speed-looting and custom inventory GUIs can resemble automation; disabled by default.
+  container-steal:
+    # Enable this feature only after testing your inventory plugins on staging.
+    enabled: false
+    # Send alerts when sustained container transfer bursts are detected.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # Worlds where this check should not run. Empty means all worlds.
+    ignored-worlds: []
+    # Permissions that exempt players from this check.
+    ignored-permissions: []
+    # Game modes excluded from the check.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Rolling window used to count shift-transfers out of the open top inventory.
+    sample-window-ms: 1000
+    # Optional exact-version or major.minor numeric overrides; version keys use underscores.
+    version-overrides: {}
+    # Optional client protocol overrides; requires compatible PacketEvents.
+    client-version-overrides: {}
+    # Shift-transfers from the top inventory within the window before suspicion.
+    max-transfers-per-window: 28
+    # Minimum delay between over-limit window evaluations.
+    evaluation-interval-ms: 250
+    # Consecutive over-limit evaluations required before creating a violation.
+    required-over-limit-windows: 3
+    # Minimum time between repeated transfer-rate signals.
+    flag-cooldown-ms: 5000
+    # Per-player event history cap, clamped to 64–4096.
+    max-buffered-samples-per-player: 512
+    # Inventory types excluded from monitoring. Add custom GUI types here if needed.
+    ignored-inventory-types: [PLAYER, CRAFTING, CREATIVE]
+    # Violation level (VL) added when repeated transfer bursts are detected.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for configured automatic action.
+    kick-vl: 10.0
+
   # Experimental rotation and hit-pattern signal; review evidence before punishment.
   combat-pattern:
     # Enable this feature. For experimental checks, leave false until tested on a staging server.
