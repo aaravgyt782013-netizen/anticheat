@@ -13,7 +13,6 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,7 +49,10 @@ public final class WallHitCheck implements Listener {
         double margin = Math.max(0.0,
                 CheckUtil.getVersionedDouble(plugin, player, "wall-hit", "occlusion-margin", 0.15));
 
-        List<Vector> samplePoints = samplePoints(box);
+        int maxSamples = plugin.getConfig().getInt("checks.wall-hit.max-sample-points", 9);
+        List<Vector> samplePoints = HitboxSamplePoints.resolve(box,
+                plugin.getConfig().getMapList("checks.wall-hit.sample-points"), maxSamples);
+        if (samplePoints.isEmpty()) return;
         int occluded = 0;
         for (Vector point : samplePoints) {
             Vector toPoint = point.clone().subtract(eye.toVector());
@@ -78,23 +80,4 @@ public final class WallHitCheck implements Listener {
         }
     }
 
-    private static List<Vector> samplePoints(BoundingBox box) {
-        double minX = box.getMinX(), maxX = box.getMaxX();
-        double minY = box.getMinY(), maxY = box.getMaxY();
-        double minZ = box.getMinZ(), maxZ = box.getMaxZ();
-        double midX = (minX + maxX) / 2.0;
-        double midY = (minY + maxY) / 2.0;
-        double midZ = (minZ + maxZ) / 2.0;
-        List<Vector> points = new ArrayList<>(9);
-        points.add(new Vector(midX, midY, midZ));
-        points.add(new Vector(midX, minY + (maxY - minY) * 0.1, midZ));
-        points.add(new Vector(midX, minY + (maxY - minY) * 0.9, midZ));
-        points.add(new Vector(minX, midY, minZ));
-        points.add(new Vector(minX, midY, maxZ));
-        points.add(new Vector(maxX, midY, minZ));
-        points.add(new Vector(maxX, midY, maxZ));
-        points.add(new Vector(minX, minY + (maxY - minY) * 0.25, midZ));
-        points.add(new Vector(maxX, minY + (maxY - minY) * 0.75, midZ));
-        return points;
-    }
 }

@@ -43,6 +43,10 @@ public final class ConfigurationDiagnostics {
                 notes.add("Low-TPS pause policy contains '*'; all checks that use CheckUtil will pause during low TPS, including packet/client telemetry.");
             }
         }
+        for (String warning : dev.annamc.anticheat.check.HitboxSamplePoints
+                .validate(plugin.getConfig().getMapList("checks.wall-hit.sample-points"))) {
+            notes.add("Wall-hit sample configuration: " + warning);
+        }
         for (String warning : dev.annamc.anticheat.check.VersionedThresholds.validateOverrides(plugin.getConfig())) {
             notes.add("Threshold override configuration: " + warning);
         }

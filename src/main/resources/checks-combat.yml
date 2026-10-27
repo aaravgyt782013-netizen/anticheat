@@ -89,6 +89,20 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Maximum eye-to-sampled-hitbox distance considered by this check.
     max-evaluation-distance: 6.0
+    # Normalized coordinates (x/y/z each 0.0–1.0) inside the target bounding box.
+    # Customize sampling geometry here; default points cover center, lower/upper center, corners and edges.
+    sample-points:
+      - { x: 0.50, y: 0.50, z: 0.50 }
+      - { x: 0.50, y: 0.10, z: 0.50 }
+      - { x: 0.50, y: 0.90, z: 0.50 }
+      - { x: 0.00, y: 0.50, z: 0.00 }
+      - { x: 0.00, y: 0.50, z: 1.00 }
+      - { x: 1.00, y: 0.50, z: 0.00 }
+      - { x: 1.00, y: 0.50, z: 1.00 }
+      - { x: 0.00, y: 0.25, z: 0.50 }
+      - { x: 1.00, y: 0.75, z: 0.50 }
+    # Maximum ray samples per attack (effective range 1–32) to bound CPU cost.
+    max-sample-points: 9
     # Optional overrides for evaluation distance, occlusion margin and required blocked-sample ratio.
     version-overrides: {}
     # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.

@@ -102,6 +102,8 @@ At startup and after `/annaac reload`, ANNA AC prints warnings for invalid numer
 
 ## Per-version movement threshold tuning
 
+The wall-hit detector's ray geometry is configurable in `checks-combat.yml` using `checks.wall-hit.sample-points`. Each entry defines normalized `x`, `y`, and `z` coordinates from 0.0 to 1.0 across the target hitbox. `max-sample-points` limits ray-tracing work to 1–32 points per attack; malformed entries are ignored, and a fully invalid list falls back to the built-in nine-point layout. Startup diagnostics warn when fewer than three valid samples remain.
+
 The movement signals support optional version-specific numeric overrides. This is useful when testing Paper 1.21 through 1.21.11 and keeping a separate threshold for a specific server version. The exact version wins, then the major/minor key, then the normal setting. Bukkit treats dots as YAML path separators, so write version keys with underscores:
 
 ```yaml
