@@ -105,16 +105,18 @@ public final class SpiderClimbCheck implements Listener {
 
     private boolean legitimateState(Player player) {
         Location location = player.getLocation();
-        Material feet = location.clone().add(0.0, 0.05, 0.0).getBlock().getType();
-        Material body = location.clone().add(0.0, 0.9, 0.0).getBlock().getType();
+        Location feetLocation = location.clone().add(0.0, 0.05, 0.0);
+        Location bodyLocation = location.clone().add(0.0, 0.9, 0.0);
+        Material feet = feetLocation.getBlock().getType();
+        Material body = bodyLocation.getBlock().getType();
+        boolean inLiquid = feetLocation.getBlock().isLiquid() || bodyLocation.getBlock().isLiquid();
         return player.isOnGround() || player.isFlying() || player.getAllowFlight()
                 || player.isGliding() || player.isInsideVehicle() || player.isSwimming()
                 || player.isClimbing() || player.isRiptiding()
                 || player.hasPotionEffect(PotionEffectType.LEVITATION)
                 || player.hasPotionEffect(PotionEffectType.SLOW_FALLING)
                 || player.hasPotionEffect(PotionEffectType.JUMP_BOOST)
-                || feet.isLiquid() || body.isLiquid()
-                || feet == Material.BUBBLE_COLUMN || body == Material.BUBBLE_COLUMN;
+                || inLiquid || feet == Material.BUBBLE_COLUMN || body == Material.BUBBLE_COLUMN;
     }
 
     @EventHandler
