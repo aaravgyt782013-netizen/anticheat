@@ -1,0 +1,200 @@
+# ANNA AC modular detector settings. Changes here are merged into the active runtime configuration.
+checks:
+  nuker-burst:
+    # Enable the block-break burst signal.
+    enabled: false
+    # Send staff alerts for repeated suspicious bursts.
+    alert: true
+    # Minimum milliseconds between alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Rolling time window used to count finished block-break events.
+    sample-window-ms: 1000
+    # How often (at most) a new over-limit window is counted, in milliseconds.
+    evaluation-interval-ms: 250
+    # Number of non-ignored blocks broken inside the rolling window that triggers suspicion.
+    max-block-breaks-per-window: 18
+    # Optional version overrides for block-rate and repeated-window thresholds.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Consecutive over-limit evaluations required before the check flags.
+    required-over-limit-windows: 3
+    # Block material names excluded from the rolling count; edit for your server's gameplay.
+    ignored-materials: [AIR, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN, DEAD_BUSH, VINE, GLOW_LICHEN, SNOW, COBWEB, SWEET_BERRY_BUSH]
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Compares observed mining time with Paper's server-calculated break-progress estimate.
+  # Repeated evidence and latency slack are used; this is not a full packet-history simulator.
+
+  fast-break:
+    # Enable the mining-speed timing signal.
+    enabled: false
+    # Send staff alerts when repeated unexpectedly-fast block breaks are detected.
+    alert: true
+    # Minimum milliseconds between alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Ratio of estimated legal tick duration to require before a break may count as suspicious (0.05–1.0).
+    minimum-time-ratio: 0.5
+    # Optional overrides for timing ratio, ping slack and minimum observed-time threshold.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Minimum observed time threshold in milliseconds after latency slack is applied.
+    minimum-required-time-ms: 60
+    # Latency allowance subtracted from the expected-time threshold per ping millisecond.
+    ping-slack-per-ms: 0.5
+    # Maximum latency allowance subtracted from the expected-time threshold.
+    max-ping-slack-ms: 200
+    # Discard mining sessions lasting longer than this period.
+    session-timeout-ms: 15000
+    # Ignore blocks whose server-calculated expected break duration is below this tick count.
+    minimum-expected-ticks: 2
+    # Window used to accumulate separate suspicious breaks before creating evidence.
+    sample-window-ms: 10000
+    # Number of suspicious breaks required before creating a violation.
+    minimum-impossible-breaks: 2
+    # Block material names excluded from this check; customize for server-specific break mechanics.
+    ignored-materials: [AIR, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN, DEAD_BUSH, VINE, GLOW_LICHEN, SNOW, COBWEB, SWEET_BERRY_BUSH]
+    # Violation level (VL) added after the required repeated evidence.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Arm-swing/click-rate signal. High CPS alone is not proof of cheating.
+
+  container-steal:
+    # Enable this feature only after testing your inventory plugins on staging.
+    enabled: false
+    # Send alerts when sustained container transfer bursts are detected.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # Worlds where this check should not run. Empty means all worlds.
+    ignored-worlds: []
+    # Permissions that exempt players from this check.
+    ignored-permissions: []
+    # Game modes excluded from the check.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Rolling window used to count shift-transfers out of the open top inventory.
+    sample-window-ms: 1000
+    # Optional exact-version or major.minor numeric overrides; version keys use underscores.
+    version-overrides: {}
+    # Optional client protocol overrides; requires compatible PacketEvents.
+    client-version-overrides: {}
+    # Shift-transfers from the top inventory within the window before suspicion.
+    max-transfers-per-window: 28
+    # Minimum delay between over-limit window evaluations.
+    evaluation-interval-ms: 250
+    # Consecutive over-limit evaluations required before creating a violation.
+    required-over-limit-windows: 3
+    # Minimum time between repeated transfer-rate signals.
+    flag-cooldown-ms: 5000
+    # Per-player event history cap, clamped to 64–4096.
+    max-buffered-samples-per-player: 512
+    # Inventory types excluded from monitoring. Add custom GUI types here if needed.
+    ignored-inventory-types: [PLAYER, CRAFTING, CREATIVE]
+    # Violation level (VL) added when repeated transfer bursts are detected.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for configured automatic action.
+    kick-vl: 10.0
+
+  # Experimental rotation and hit-pattern signal; review evidence before punishment.
+
+  scaffold-signal:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Minimum downward view angle for a placement to count toward this scaffold signal.
+    minimum-downward-pitch: 65.0
+    # Optional server/client-version overrides for placement-pattern thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
+    # Minimum horizontal player movement associated with a placement.
+    min-horizontal-distance: 0.8
+    # Minimum horizontal speed associated with a placement.
+    minimum-horizontal-speed: 0.10
+    # Time window used to count repeated combat/placement patterns.
+    pattern-window-ms: 1500
+    # Maximum pitch variation for placements to count as a repeated pattern.
+    maximum-pitch-variance: 2.0
+    # Consecutive matching placements required before flagging.
+    minimum-consecutive-placements: 8
+    # Violation level (VL) added when this check flags.
+    violation-add: 0.25
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Correlates a large fall and landing with observed fall damage; protection plugins may affect results.
+
+  no-fall:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 4000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Only evaluate falls at least this many blocks high.
+    minimum-fall-distance: 4.0
+    # Optional server/client-version overrides for fall correlation thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
+    # Time window after landing to look for expected fall-damage evidence.
+    landing-observation-window-ms: 1500
+    # Ticks to wait after landing before evaluating damage correlation.
+    landing-delay-ticks: 2
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.25
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # PacketEvents-based movement packet-rate signal. Requires compatible PacketEvents.

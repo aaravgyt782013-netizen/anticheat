@@ -3,7 +3,12 @@
 ## Main files
 
 - `plugins/ANNA-AC/config.yml`: global prefix, language, debug option, and global ignored worlds.
-- `plugins/ANNA-AC/checks.yml`: every gameplay detector and its thresholds, exemptions, alert cooldowns, and violation settings.
+- `plugins/ANNA-AC/checks-movement.yml`: basic movement, physics envelope, flight/hover, liquid-walk, spider, and knockback settings.
+- `plugins/ANNA-AC/checks-combat.yml`: reach, mace damage, wall-hit, click/attack rate, and combat-pattern settings.
+- `plugins/ANNA-AC/checks-world.yml`: FastBreak, Nuker burst, container looting, scaffold, and NoFall settings.
+- `plugins/ANNA-AC/checks-packets.yml`: packet-rate and timer telemetry settings.
+- `plugins/ANNA-AC/checks-security.yml`: Force OP and permission mutation guard settings.
+- `plugins/ANNA-AC/checks.yml`: legacy migration/default template; for existing installations, edit the modular detector files above.
 - `plugins/ANNA-AC/discord.yml`: console/staff alert toggles and all Discord webhook/embed settings.
 - `plugins/ANNA-AC/database.yml`: evidence storage directory, retention period, record cap, detail length, and in-memory violation retention.
 - `plugins/ANNA-AC/punishments.yml`: global kick switch, independent-signal correlation safety controls, kick message, and per-check actions.
@@ -13,6 +18,12 @@
 - `plugins/ANNA-AC/messages_hi.yml`: Hindi messages.
 - `plugins/ANNA-AC/evidence/<uuid>.jsonl`: recorded detector/security evidence.
 - `plugins/ANNA-AC/operator-baseline.txt`: saved UUID baseline for OP-change auditing.
+
+## Modular detector files
+
+Detector settings are organized by subsystem to make the configuration easier to review and tune. Each option remains under its familiar `checks.<detector>.*` runtime path, but its editable file is now specific to the subsystem. On first startup with this release, any existing values from `checks.yml` are copied into the corresponding new module file. Existing settings are preserved; newly introduced options are merged from the bundled defaults without overwriting explicit values.
+
+After the module files have been created, edit `checks-movement.yml`, `checks-combat.yml`, `checks-world.yml`, `checks-packets.yml`, and `checks-security.yml`. The old `checks.yml` is retained as a compatibility/migration source and will not override settings from a module file. Back up the plugin folder before upgrading, and run `/annaac reload` after edits.
 
 ## Prefix and language
 

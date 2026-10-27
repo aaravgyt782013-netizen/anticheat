@@ -1,0 +1,72 @@
+# ANNA AC modular detector settings. Changes here are merged into the active runtime configuration.
+checks:
+  packet-rate:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Movement packet intervals below this may contribute to a packet-rate signal.
+    minimum-interval-ms: 5
+    # Number of recent packet intervals used in the rate estimate.
+    sample-window: 40
+    # Memory cap for each connected player's rolling movement-packet window (clamped to 128–4096).
+    max-buffered-samples-per-player: 1024
+    # Movement packet-rate threshold for this telemetry check.
+    max-movement-packets-per-second: 45
+    # Optional server/client-version overrides for packet-rate thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
+    # Minimum time between repeated flags from this check.
+    flag-cooldown-ms: 3000
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Packet-rate timing signal, not a validated simulation of client timer mechanics.
+
+  timer:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Minimum elapsed time required before timer-rate telemetry is evaluated.
+    minimum-sample-duration-ms: 1200
+    # Movement packet-rate threshold for this telemetry check.
+    max-movement-packets-per-second: 23
+    # Optional server/client-version overrides for timer telemetry thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
+    # Minimum time between repeated flags from this check.
+    flag-cooldown-ms: 5000
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Conservative Mace damage anomaly signal. Disabled by default because plugins and enchantments
+  # can alter damage. This is not a full vanilla damage simulator; validate against your server's mechanics.

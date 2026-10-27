@@ -1,0 +1,222 @@
+# ANNA AC modular detector settings. Changes here are merged into the active runtime configuration.
+checks:
+  reach:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Maximum approximate eye-to-target hitbox distance before adding violation.
+    max-distance: 3.6
+    # Optional exact server version or major.minor numeric overrides for this check.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Extra movement allowance per millisecond of measured ping.
+    ping-slack-per-ms: 0.001
+    # Maximum extra movement allowance granted for ping.
+    max-ping-slack: 0.20
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.35
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Samples the target hitbox and flags only when every sampled line is blocked by a solid block.
+  # This is a conservative signal, not latency-compensated ray tracing; keep disabled until tested.
+
+  mace-damage:
+    # Enable this detector only after reviewing logs on a staging server.
+    enabled: false
+    # Send staff alerts when an implausible Mace damage event is observed.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 4000
+    # Worlds where this check should not run.
+    ignored-worlds: []
+    # Permissions that exempt players from this check.
+    ignored-permissions: []
+    # Game modes excluded from this check.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Use the vanilla Java mace smash curve (+4/block through 3, +2/block through 8, then +1/block).
+    # This is still a heuristic, not a complete replay of critical hits, potion effects, plugins, or combat modifiers.
+    vanilla-smash-model-enabled: true
+    # Conservative base-damage allowance for the mace's base hit, critical hit, and ordinary combat effects.
+    base-damage-allowance: 10.0
+    # Optional exact server version or major.minor numeric overrides for mace damage constants.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Density adds 0.5 raw damage per block per level in vanilla Java; tune upward only if server mechanics require it.
+    density-damage-per-block-per-level: 0.5
+    # Additional tolerance for plugin-modified damage, effects, timing, and engine differences.
+    extra-tolerance: 12.0
+    # Legacy fallback used only when vanilla-smash-model-enabled is false.
+    damage-per-fall-block-allowance: 4.5
+    # Violation level added when repeated/implausible damage is observed.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.35
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for configured automatic action.
+    kick-vl: 10.0
+
+  # Security auditing for privileged player commands and changes to the operator list.
+
+  wall-hit:
+    # Enable the wall-hit occlusion signal.
+    enabled: false
+    # Send staff alerts when the check meets the occlusion threshold.
+    alert: true
+    # Minimum milliseconds between repeated alerts for this player/check.
+    alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Maximum eye-to-sampled-hitbox distance considered by this check.
+    max-evaluation-distance: 6.0
+    # Optional overrides for evaluation distance, occlusion margin and required blocked-sample ratio.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Require this ratio of sampled target points to be occluded before flagging (0.0–1.0).
+    minimum-occluded-sample-ratio: 1.0
+    # Ignore block hits closer than this margin to a target sample to reduce edge noise.
+    occlusion-margin: 0.15
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Sustained block-break burst signal for possible Nuker-like automation.
+  # This is not a per-block mining-speed simulator; validate tools, effects and plugins before use.
+
+  click-rate:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Arm-swing events per second above which the Bukkit-event signal may flag.
+    max-cps: 24
+    # Optional server/client-version overrides for click/attack-rate thresholds.
+    version-overrides: {}
+    # Requires PacketEvents for detected client-protocol overrides.
+    client-version-overrides: {}
+    # Use PacketEvents INTERACT_ENTITY attack packets for a second attack-rate signal when PacketEvents is installed.
+    attack-packets-enabled: true
+    # Rolling attack packet window length in milliseconds (effective range 250–5000).
+    attack-window-ms: 1000
+    # Memory cap for each connected player's rolling attack-packet window (clamped to 128–4096).
+    max-buffered-samples-per-player: 1024
+    # Maximum attacks within the rolling window before a sample counts as over-limit.
+    max-attacks-per-window: 24
+    # Minimum delay between rolling-window evaluations in milliseconds (effective minimum 100).
+    attack-evaluation-interval-ms: 250
+    # Consecutive over-limit evaluations required before the packet signal adds violation level.
+    minimum-over-limit-windows: 3
+    # Minimum time between repeated packet-level attack-rate flags.
+    attack-flag-cooldown-ms: 3000
+    # Optional statistical attack-interval regularity signal; not proof of automation and disabled by default.
+    pattern-detection-enabled: false
+    # Rolling time window used to estimate the player's attack interval distribution (effective range 500–10000).
+    pattern-window-ms: 3000
+    # Minimum attack timestamps required before checking for unusually regular intervals (effective range 5–200).
+    minimum-pattern-attacks: 15
+    # Require at least this average attacks-per-second rate before timing regularity counts.
+    minimum-pattern-cps: 5.0
+    # Maximum population standard deviation of intervals, in milliseconds, for a regularity candidate.
+    max-pattern-interval-stddev-ms: 3.0
+    # Maximum standard-deviation/mean ratio (coefficient of variation, 0–1) for a regularity candidate.
+    max-pattern-coefficient-variation: 0.08
+    # Time between statistical pattern evaluations (effective range 100–2000).
+    pattern-evaluation-interval-ms: 200
+    # Repeated regularity evaluations required before adding a violation level.
+    minimum-pattern-windows: 3
+    # Cooldown between regularity-pattern signals.
+    pattern-flag-cooldown-ms: 5000
+    # Minimum time between repeated flags from this check.
+    flag-cooldown-ms: 1500
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Optional ChestStealer-like signal based on rapid shift-transfers from an open container.
+  # Legitimate speed-looting and custom inventory GUIs can resemble automation; disabled by default.
+
+  combat-pattern:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Rotation-step granularity used to look for repeated aim patterns.
+    rotation-quantization-degrees: 0.15
+    # Maximum angle between view direction and target direction used by this signal.
+    maximum-hit-angle-degrees: 22.0
+    # Optional server/client-version overrides for combat-pattern numeric thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
+    # Recent rotation history window used around attacks.
+    rotation-window-ms: 180
+    # Additional angle tolerance per millisecond of ping.
+    ping-angle-allowance-per-ms: 0.02
+    # Upper bound for ping-based angle tolerance.
+    max-ping-angle-allowance: 8.0
+    # VL added for a suspicious hit-angle signal.
+    hit-angle-violation-add: 0.5
+    # VL added for a repeated-rotation pattern signal.
+    rotation-violation-add: 0.5
+    # Time window used to count repeated combat/placement patterns.
+    pattern-window-ms: 5000
+    # Minimum attacks required before evaluating a combat pattern.
+    minimum-hits: 12
+    # Minimum similar rotation steps before the pattern may flag.
+    minimum-repeated-rotations: 7
+    # Violation level (VL) added when this check flags.
+    violation-add: 0.5
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.2
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 1.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 8.0
+
+  # Experimental repeated placement-angle signal; legitimate bridging can look similar.

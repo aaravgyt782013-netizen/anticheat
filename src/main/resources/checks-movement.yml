@@ -1,0 +1,241 @@
+# ANNA AC modular detector settings. Changes here are merged into the active runtime configuration.
+checks:
+  movement:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Horizontal movement distance threshold per event tick; tune carefully to avoid false positives.
+    max-horizontal-distance-per-tick: 1.25
+    # Optional per-version threshold overrides. Use underscores in keys such as '1_21_11'.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.25
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 3.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 12.0
+
+  # Experimental hover/flight signal. Requires sustained airborne near-horizontal movement.
+  # It excludes many legitimate states but is not a full client-physics simulation; disabled by default.
+
+  movement-physics:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 3000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Baseline horizontal movement allowance used by the experimental heuristic.
+    base-horizontal-per-tick: 0.72
+    # Movement allowance multiplier when sprinting.
+    sprint-multiplier: 1.3
+    # Additional horizontal allowance per active Speed potion level.
+    speed-potion-multiplier-per-level: 0.20
+    # Multiplicative allowance adjustment while in Adventure mode.
+    adventure-mode-multiplier: 1.03
+    # Extra movement allowance per millisecond of measured ping.
+    ping-slack-per-ms: 0.001
+    # Maximum extra movement allowance granted for ping.
+    max-ping-slack: 0.75
+    # Extra allowance for movement affected by special blocks or terrain.
+    special-block-allowance-per-tick: 0.18
+    # Material names treated as movement-modifying surfaces; add custom server materials here.
+    special-block-materials: [ICE, PACKED_ICE, BLUE_ICE, SLIME_BLOCK, HONEY_BLOCK]
+    # Discard or ignore movement samples separated by longer gaps than this.
+    max-sample-gap-ms: 250
+    # How far observed movement must exceed the estimate before it is treated as an outlier.
+    outlier-ratio: 2.2
+    # Number of consecutive outlier samples required before flagging.
+    required-consecutive-outliers: 3
+    # Optional exact-version or major.minor overrides; dots are replaced with underscores.
+    # Exact version takes priority over major.minor, then the regular setting.
+    # Example:
+    # version-overrides:
+    #   '1_21_11':
+    #     base-horizontal-per-tick: 0.72
+    #     sprint-multiplier: 1.3
+    #   '1_21':
+    #     base-horizontal-per-tick: 0.72
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 3.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 12.0
+
+  # Experimental check for movement after server-applied velocity.
+
+  flight:
+    # Enable the airborne hover detector.
+    enabled: false
+    # Send staff alerts when sustained hover-like movement is detected.
+    alert: true
+    # Minimum time between repeated alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # World names where this check should not run.
+    ignored-worlds: []
+    # Permissions that exempt players from this check.
+    ignored-permissions: []
+    # Game modes excluded from this check.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Minimum interval between movement samples in milliseconds.
+    sample-interval-ms: 50
+    # Reset tracking after long server pauses rather than interpreting a lag gap as a normal sample.
+    max-sample-gap-ms: 250
+    # Reset tracking when a single horizontal step exceeds this distance, avoiding teleport artefacts.
+    max-horizontal-distance-per-sample: 2.5
+    # Also reset when the absolute vertical step exceeds this value.
+    max-vertical-distance-per-sample: 3.0
+    # Safe floor for the horizontal reset distance when the main threshold is tuned lower.
+    minimum-horizontal-step: 0.5
+    # Maximum absolute vertical movement between samples still considered near-hover.
+    max-hover-vertical-delta: 0.025
+    # Optional overrides for max-horizontal-distance-per-sample and max-hover-vertical-delta.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Minimum horizontal displacement between samples.
+    minimum-horizontal-distance: 0.08
+    # Consecutive near-hover samples required before flagging (a value around 24 is roughly 1.2 seconds).
+    required-hover-samples: 24
+    # Violation level added when the heuristic flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for configured automatic action.
+    kick-vl: 12.0
+
+  # Experimental liquid-walk/Jesus signal. Requires stable horizontal travel over deep liquid while not swimming.
+  # Shallow water, custom movement plugins, and server mechanics need local validation; disabled by default.
+
+  jesus:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 5000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    sample-interval-ms: 50
+    max-sample-gap-ms: 250
+    max-horizontal-distance-per-sample: 1.8
+    # Reset tracking if the absolute vertical step exceeds this value.
+    max-vertical-distance-per-sample: 1.5
+    # Safe floor for the horizontal reset distance when the main threshold is tuned lower.
+    minimum-horizontal-step: 0.5
+    max-vertical-delta: 0.04
+    # Optional overrides for max-horizontal-distance-per-sample and max-vertical-delta.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    minimum-horizontal-distance: 0.06
+    required-stable-samples: 10
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
+  # Experimental Spider signal. Looks for sustained upward movement beside solid walls.
+  # Parkour, custom movement, and unusual geometry require testing; disabled by default.
+
+  spider-signal:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 5000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    sample-interval-ms: 75
+    max-sample-gap-ms: 250
+    max-horizontal-distance-per-sample: 2.5
+    # Reset tracking if the absolute vertical step exceeds this value.
+    max-vertical-distance-per-sample: 1.25
+    # Safe floor for the horizontal reset distance when the main threshold is tuned lower.
+    minimum-horizontal-step: 0.5
+    # Horizontal distance used to sample for an adjacent solid wall.
+    wall-sample-horizontal-offset: 0.36
+    # Heights (blocks above the player's base position) sampled for adjacent solid walls.
+    wall-sample-heights: [0.35, 1.05, 1.45]
+    # Materials treated as climbable, so the wall signal does not confuse them with spider movement.
+    climbable-materials: [LADDER, VINE, TWISTING_VINES, TWISTING_VINES_PLANT, WEEPING_VINES, WEEPING_VINES_PLANT, SCAFFOLDING]
+    minimum-upward-delta: 0.08
+    # Optional per-version overrides for minimum-upward-delta; version keys use underscores.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    required-upward-samples: 10
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
+  # Experimental movement-envelope heuristic; may flag legitimate movement and is disabled by default.
+
+  knockback:
+    # Enable this feature. For experimental checks, leave false until tested on a staging server.
+    enabled: false
+    # Send alerts when this feature detects a possible violation.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 4000
+    # World names where checks should not run. Empty means no worlds are ignored.
+    ignored-worlds: []
+    # Players with any listed permission are excluded from this check. Empty means none.
+    ignored-permissions: []
+    # Game modes excluded from this check, usually CREATIVE and SPECTATOR.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Ignore knockback observations below this horizontal velocity.
+    minimum-horizontal-velocity: 0.25
+    # Optional version overrides for velocity/projection thresholds; use keys such as '1_21_11'.
+    version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
+    # Time window after velocity in which movement is observed.
+    observation-window-ms: 350
+    # Additional observation-window time per millisecond of ping.
+    ping-window-extension-per-ms: 0.5
+    # Maximum extra observation time allowed for ping.
+    max-ping-window-extension-ms: 200
+    # Minimum movement observations required before evaluating a knockback response.
+    minimum-observations: 4
+    # Wait this long after velocity before evaluating the response.
+    minimum-age-ms: 120
+    # Legacy minimum displacement setting retained for compatibility.
+    minimum-observed-displacement: 0.08
+    # Minimum movement projected along the applied velocity direction.
+    minimum-forward-projection: 0.04
+    # Violation level (VL) added when this check flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.25
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for kicking, but only when the relevant punishment switches are enabled.
+    kick-vl: 10.0
+
+  # Approximate distance-to-target hitbox check; not full historical hitbox compensation.

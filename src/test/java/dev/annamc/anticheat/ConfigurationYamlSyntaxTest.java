@@ -15,7 +15,9 @@ class ConfigurationYamlSyntaxTest {
     private static final List<String> YAML_FILES = List.of(
             "config.yml", "checks.yml", "discord.yml", "database.yml",
             "punishments.yml", "security.yml", "messages.yml",
-            "messages_en.yml", "messages_hi.yml", "plugin.yml");
+            "messages_en.yml", "messages_hi.yml", "plugin.yml",
+            "checks-movement.yml", "checks-combat.yml", "checks-world.yml",
+            "checks-packets.yml", "checks-security.yml");
 
     @Test
     void everyBundledYamlFileParsesToAMapping() throws Exception {
@@ -27,6 +29,29 @@ class ConfigurationYamlSyntaxTest {
                 assertInstanceOf(Map.class, parsed, file + " must have a YAML mapping at its root");
             }
         }
+    }
+
+    @Test
+    void detectorConfigurationModulesCoverEveryDetectorExactlyOnce() throws Exception {
+        Yaml yaml = new Yaml();
+        List<String> files = List.of("checks-movement.yml", "checks-combat.yml",
+                "checks-world.yml", "checks-packets.yml", "checks-security.yml");
+        java.util.Set<String> found = new java.util.HashSet<>();
+        for (String file : files) {
+            try (InputStream in = Files.newInputStream(Path.of("src/main/resources", file))) {
+                Map<?, ?> root = yaml.load(in);
+                assertInstanceOf(Map.class, root.get("checks"), file + " must contain checks");
+                Map<?, ?> checks = (Map<?, ?>) root.get("checks");
+                for (Object key : checks.keySet()) {
+                    assertTrue(found.add(String.valueOf(key)),
+                            "Detector " + key + " must appear in exactly one module");
+                }
+            }
+        }
+        assertEquals(java.util.Set.of("movement", "movement-physics", "flight", "jesus",
+                "spider-signal", "knockback", "reach", "mace-damage", "wall-hit", "click-rate",
+                "combat-pattern", "nuker-burst", "fast-break", "container-steal", "scaffold-signal",
+                "no-fall", "packet-rate", "timer", "force-op"), found);
     }
 
     @Test

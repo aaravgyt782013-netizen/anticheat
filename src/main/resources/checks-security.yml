@@ -1,0 +1,63 @@
+# ANNA AC modular detector settings. Changes here are merged into the active runtime configuration.
+checks:
+  force-op:
+    # Enable privileged player-command blocking and operator-list security auditing.
+    enabled: true
+    # Send alerts for privileged-command or operator-list security events.
+    alert: true
+    # Block configured OP/permission-management commands issued by players without annaac.admin.
+    cancel-player-op-commands: true
+    # Kick a player after a blocked privileged-command attempt. Off by default.
+    kick-player-on-attempt: false
+    # Monitor the server operator list for changes.
+    detect-op-grants: true
+    # Save known operator UUIDs across restarts to help identify new OP grants.
+    persist-operator-baseline: true
+    # Alert when an operator disappears from the list (de-op); actor attribution may be unknown.
+    detect-op-removals: true
+    # Log and alert when the console executes configured privilege-management commands.
+    audit-console-op-commands: true
+    # Commands whose root is dedicated to privilege changes; namespaces/aliases are also matched.
+    protected-command-prefixes: [op, deop, minecraft:op, minecraft:deop, bukkit:op, bukkit:deop, manuadd]
+    # Token patterns for permission plugins. '*' matches one token; '**' matches the remaining tokens.
+    # This avoids blocking harmless /lp help, /lp list, and other read-only commands.
+    # Add the actual aliases and syntax used by your permission plugin.
+    protected-command-patterns:
+      - 'lp user * permission set **'
+      - 'lp user * permission settemp **'
+      - 'lp user * permission unsettemp **'
+      - 'lp user * permission settrack **'
+      - 'lp user * parent addtemp **'
+      - 'lp user * parent removetemp **'
+      - 'lp group * permission settemp **'
+      - 'lp group * permission unsettemp **'
+      - 'lp group * permission settrack **'
+      - 'lp group * parent removetemp **'
+      - 'lp group * parent clear **'
+      - 'lp user * clear **'
+      - 'lp group * clear **'
+      - 'pex user * remove **'
+      - 'pex user * group remove **'
+      - 'pex group * remove **'
+      - 'pex group * user add **'
+      - 'lp user * permission unset **'
+      - 'lp user * permission clear'
+      - 'lp user * parent add **'
+      - 'lp user * parent set **'
+      - 'lp user * parent clear'
+      - 'lp group * permission set **'
+      - 'lp group * permission unset **'
+      - 'lp group * permission clear'
+      - 'lp group * parent add **'
+      - 'lp group * parent set **'
+      - 'lp group * parent clear'
+      - 'lp track * append **'
+      - 'lp track * insert **'
+      - 'lp editor'
+      - 'pex user * add **'
+      - 'pex user * set **'
+      - 'pex user * group add **'
+      - 'pex group * add **'
+      - 'pex group * set **'
+      - 'permissions user * set **'
+      - 'permissions group * set **'

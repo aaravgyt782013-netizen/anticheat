@@ -19,6 +19,12 @@ import java.util.Map;
  */
 public final class ModularConfigManager {
     private static final String[] FILES = {"checks.yml", "discord.yml", "database.yml", "punishments.yml", "security.yml"};
+    private static final Map<String, java.util.List<String>> CHECK_MODULES = Map.of(
+            "checks-movement.yml", java.util.List.of("movement", "movement-physics", "flight", "jesus", "spider-signal", "knockback"),
+            "checks-combat.yml", java.util.List.of("reach", "mace-damage", "wall-hit", "click-rate", "combat-pattern"),
+            "checks-world.yml", java.util.List.of("nuker-burst", "fast-break", "container-steal", "scaffold-signal", "no-fall"),
+            "checks-packets.yml", java.util.List.of("packet-rate", "timer"),
+            "checks-security.yml", java.util.List.of("force-op"));
     private final JavaPlugin plugin;
 
     public ModularConfigManager(JavaPlugin plugin) {
@@ -71,6 +77,9 @@ public final class ModularConfigManager {
         saveIfMigrated(punishmentsCreated, punishments, "punishments.yml");
         saveIfMigrated(securityCreated, security, "security.yml");
 
+        // Split detector settings into manageable files while migrating existing checks.yml values once.
+        Map<String, YamlConfiguration> checkModules = loadCheckModules(checks, folder);
+
         if (migrationPending) {
             boolean hasLegacySections = main.isConfigurationSection("checks")
                     || main.isConfigurationSection("alerts")
@@ -103,6 +112,7 @@ public final class ModularConfigManager {
         }
 
         overlay(checks, "checks", main);
+        overlayCheckModules(checkModules, main);
         overlay(discord, "alerts", main);
         overlay(database, "database", main);
         overlay(punishments, "punishments", main);
@@ -112,7 +122,68 @@ public final class ModularConfigManager {
             main.set("security", null);
             plugin.saveConfig();
         }
-        plugin.getLogger().info("Loaded checks.yml, discord.yml, database.yml, punishments.yml and security.yml.");
+        plugin.getLogger().info("Loaded modular detector files checks-movement.yml, checks-combat.yml, checks-world.yml, checks-packets.yml and checks-security.yml, plus discord.yml, database.yml, punishments.yml and security.yml. Legacy checks.yml values are migrated into detector files when they are first created.");
+    }
+
+    private Map<String, YamlConfiguration> loadCheckModules(YamlConfiguration legacyChecks, File folder) {
+        Map<String, YamlConfiguration> modules = new java.util.LinkedHashMap<>();
+        for (Map.Entry<String, java.util.List<String>> entry : CHECK_MODULES.entrySet()) {
+            String resource = entry.getKey();
+            File target = new File(folder, resource);
+            boolean created = !target.isFile();
+            if (created) {
+                plugin.saveResource(resource, false);
+                plugin.getLogger().info("Created " + resource + " and migrated existing detector settings if available.");
+            }
+
+            YamlConfiguration module = YamlConfiguration.loadConfiguration(target);
+            if (created) {
+                copySelectedChecks(legacyChecks, module, entry.getValue());
+                saveConfiguration(module, resource);
+            }
+            if (mergeMissingDefaults(module, resource)) saveConfiguration(module, resource);
+            modules.put(resource, module);
+        }
+        return modules;
+    }
+
+    private void copySelectedChecks(ConfigurationSection source, ConfigurationSection target,
+                                    java.util.List<String> checkNames) {
+        for (String check : checkNames) {
+            String path = "checks." + check;
+            ConfigurationSection sourceSection = source.getConfigurationSection(path);
+            if (sourceSection == null) continue;
+            target.set(path, null);
+            for (String key : sourceSection.getKeys(true)) {
+                if (!sourceSection.isConfigurationSection(key)) {
+                    target.set(path + "." + key, sourceSection.get(key));
+                }
+            }
+        }
+    }
+
+    private void overlayCheckModules(Map<String, YamlConfiguration> modules, FileConfiguration target) {
+        for (Map.Entry<String, YamlConfiguration> entry : modules.entrySet()) {
+            ConfigurationSection section = entry.getValue().getConfigurationSection("checks");
+            if (section == null) {
+                plugin.getLogger().warning("Missing 'checks' section in " + entry.getKey() + ".");
+                continue;
+            }
+            for (String check : section.getKeys(false)) {
+                String path = "checks." + check;
+                target.set(path, null);
+                ConfigurationSection checkSection = section.getConfigurationSection(check);
+                if (checkSection == null) {
+                    plugin.getLogger().warning("Invalid detector section '" + path + "' in " + entry.getKey() + ".");
+                    continue;
+                }
+                for (String key : checkSection.getKeys(true)) {
+                    if (!checkSection.isConfigurationSection(key)) {
+                        target.set(path + "." + key, checkSection.get(key));
+                    }
+                }
+            }
+        }
     }
 
     /**

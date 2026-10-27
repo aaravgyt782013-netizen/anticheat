@@ -1,4 +1,8 @@
-# Detection checks and thresholds; each check can be enabled and tuned independently.
+# Legacy aggregate detector defaults and migration source.
+# On first startup, values are copied into checks-movement.yml, checks-combat.yml,
+# checks-world.yml, checks-packets.yml and checks-security.yml. Those files become
+# the active source of truth for their detector sections after they are created.
+# Keep this file for compatibility; edit the individual modular files on existing servers.
 checks:
   # Basic horizontal movement-distance heuristic. Not a complete Minecraft physics simulator.
   movement:
