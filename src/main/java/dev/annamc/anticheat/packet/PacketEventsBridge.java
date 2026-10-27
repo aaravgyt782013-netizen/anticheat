@@ -92,6 +92,8 @@ public final class PacketEventsBridge implements Listener {
                 Long previous = lastMovementPacket.put(id, nowNanos);
                 long intervalMs = previous == null ? Long.MAX_VALUE : (nowNanos - previous) / 1_000_000L;
                 if (previous == null || intervalMs > 1500L) movementStreamStarted.put(id, nowMs);
+                int maxMovementSamples = boundedSampleLimit(
+                        "checks.packet-rate.max-buffered-samples-per-player", 1024);
                 long minimum = Math.round(versionedThreshold(id, "packet-rate", "minimum-interval-ms", 5.0));
                 int fast = intervalMs < minimum
                         ? fastIntervals.compute(id, (key, value) ->
@@ -101,8 +103,6 @@ public final class PacketEventsBridge implements Listener {
 
                 Deque<Long> times = packetTimes.computeIfAbsent(id, ignored -> new ArrayDeque<>());
                 int pps;
-                int maxMovementSamples = boundedSampleLimit(
-                        "checks.packet-rate.max-buffered-samples-per-player", 1024);
                 synchronized (times) {
                     pps = TimestampWindow.addAndTrim(times, nowMs, 1000L, maxMovementSamples);
                 }
