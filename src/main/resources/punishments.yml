@@ -227,3 +227,19 @@ punishments:
       cooldown-ms: 30000
       message: ""
       commands: []
+    # Experimental liquid-walk/Jesus detector; auto-punishment must remain disabled until staging-tested.
+    jesus:
+      enabled: false
+      type: "KICK"
+      threshold-vl: 10.0
+      cooldown-ms: 30000
+      message: ""
+      commands: []
+    # Experimental Spider detector; auto-punishment must remain disabled until staging-tested.
+    spider-signal:
+      enabled: false
+      type: "KICK"
+      threshold-vl: 10.0
+      cooldown-ms: 30000
+      message: ""
+      commands: []
