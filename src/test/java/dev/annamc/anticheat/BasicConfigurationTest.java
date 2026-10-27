@@ -30,6 +30,8 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("rotation-quantization-degrees"));
         assertTrue(yaml.contains("max-movement-packets-per-second"));
         assertTrue(yaml.contains("required-hover-samples: 24"));
+        assertTrue(yaml.contains("required-stable-samples: 10"));
+        assertTrue(yaml.contains("required-upward-samples: 10"));
         assertTrue(yaml.contains("base-damage-allowance: 10.0"));
         assertTrue(yaml.contains("damage-per-fall-block-allowance: 4.5"));
         assertTrue(yaml.contains("attack-packets-enabled: true"));
@@ -65,6 +67,8 @@ class BasicConfigurationTest {
         String yaml = config();
         assertTrue(yaml.contains("movement-physics:\nenabled: false"));
         assertTrue(yaml.contains("flight:\nenabled: false"));
+        assertTrue(yaml.contains("jesus:\nenabled: false"));
+        assertTrue(yaml.contains("spider-signal:\nenabled: false"));
         assertTrue(yaml.contains("knockback:\nenabled: false"));
         assertTrue(yaml.contains("reach:\nenabled: false"));
         assertTrue(yaml.contains("mace-damage:\nenabled: false"));
