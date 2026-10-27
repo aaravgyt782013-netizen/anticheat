@@ -15,7 +15,7 @@ class PrivilegeCommandMatcherTest {
             "lp user * permission clear",
             "lp user * parent add **",
             "lp group * permission set **",
-            "pex user * add **",
+            "pex user * group add **",
             "permissions group * set **");
 
     @Test
