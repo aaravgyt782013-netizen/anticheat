@@ -32,7 +32,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 - Keep `punishments.require-independent-families: true` on a public server. By default, an automatic kick requires repeated flags from at least two distinct detector families inside `correlation-window-ms`, with at least two signals per family. If you enable only one family, the plugin will warn that kicks cannot trigger until you lower the family threshold or enable a second family.
 - Keep creative and spectator exemptions, and add any server-specific worlds/permissions to ignored lists only after reviewing the effect.
 - Install the compatible PacketEvents build if you want the optional packet-rate/timer telemetry and click-rate attack packet signal. Without it, packet telemetry is unavailable.
-- Force OP auditing is enabled by default, but the command-prefix list must match the permission plugins and aliases actually installed. It cannot prevent host-panel/file/console compromise or malicious plugins.
+- Force OP auditing is enabled by default. In `checks.yml`, tune both `checks.force-op.protected-command-prefixes` (dedicated OP/deop roots) and `checks.force-op.protected-command-patterns` (permission-mutating subcommands). Pattern `*` matches one token and `**` matches the remaining tokens. Add the aliases and syntax used by your installed permission plugin; this guard cannot stop host-panel/file/console compromise or malicious plugins.
 
 ## Checks currently present
 
@@ -45,7 +45,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `spider-signal` | Repeated upward movement beside a solid wall | Disabled |
 | `knockback` | Movement after server velocity | Disabled |
 | `reach` | Approximate target hitbox distance | Disabled |
-| `mace-damage` | Implausible Mace damage signal; configurable allowance/tolerance | Disabled |
+| `mace-damage` | Piecewise vanilla Java smash curve, Density allowance, extra tolerance, optional legacy formula | Disabled |
 | `wall-hit` | Multi-point hitbox occlusion signal; not latency-compensated | Disabled |
 | `fast-break` | Paper break-progress estimate versus observed mining time | Disabled |
 | `nuker-burst` | Repeated rolling-window block-break burst | Disabled |
@@ -55,7 +55,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `no-fall` | Fall/landing damage correlation | Disabled |
 | `packet-rate` | PacketEvents rate telemetry | Disabled |
 | `timer` | Sustained movement packet-rate telemetry | Disabled |
-| `force-op` | Privilege command and operator-list auditing | Enabled |
+| `force-op` | Alias-aware OP/deop blocking, configurable permission-mutation patterns, operator-list auditing | Enabled |
 
 These are signals, not guaranteed identification of Meteor, Wurst, Baritone, or any other client. Several are experimental heuristics. See `CHEAT_COVERAGE.md` for the current/planned coverage split.
 
