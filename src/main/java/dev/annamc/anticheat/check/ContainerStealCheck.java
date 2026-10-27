@@ -1,6 +1,5 @@
 package dev.annamc.anticheat.check;
 
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -41,8 +40,6 @@ public final class ContainerStealCheck implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)
                 || CheckUtil.shouldSkip(plugin, player, "container-steal")
-                || player.getGameMode() == GameMode.CREATIVE
-                || player.getGameMode() == GameMode.SPECTATOR
                 || event.getAction() != InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             return;
         }
