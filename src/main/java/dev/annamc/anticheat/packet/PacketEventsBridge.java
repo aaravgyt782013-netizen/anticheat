@@ -229,6 +229,16 @@ public final class PacketEventsBridge implements Listener {
         packetMovementPositions.remove(event.getPlayer().getUniqueId());
     }
 
+    @EventHandler
+    public void onPacketSanityRespawn(org.bukkit.event.player.PlayerRespawnEvent event) {
+        packetMovementPositions.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onPacketSanityWorldChange(org.bukkit.event.player.PlayerChangedWorldEvent event) {
+        packetMovementPositions.remove(event.getPlayer().getUniqueId());
+    }
+
     private record PacketMovementSample(double x, double y, double z, long timeMs) {}
 
     private void observeAttack(UUID id, long nowMs) {
