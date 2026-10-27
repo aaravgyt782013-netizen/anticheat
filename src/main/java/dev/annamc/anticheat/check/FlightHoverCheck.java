@@ -47,7 +47,7 @@ public final class FlightHoverCheck implements Listener {
         }
 
         long now = System.currentTimeMillis();
-        long interval = Math.max(35L, plugin.getConfig().getLong("checks.flight.sample-interval-ms", 50L));
+        long interval = Math.max(35L, Math.round(CheckUtil.getVersionedDouble(plugin, player, "flight", "sample-interval-ms", 50.0)));
         Sample previous = samples.get(id);
         if (previous == null || !previous.world.equals(to.getWorld().getUID())) {
             samples.put(id, new Sample(to, now, 0));
@@ -55,7 +55,7 @@ public final class FlightHoverCheck implements Listener {
         }
         if (now - previous.sampledAt < interval) return;
         long gap = now - previous.sampledAt;
-        long maxGap = Math.max(interval, plugin.getConfig().getLong("checks.flight.max-sample-gap-ms", 250L));
+        long maxGap = Math.max(interval, Math.round(CheckUtil.getVersionedDouble(plugin, player, "flight", "max-sample-gap-ms", 250.0)));
         if (gap > maxGap) {
             samples.put(id, new Sample(to, now, 0));
             return;
@@ -66,7 +66,7 @@ public final class FlightHoverCheck implements Listener {
         double dz = to.getZ() - previous.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
         double maxStep = Math.max(0.5,
-                plugin.getConfig().getDouble("checks.flight.max-horizontal-distance-per-sample", 2.5));
+                CheckUtil.getVersionedDouble(plugin, player, "flight", "max-horizontal-distance-per-sample", 2.5));
         if (horizontal > maxStep || Math.abs(dy) > 3.0) {
             samples.put(id, new Sample(to, now, 0));
             return;
@@ -74,12 +74,12 @@ public final class FlightHoverCheck implements Listener {
         double verticalTolerance = Math.max(0.0,
                 CheckUtil.getVersionedDouble(plugin, player, "flight", "max-hover-vertical-delta", 0.025));
         double minimumHorizontal = Math.max(0.0,
-                plugin.getConfig().getDouble("checks.flight.minimum-horizontal-distance", 0.08));
+                CheckUtil.getVersionedDouble(plugin, player, "flight", "minimum-horizontal-distance", 0.08));
 
         int count = Math.abs(dy) <= verticalTolerance && horizontal >= minimumHorizontal
                 ? previous.hoverSamples + 1 : 0;
         int required = Math.max(5, Math.min(200,
-                plugin.getConfig().getInt("checks.flight.required-hover-samples", 24)));
+                (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "flight", "required-hover-samples", 24.0))));
 
         samples.put(id, new Sample(to, now, count));
         if (count >= required) {
