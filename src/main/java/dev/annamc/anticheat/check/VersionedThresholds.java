@@ -1,10 +1,12 @@
 package dev.annamc.anticheat.check;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 /**
  * Resolves a numeric check threshold without guessing defaults for unknown versions.
- * Exact version overrides win, followed by major.minor, then the ordinary check value.
+ * Version strings contain dots, so version keys are read as literal section keys rather
+ * than concatenated Bukkit paths (which would split "1.21.11" into multiple path parts).
  */
 public final class VersionedThresholds {
     private VersionedThresholds() {}
@@ -12,20 +14,26 @@ public final class VersionedThresholds {
     public static double resolve(FileConfiguration config, String version, String check,
                                  String key, double fallback) {
         String base = "checks." + check + ".";
-        if (version != null && !version.isBlank()) {
-            String exact = base + "version-overrides." + version + "." + key;
-            if (isNumeric(config, exact)) return config.getDouble(exact);
+        ConfigurationSection overrides = config.getConfigurationSection(base + "version-overrides");
+        if (overrides != null && version != null && !version.isBlank()) {
+            Double exact = numericValue(overrides.getValues(false).get(version), key);
+            if (exact != null) return exact;
 
             String[] parts = version.split("\\.");
             if (parts.length >= 2) {
-                String compatible = base + "version-overrides." + parts[0] + "." + parts[1] + "." + key;
-                if (isNumeric(config, compatible)) return config.getDouble(compatible);
+                String majorMinor = parts[0] + "." + parts[1];
+                Double compatible = numericValue(overrides.getValues(false).get(majorMinor), key);
+                if (compatible != null) return compatible;
             }
         }
         return config.getDouble(base + key, fallback);
     }
 
-    private static boolean isNumeric(FileConfiguration config, String path) {
-        return config.isDouble(path) || config.isInt(path);
+    private static Double numericValue(Object sectionValue, String key) {
+        if (!(sectionValue instanceof ConfigurationSection section)) return null;
+        Object value = section.get(key);
+        if (!(value instanceof Number number)) return null;
+        double result = number.doubleValue();
+        return Double.isFinite(result) ? result : null;
     }
 }
