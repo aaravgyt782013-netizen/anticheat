@@ -49,7 +49,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `wall-hit` | Multi-point hitbox occlusion signal; not latency-compensated | Disabled |
 | `fast-break` | Paper break-progress estimate versus observed mining time | Disabled |
 | `nuker-burst` | Repeated rolling-window block-break burst | Disabled |
-| `click-rate` | Arm-swing and optional PacketEvents attack-packet rate telemetry | Disabled |
+| `click-rate` | Arm-swing/CPS telemetry, optional PacketEvents attack-rate limit, and optional statistical attack-interval regularity signal | Disabled |
 | `combat-pattern` | Rotation/hit-pattern telemetry | Disabled |
 | `scaffold-signal` | Repeated placement-angle pattern | Disabled |
 | `no-fall` | Fall/landing damage correlation | Disabled |
@@ -58,6 +58,19 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `force-op` | Alias-aware OP/deop blocking, configurable permission-mutation patterns, operator-list auditing | Enabled |
 
 These are signals, not guaranteed identification of Meteor, Wurst, Baritone, or any other client. Several are experimental heuristics. See `CHEAT_COVERAGE.md` for the current/planned coverage split.
+
+## Optional autoclicker interval-regularity signal
+
+The `checks.click-rate.pattern-detection-enabled` option enables an additional PacketEvents-based signal that analyzes recent attack timestamps. It requires a minimum sample count and attack rate, then checks both interval standard deviation and coefficient of variation across repeated evaluations. It is disabled by default and only adds evidence to the existing `click-rate` violation level; it is not proof of a cheat.
+
+Tune these settings under `checks.click-rate` in `checks.yml`:
+
+- `pattern-window-ms`: rolling interval-history window.
+- `minimum-pattern-attacks` and `minimum-pattern-cps`: how much data is required and the lowest attack rate considered.
+- `max-pattern-interval-stddev-ms` and `max-pattern-coefficient-variation`: interval regularity bounds; stricter limits reduce detections and still do not guarantee accuracy.
+- `pattern-evaluation-interval-ms`, `minimum-pattern-windows`, and `pattern-flag-cooldown-ms`: repeat-evidence and alert rate controls.
+
+All thresholds can also use `client-version-overrides`, with underscore-separated version keys, because attack timing can vary with client/protocol behavior. PacketEvents must be installed and compatible with the server protocol. Keep this signal disabled until it has been checked against legitimate players and controlled test cases. Do not enable an automatic kick based on this signal alone.
 
 ## Configuration validation
 
