@@ -444,6 +444,36 @@ checks:
     # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Conservative Mace damage anomaly signal. Disabled by default because plugins and enchantments
+  # can alter damage. This is not a full vanilla damage simulator; validate against your server's mechanics.
+  mace-damage:
+    # Enable this detector only after reviewing logs on a staging server.
+    enabled: false
+    # Send staff alerts when an implausible Mace damage event is observed.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 4000
+    # Worlds where this check should not run.
+    ignored-worlds: []
+    # Permissions that exempt players from this check.
+    ignored-permissions: []
+    # Game modes excluded from this check.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Conservative baseline allowance before extra fall-distance allowance and tolerance.
+    base-damage-allowance: 10.0
+    # Damage allowance per block of observed fall distance; server plugins may alter this.
+    damage-per-fall-block-allowance: 4.5
+    # Additional tolerance for enchantments, server-specific combat plugins, and engine differences.
+    extra-tolerance: 12.0
+    # Violation level added when repeated/implausible damage is observed.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.35
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for configured automatic action.
+    kick-vl: 10.0
+
   # Security auditing for privileged player commands and changes to the operator list.
   force-op:
     # Enable privileged player-command blocking and operator-list security auditing.
