@@ -50,6 +50,10 @@ checks:
     max-sample-gap-ms: 250
     # Reset tracking when a single horizontal step exceeds this distance, avoiding teleport artefacts.
     max-horizontal-distance-per-sample: 2.5
+    # Also reset when the absolute vertical step exceeds this value.
+    max-vertical-distance-per-sample: 3.0
+    # Safe floor for the horizontal reset distance when the main threshold is tuned lower.
+    minimum-horizontal-step: 0.5
     # Maximum absolute vertical movement between samples still considered near-hover.
     max-hover-vertical-delta: 0.025
     # Optional overrides for max-horizontal-distance-per-sample and max-hover-vertical-delta.
@@ -81,6 +85,10 @@ checks:
     sample-interval-ms: 50
     max-sample-gap-ms: 250
     max-horizontal-distance-per-sample: 1.8
+    # Reset tracking if the absolute vertical step exceeds this value.
+    max-vertical-distance-per-sample: 1.5
+    # Safe floor for the horizontal reset distance when the main threshold is tuned lower.
+    minimum-horizontal-step: 0.5
     max-vertical-delta: 0.04
     # Optional overrides for max-horizontal-distance-per-sample and max-vertical-delta.
     version-overrides: {}
@@ -105,6 +113,16 @@ checks:
     sample-interval-ms: 75
     max-sample-gap-ms: 250
     max-horizontal-distance-per-sample: 2.5
+    # Reset tracking if the absolute vertical step exceeds this value.
+    max-vertical-distance-per-sample: 1.25
+    # Safe floor for the horizontal reset distance when the main threshold is tuned lower.
+    minimum-horizontal-step: 0.5
+    # Horizontal distance used to sample for an adjacent solid wall.
+    wall-sample-horizontal-offset: 0.36
+    # Heights (blocks above the player's base position) sampled for adjacent solid walls.
+    wall-sample-heights: [0.35, 1.05, 1.45]
+    # Materials treated as climbable, so the wall signal does not confuse them with spider movement.
+    climbable-materials: [LADDER, VINE, TWISTING_VINES, TWISTING_VINES_PLANT, WEEPING_VINES, WEEPING_VINES_PLANT, SCAFFOLDING]
     minimum-upward-delta: 0.08
     # Optional per-version overrides for minimum-upward-delta; version keys use underscores.
     version-overrides: {}
@@ -140,6 +158,8 @@ checks:
     max-ping-slack: 0.75
     # Extra allowance for movement affected by special blocks or terrain.
     special-block-allowance-per-tick: 0.18
+    # Material names treated as movement-modifying surfaces; add custom server materials here.
+    special-block-materials: [ICE, PACKED_ICE, BLUE_ICE, SLIME_BLOCK, HONEY_BLOCK]
     # Discard or ignore movement samples separated by longer gaps than this.
     max-sample-gap-ms: 250
     # How far observed movement must exceed the estimate before it is treated as an outlier.

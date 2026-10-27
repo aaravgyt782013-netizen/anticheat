@@ -60,9 +60,13 @@ public final class JesusWaterWalkCheck implements Listener {
         double dy = to.getY() - previous.y;
         double dz = to.getZ() - previous.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
-        double maxStep = Math.max(0.5,
+        double horizontalStepFloor = Math.max(0.0,
+                CheckUtil.getVersionedDouble(plugin, player, "jesus", "minimum-horizontal-step", 0.5));
+        double maxStep = Math.max(horizontalStepFloor,
                 CheckUtil.getVersionedDouble(plugin, player, "jesus", "max-horizontal-distance-per-sample", 1.8));
-        if (horizontal > maxStep || Math.abs(dy) > 1.5) {
+        double maxVerticalStep = CheckUtil.getVersionedDouble(
+                plugin, player, "jesus", "max-vertical-distance-per-sample", 1.5);
+        if (horizontal > maxStep || Math.abs(dy) > maxVerticalStep) {
             samples.put(id, new Sample(to, now, 0));
             return;
         }

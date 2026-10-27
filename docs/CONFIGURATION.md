@@ -74,7 +74,7 @@ checks:
         max-horizontal-distance-per-tick: 1.30
 ```
 
-Server-version and client-protocol overrides are wired for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, `click-rate`, `combat-pattern`, `scaffold-signal`, `no-fall`, `packet-rate`, `timer`, and `mace-damage`. For each check, only the numeric settings explicitly read through the version-aware resolver are affected; all other settings remain normal global settings. The example numbers are illustrative, not recommended anti-cheat defaults. Keep experimental checks disabled until staging tests confirm they do not flag legitimate movement.
+Server-version and client-protocol overrides are wired for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, `click-rate`, `combat-pattern`, `scaffold-signal`, `no-fall`, `packet-rate`, `timer`, and `mace-damage`. For each check, only the numeric settings explicitly read through the version-aware resolver are affected; all other settings remain normal global settings. The example numbers are illustrative, not recommended anti-cheat defaults. Keep experimental checks disabled until staging tests confirm they do not flag legitimate movement. Flight, Jesus and Spider checks also expose vertical reset distances and horizontal sample floors. Spider wall-sampling heights, wall offset and climbable-material exemptions, plus the movement-physics special-surface allowlist, are configurable directly in `checks.yml`.
 
 ## Client-protocol-aware tuning
 

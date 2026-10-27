@@ -61,11 +61,15 @@ public final class SpiderClimbCheck implements Listener {
         double dy = to.getY() - previous.y;
         double dz = to.getZ() - previous.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
-        double maxStep = Math.max(0.5,
+        double horizontalStepFloor = Math.max(0.0,
+                CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "minimum-horizontal-step", 0.5));
+        double maxStep = Math.max(horizontalStepFloor,
                 CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "max-horizontal-distance-per-sample", 2.5));
+        double maxVerticalStep = CheckUtil.getVersionedDouble(
+                plugin, player, "spider-signal", "max-vertical-distance-per-sample", 1.25);
         double minimumRise = Math.max(0.0,
                 CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "minimum-upward-delta", 0.08));
-        if (horizontal > maxStep || Math.abs(dy) > 1.25) {
+        if (horizontal > maxStep || Math.abs(dy) > maxVerticalStep) {
             samples.put(id, new Sample(to, now, 0));
             return;
         }
@@ -85,10 +89,17 @@ public final class SpiderClimbCheck implements Listener {
     }
 
     private boolean hasAdjacentSolidWall(Location location) {
-        double[][] offsets = {{0.36, 0}, {-0.36, 0}, {0, 0.36}, {0, -0.36}};
-        double[] heights = {0.35, 1.05, 1.45};
+        double horizontalOffset = Math.max(0.1, Math.min(1.0,
+                CheckUtil.getVersionedDouble(plugin, "spider-signal", "wall-sample-horizontal-offset", 0.36)));
+        double[][] offsets = {{horizontalOffset, 0}, {-horizontalOffset, 0},
+                {0, horizontalOffset}, {0, -horizontalOffset}};
+        java.util.List<Double> configured = plugin.getConfig().getDoubleList(
+                "checks.spider-signal.wall-sample-heights");
+        java.util.List<Double> heights = configured.isEmpty()
+                ? java.util.List.of(0.35, 1.05, 1.45) : configured;
         for (double[] offset : offsets) {
             for (double height : heights) {
+                if (!Double.isFinite(height) || height < 0.0 || height > 2.5) continue;
                 Material type = location.clone().add(offset[0], height, offset[1]).getBlock().getType();
                 if (type.isSolid() && !isClimbable(type)) return true;
             }
@@ -97,10 +108,8 @@ public final class SpiderClimbCheck implements Listener {
     }
 
     private boolean isClimbable(Material type) {
-        return type == Material.LADDER || type == Material.VINE
-                || type == Material.TWISTING_VINES || type == Material.TWISTING_VINES_PLANT
-                || type == Material.WEEPING_VINES || type == Material.WEEPING_VINES_PLANT
-                || type == Material.SCAFFOLDING;
+        return plugin.getConfig().getStringList("checks.spider-signal.climbable-materials")
+                .stream().anyMatch(name -> name.equalsIgnoreCase(type.name()));
     }
 
     private boolean legitimateState(Player player) {

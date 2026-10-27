@@ -65,9 +65,13 @@ public final class FlightHoverCheck implements Listener {
         double dy = to.getY() - previous.y;
         double dz = to.getZ() - previous.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
-        double maxStep = Math.max(0.5,
+        double horizontalStepFloor = Math.max(0.0,
+                CheckUtil.getVersionedDouble(plugin, player, "flight", "minimum-horizontal-step", 0.5));
+        double maxStep = Math.max(horizontalStepFloor,
                 CheckUtil.getVersionedDouble(plugin, player, "flight", "max-horizontal-distance-per-sample", 2.5));
-        if (horizontal > maxStep || Math.abs(dy) > 3.0) {
+        double maxVerticalStep = CheckUtil.getVersionedDouble(
+                plugin, player, "flight", "max-vertical-distance-per-sample", 3.0);
+        if (horizontal > maxStep || Math.abs(dy) > maxVerticalStep) {
             samples.put(id, new Sample(to, now, 0));
             return;
         }

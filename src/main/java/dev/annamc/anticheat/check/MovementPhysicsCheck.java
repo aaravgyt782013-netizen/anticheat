@@ -110,8 +110,8 @@ public final class MovementPhysicsCheck implements Listener {
 
     private boolean isOnSlipperyOrSpecialBlock(Player player) {
         Material type = player.getLocation().getBlock().getRelative(0, -1, 0).getType();
-        return type == Material.ICE || type == Material.PACKED_ICE || type == Material.BLUE_ICE
-                || type == Material.SLIME_BLOCK || type == Material.HONEY_BLOCK;
+        return plugin.getConfig().getStringList("checks.movement-physics.special-block-materials")
+                .stream().anyMatch(name -> name.equalsIgnoreCase(type.name()));
     }
 
     private record Sample(Location location, long nanoTime, int outlierStreak) {

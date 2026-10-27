@@ -24,6 +24,12 @@ class BasicConfigurationTest {
 
     @Test void checksExposeThresholdDecayAndCooldownControls() throws Exception {
         String yaml = config();
+        assertTrue(yaml.contains("special-block-materials: [ICE, PACKED_ICE, BLUE_ICE, SLIME_BLOCK, HONEY_BLOCK]"));
+        assertTrue(yaml.contains("max-vertical-distance-per-sample: 3.0"));
+        assertTrue(yaml.contains("minimum-horizontal-step: 0.5"));
+        assertTrue(yaml.contains("wall-sample-horizontal-offset: 0.36"));
+        assertTrue(yaml.contains("wall-sample-heights: [0.35, 1.05, 1.45]"));
+        assertTrue(yaml.contains("climbable-materials: [LADDER, VINE"));
         assertTrue(yaml.contains("base-horizontal-per-tick"));
         assertTrue(yaml.contains("required-consecutive-outliers"));
         assertTrue(yaml.contains("minimum-observed-displacement"));
