@@ -40,8 +40,10 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 |---|---|---|
 | `movement` | Basic displacement heuristic | Disabled |
 | `movement-physics` | Repeated movement-envelope outlier heuristic | Disabled |
+| `flight` | Sustained airborne hover heuristic | Disabled |
 | `knockback` | Movement after server velocity | Disabled |
 | `reach` | Approximate target hitbox distance | Disabled |
+| `mace-damage` | Implausible Mace damage signal; configurable allowance/tolerance | Disabled |
 | `wall-hit` | Multi-point hitbox occlusion signal; not latency-compensated | Disabled |
 | `fast-break` | Paper break-progress estimate versus observed mining time | Disabled |
 | `nuker-burst` | Repeated rolling-window block-break burst | Disabled |
