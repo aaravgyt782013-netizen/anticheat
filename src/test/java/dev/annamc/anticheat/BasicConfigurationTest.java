@@ -46,6 +46,10 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("attack-packets-enabled: true"));
         assertTrue(yaml.contains("max-attacks-per-window: 24"));
         assertTrue(yaml.contains("minimum-over-limit-windows: 3"));
+        assertTrue(yaml.contains("pattern-detection-enabled: false"));
+        assertTrue(yaml.contains("minimum-pattern-attacks: 15"));
+        assertTrue(yaml.contains("max-pattern-interval-stddev-ms: 3.0"));
+        assertTrue(yaml.contains("max-pattern-coefficient-variation: 0.08"));
         assertTrue(yaml.contains("maximum-hit-angle-degrees"));
         assertTrue(yaml.contains("minimum-consecutive-placements"));
         assertTrue(yaml.contains("ping-window-extension-per-ms"));
