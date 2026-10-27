@@ -7,29 +7,55 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PrivilegeCommandMatcherTest {
-    private static final List<String> PROTECTED = List.of(
-            "op", "deop", "minecraft:op", "minecraft:deop",
-            "lp", "luckperms", "pex", "permissions"
-    );
+    private static final List<String> ROOTS = List.of(
+            "op", "deop", "minecraft:op", "minecraft:deop", "bukkit:op", "bukkit:deop", "manuadd");
+    private static final List<String> PERMISSION_MUTATIONS = List.of(
+            "lp user * permission set **",
+            "lp user * permission unset **",
+            "lp user * permission clear",
+            "lp user * parent add **",
+            "lp group * permission set **",
+            "pex user * add **",
+            "permissions group * set **");
 
-    @Test void detectsDirectOperatorAndPermissionCommands() {
-        assertTrue(PrivilegeCommandMatcher.isProtected("/op Player", PROTECTED));
-        assertTrue(PrivilegeCommandMatcher.isProtected("minecraft:deop Player", PROTECTED));
-        assertTrue(PrivilegeCommandMatcher.isProtected("lp user Player permission set * true", PROTECTED));
+    @Test
+    void matchesNamespacedAndPluginAliasOpCommands() {
+        assertTrue(PrivilegeCommandMatcher.isProtected("/op Hacker", ROOTS));
+        assertTrue(PrivilegeCommandMatcher.isProtected("minecraft:op Hacker", ROOTS));
+        assertTrue(PrivilegeCommandMatcher.isProtected("/essentials:op Hacker", ROOTS));
+        assertTrue(PrivilegeCommandMatcher.isProtected("bukkit:deop Hacker", ROOTS));
+        assertFalse(PrivilegeCommandMatcher.isProtected("operationstatus hello", ROOTS));
     }
 
-    @Test void detectsNestedExecuteWrappedPrivilegeCommands() {
+    @Test
+    void findsPrivilegeCommandsWrappedInExecute() {
         assertTrue(PrivilegeCommandMatcher.isProtected(
-                "/execute as @a run op Player", PROTECTED));
-        assertTrue(PrivilegeCommandMatcher.isProtected(
-                "minecraft:execute as @s run minecraft:execute run lp user Player permission set * true",
-                PROTECTED));
+                "/execute as @s run essentials:op Hacker", ROOTS));
+        assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
+                "/execute as @s run lp user Hacker permission set annaac.admin true", PERMISSION_MUTATIONS));
     }
 
-    @Test void leavesOrdinaryCommandsAlone() {
-        assertFalse(PrivilegeCommandMatcher.isProtected("/say hello", PROTECTED));
-        assertFalse(PrivilegeCommandMatcher.isProtected(
-                "/execute as @a run say hello", PROTECTED));
-        assertFalse(PrivilegeCommandMatcher.isProtected("/operationstatus", PROTECTED));
+    @Test
+    void matchesPermissionMutationsWithoutBlockingReadOnlyCommands() {
+        assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
+                "/lp user Hacker permission set annaac.admin true", PERMISSION_MUTATIONS));
+        assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
+                "/luckperms:lp group staff permission set * true", PERMISSION_MUTATIONS));
+        assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
+                "/pex user Hacker group add admin", PERMISSION_MUTATIONS));
+        assertFalse(PrivilegeCommandMatcher.matchesAnyPattern("/lp help", PERMISSION_MUTATIONS));
+        assertFalse(PrivilegeCommandMatcher.matchesAnyPattern("/lp user Hacker info", PERMISSION_MUTATIONS));
+        assertFalse(PrivilegeCommandMatcher.matchesAnyPattern(
+                "/say lp user Hacker permission set annaac.admin true", PERMISSION_MUTATIONS));
+    }
+
+    @Test
+    void wildcardsAreTokenBoundedAndSupportEmptyRemainder() {
+        assertTrue(PrivilegeCommandMatcher.matchesAnyPattern(
+                "lp user Hacker permission clear", PERMISSION_MUTATIONS));
+        assertFalse(PrivilegeCommandMatcher.matchesAnyPattern(
+                "lp user Hacker permission", PERMISSION_MUTATIONS));
+        assertFalse(PrivilegeCommandMatcher.matchesAnyPattern(null, PERMISSION_MUTATIONS));
+        assertFalse(PrivilegeCommandMatcher.matchesAnyPattern("lp user Hacker permission set true", null));
     }
 }
