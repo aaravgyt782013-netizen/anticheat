@@ -109,14 +109,14 @@ public final class FastBreakCheck implements Listener {
         if (elapsed > timeout) return;
 
         double ratio = Math.max(0.05,
-                Math.min(1.0, CheckUtil.getVersionedDouble(plugin, "fast-break", "minimum-time-ratio", 0.5)));
+                Math.min(1.0, CheckUtil.getVersionedDouble(plugin, player, "fast-break", "minimum-time-ratio", 0.5)));
         double baseExpectedMs = session.expectedTicks * 50.0 * ratio;
         double pingSlack = Math.min(
-                Math.max(0.0, CheckUtil.getVersionedDouble(plugin, "fast-break", "max-ping-slack-ms", 200.0)),
+                Math.max(0.0, CheckUtil.getVersionedDouble(plugin, player, "fast-break", "max-ping-slack-ms", 200.0)),
                 Math.max(0, player.getPing()) * Math.max(0.0,
-                        CheckUtil.getVersionedDouble(plugin, "fast-break", "ping-slack-per-ms", 0.5)));
+                        CheckUtil.getVersionedDouble(plugin, player, "fast-break", "ping-slack-per-ms", 0.5)));
         long minimumAllowedMs = Math.max(0L,
-                Math.round(CheckUtil.getVersionedDouble(plugin, "fast-break", "minimum-required-time-ms", 60.0)));
+                Math.round(CheckUtil.getVersionedDouble(plugin, player, "fast-break", "minimum-required-time-ms", 60.0)));
         double thresholdMs = Math.max(minimumAllowedMs, baseExpectedMs - pingSlack);
         if (elapsed >= thresholdMs) return;
 

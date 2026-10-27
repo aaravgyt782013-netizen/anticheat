@@ -46,9 +46,9 @@ public final class WallHitCheck implements Listener {
         Location eye = player.getEyeLocation();
         BoundingBox box = target.getBoundingBox();
         double maxDistance = Math.max(1.0,
-                CheckUtil.getVersionedDouble(plugin, "wall-hit", "max-evaluation-distance", 6.0));
+                CheckUtil.getVersionedDouble(plugin, player, "wall-hit", "max-evaluation-distance", 6.0));
         double margin = Math.max(0.0,
-                CheckUtil.getVersionedDouble(plugin, "wall-hit", "occlusion-margin", 0.15));
+                CheckUtil.getVersionedDouble(plugin, player, "wall-hit", "occlusion-margin", 0.15));
 
         List<Vector> samplePoints = samplePoints(box);
         int occluded = 0;
@@ -67,7 +67,7 @@ public final class WallHitCheck implements Listener {
         }
 
         double ratio = (double) occluded / samplePoints.size();
-        double requiredRatio = CheckUtil.getVersionedDouble(plugin, "wall-hit", "minimum-occluded-sample-ratio", 1.0);
+        double requiredRatio = CheckUtil.getVersionedDouble(plugin, player, "wall-hit", "minimum-occluded-sample-ratio", 1.0);
         requiredRatio = Math.max(0.0, Math.min(1.0, requiredRatio));
         if (ratio >= requiredRatio && occluded > 0) {
             violations.add(player, "wall-hit",

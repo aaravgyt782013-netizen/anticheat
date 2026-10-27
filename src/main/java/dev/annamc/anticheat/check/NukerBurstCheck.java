@@ -67,13 +67,13 @@ public final class NukerBurstCheck implements Listener {
         lastEvaluation.put(id, now);
 
         int maxBreaks = Math.max(1,
-                (int) Math.round(CheckUtil.getVersionedDouble(plugin, "nuker-burst", "max-block-breaks-per-window", 18.0)));
+                (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "nuker-burst", "max-block-breaks-per-window", 18.0)));
         int count = times.size();
         int streak = count >= maxBreaks ? overLimitWindows.getOrDefault(id, 0) + 1 : 0;
         overLimitWindows.put(id, streak);
 
         int requiredWindows = Math.max(1,
-                (int) Math.round(CheckUtil.getVersionedDouble(plugin, "nuker-burst", "required-over-limit-windows", 3.0)));
+                (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "nuker-burst", "required-over-limit-windows", 3.0)));
         long cooldown = Math.max(0L,
                 plugin.getConfig().getLong("checks.nuker-burst.flag-cooldown-ms", 5000L));
         if (streak < requiredWindows || now - lastFlag.getOrDefault(id, 0L) < cooldown) return;
