@@ -5,8 +5,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 /**
  * Resolves a numeric check threshold without guessing defaults for unknown versions.
- * Version strings contain dots, so version keys are read as literal section keys rather
- * than concatenated Bukkit paths (which would split "1.21.11" into multiple path parts).
+ * Bukkit treats dots as configuration path separators, so override keys use underscores
+ * (for example "1_21_11" and "1_21") to preserve the complete version identifier.
  */
 public final class VersionedThresholds {
     private VersionedThresholds() {}
@@ -16,12 +16,13 @@ public final class VersionedThresholds {
         String base = "checks." + check + ".";
         ConfigurationSection overrides = config.getConfigurationSection(base + "version-overrides");
         if (overrides != null && version != null && !version.isBlank()) {
-            Double exact = numericValue(overrides.getValues(false).get(version), key);
+            String exactKey = version.replace('.', '_');
+            Double exact = numericValue(overrides.getValues(false).get(exactKey), key);
             if (exact != null) return exact;
 
             String[] parts = version.split("\\.");
             if (parts.length >= 2) {
-                String majorMinor = parts[0] + "." + parts[1];
+                String majorMinor = parts[0] + "_" + parts[1];
                 Double compatible = numericValue(overrides.getValues(false).get(majorMinor), key);
                 if (compatible != null) return compatible;
             }
