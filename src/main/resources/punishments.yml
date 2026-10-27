@@ -219,3 +219,11 @@ punishments:
       cooldown-ms: 30000
       message: ""
       commands: []
+    # Experimental flight/hover heuristic; do not punish automatically until staging-tested.
+    flight:
+      enabled: false
+      type: "KICK"
+      threshold-vl: 12.0
+      cooldown-ms: 30000
+      message: ""
+      commands: []
