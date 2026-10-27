@@ -20,6 +20,9 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Horizontal movement distance threshold per event tick; tune carefully to avoid false positives.
     max-horizontal-distance-per-tick: 1.25
+    # Ignore displacement flags briefly after server-applied velocity (knockback, launch pads, plugin impulses).
+    # Set to 0 to disable; range 0–5000 ms. Can be overridden by server/client version.
+    velocity-grace-ms: 300
     # Optional per-version threshold overrides. Use underscores in keys such as '1_21_11'.
     version-overrides: {}
     # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
@@ -174,6 +177,9 @@ checks:
     outlier-ratio: 2.2
     # Number of consecutive outlier samples required before flagging.
     required-consecutive-outliers: 3
+    # Rebase movement samples for this many milliseconds after server-applied velocity changes.
+    # Helps avoid knockback/launch-pad impulses being treated as ordinary outliers; 0 disables.
+    velocity-grace-ms: 300
     # Optional exact-version or major.minor overrides; dots are replaced with underscores.
     # Exact version takes priority over major.minor, then the regular setting.
     # Example:

@@ -30,6 +30,8 @@ version-overrides:
 
 Server-version overrides and PacketEvents client-protocol overrides are supported for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, `click-rate`, `combat-pattern`, `scaffold-signal`, `no-fall`, `packet-rate`, `timer`, and `mace-damage`. Client overrides use the separate `client-version-overrides` map, keys with underscores, and only affect fields read through the version-aware resolver. A client protocol version is not a cheat-client brand fingerprint.
 
+The `movement` and `movement-physics` checks expose `velocity-grace-ms` (0–5000, default 300 ms). After a server-applied `PlayerVelocityEvent`, the basic movement detector suppresses displacement flags and the physics detector rebases its sample baseline during that window. This reduces knockback/launch-pad false positives; setting it too high creates a short detection blind spot. Test it with the actual knockback and velocity-changing plugins before changing the default.
+
 ## Baseline and test matrix
 
 For each test, record Paper build, Minecraft client version, ping range, TPS/MSPT, enabled movement plugins, expected outcome, detector VL, evidence entry, and whether staff review agrees.

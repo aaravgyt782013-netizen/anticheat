@@ -4,8 +4,8 @@ Original anti-cheat project targeting **Paper 1.21–1.21.11 / Java 21**. CI is 
 
 ## Implemented detector signals
 
-- **Movement displacement:** legacy conservative displacement heuristic; disabled by default.
-- **Movement physics envelope:** repeated movement-envelope outlier heuristic with sprint/speed and ping slack. This is not a deterministic per-tick physics simulator; disabled by default.
+- **Movement displacement:** legacy conservative displacement heuristic with configurable post-velocity grace for knockback and server-applied impulses; disabled by default.
+- **Movement physics envelope:** repeated movement-envelope outlier heuristic with sprint/speed and ping slack, plus a configurable baseline-reset grace period after server-applied velocity changes. This is not a deterministic per-tick physics simulator; disabled by default.
 - **Flight / hover:** detects sustained near-horizontal movement while airborne and excludes common legitimate states such as flight permissions, elytra, vehicles, swimming, climbing, slow falling, levitation and several special blocks. Experimental and disabled by default; it is not a full movement simulator.
 - **Jesus / liquid walk:** flags sustained horizontal movement at a stable Y over deep liquid while not swimming. Server-side state is imperfect; disabled by default.
 - **Spider climb:** flags repeated upward movement beside a solid wall, excluding common climbable blocks, flight modes, jump effects and liquids. Parkour/plugin mechanics require staging validation; disabled by default.

@@ -55,6 +55,22 @@ class ConfigurationYamlSyntaxTest {
     }
 
     @Test
+    void movementVelocityGraceIsConfigurableInBothModernAndLegacyFiles() throws Exception {
+        Yaml yaml = new Yaml();
+        for (String file : List.of("checks-movement.yml", "checks.yml")) {
+            try (InputStream in = Files.newInputStream(Path.of("src/main/resources", file))) {
+                Map<?, ?> root = yaml.load(in);
+                Map<?, ?> checks = (Map<?, ?>) root.get("checks");
+                for (String detector : List.of("movement", "movement-physics")) {
+                    Map<?, ?> options = (Map<?, ?>) checks.get(detector);
+                    assertEquals(300, ((Number) options.get("velocity-grace-ms")).intValue(),
+                            file + " must include a configurable velocity grace for " + detector);
+                }
+            }
+        }
+    }
+
+    @Test
     void securityDefaultsKeepRiskyAutomaticActionsOff() throws Exception {
         Yaml yaml = new Yaml();
         Map<?, ?> root;
