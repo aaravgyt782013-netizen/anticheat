@@ -8,3 +8,10 @@ settings:
   debug: false
   # World names where checks should not run. Empty means no worlds are ignored.
   ignored-worlds: []
+  # Reduce false positives when the server is overloaded. Applies to gameplay detector checks only.
+  performance:
+    # Pause gameplay detector evaluation when the one-minute average TPS falls below minimum-tps.
+    # Security protections such as Force OP and anti-nuke are not paused by this setting.
+    pause-detection-under-tps-enabled: true
+    # Valid range: 1.0–20.0. Set lower for more detection during lag, higher for a safer posture.
+    minimum-tps: 17.0

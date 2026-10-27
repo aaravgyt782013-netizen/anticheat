@@ -11,6 +11,10 @@ public final class CheckUtil {
 
     public static boolean shouldSkip(JavaPlugin plugin, Player player, String check) {
         if (!plugin.getConfig().getBoolean("checks." + check + ".enabled", false)) return true;
+        if (plugin.getConfig().getBoolean("settings.performance.pause-detection-under-tps-enabled", true)) {
+            double threshold = plugin.getConfig().getDouble("settings.performance.minimum-tps", 17.0);
+            if (ServerPerformanceGuard.isLagging(org.bukkit.Bukkit.getTPS(), threshold)) return true;
+        }
         if (player.hasPermission("annaac.bypass")
                 || player.hasPermission("annaac.bypass." + check)) return true;
         if (contains(plugin.getConfig().getStringList("settings.ignored-worlds"), player.getWorld().getName())

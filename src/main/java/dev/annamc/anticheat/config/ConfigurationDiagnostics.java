@@ -24,6 +24,10 @@ public final class ConfigurationDiagnostics {
             notes.add("settings.language is not a supported language (en, hi); verify the language file exists.");
         }
 
+        double minimumTps = plugin.getConfig().getDouble("settings.performance.minimum-tps", 17.0);
+        if (!Double.isFinite(minimumTps) || minimumTps < 1.0 || minimumTps > 20.0) {
+            notes.add("settings.performance.minimum-tps must be finite and between 1.0 and 20.0; the lag guard ignores invalid values.");
+        }
         for (String warning : dev.annamc.anticheat.check.VersionedThresholds.validateOverrides(plugin.getConfig())) {
             notes.add("Threshold override configuration: " + warning);
         }
