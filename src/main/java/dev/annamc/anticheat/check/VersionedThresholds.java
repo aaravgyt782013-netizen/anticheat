@@ -136,6 +136,16 @@ public final class VersionedThresholds {
         if (key.equals("velocity-grace-ms")) {
             return value < 0.0 || value > 5000.0 ? "must be between 0 and 5000 milliseconds." : null;
         }
+        if (key.equals("baseline-reset-gap-ms")) {
+            return value < 250.0 || value > 10_000.0
+                    ? "must be between 250 and 10000 milliseconds." : null;
+        }
+        if (key.equals("max-horizontal-step-per-packet") || key.equals("max-vertical-step-per-packet")) {
+            return value < 1.0 || value > 128.0 ? "must be between 1 and 128 blocks per packet." : null;
+        }
+        if (key.equals("max-absolute-coordinate") || key.equals("max-absolute-y")) {
+            return value <= 0.0 ? "must be greater than 0." : null;
+        }
         if (key.equals("minimum-time-ratio") || key.equals("minimum-occluded-sample-ratio")) {
             return value < 0.0 || value > 1.0 ? "must be between 0 and 1." : null;
         }

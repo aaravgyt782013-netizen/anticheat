@@ -365,6 +365,39 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void packetSanityThresholdsValidateTheEffectiveRangesUsedByTheDetector() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  packet-sanity:
+                    max-horizontal-step-per-packet: 16.0
+                    max-vertical-step-per-packet: 16.0
+                    baseline-reset-gap-ms: 1500
+                    max-absolute-coordinate: 30000000.0
+                    max-absolute-y: 4096.0
+                    version-overrides:
+                      '1_21':
+                        max-horizontal-step-per-packet: 0.5
+                        baseline-reset-gap-ms: 100
+                    client-version-overrides:
+                      '1_21':
+                        max-vertical-step-per-packet: 129
+                """);
+
+        assertEquals(16.0, VersionedThresholds.resolve(config, "1.21.11",
+                "packet-sanity", "max-horizontal-step-per-packet", 16.0));
+        assertEquals(1500.0, VersionedThresholds.resolve(config, "1.21.11",
+                "packet-sanity", "baseline-reset-gap-ms", 1500.0));
+        assertEquals(16.0, VersionedThresholds.resolveForClient(config, "1.21",
+                "1.21.11", "packet-sanity", "max-vertical-step-per-packet", 16.0));
+
+        java.util.List<String> warnings = VersionedThresholds.validateOverrides(config);
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("max-horizontal-step-per-packet must be between 1 and 128")));
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("baseline-reset-gap-ms must be between 250 and 10000 milliseconds")));
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("max-vertical-step-per-packet must be between 1 and 128")));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 
