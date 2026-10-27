@@ -108,7 +108,23 @@ public final class PacketEventsBridge implements Listener {
                 }
                 if (packetSanityEnabled && movementPacket.hasPositionChanged()) {
                     var position = movementPacket.getLocation().getPosition();
-                    observePacketMovement(id, position.getX(), position.getY(), position.getZ(), nowMs);
+                    double x = position.getX(), y = position.getY(), z = position.getZ();
+                    double maxCoordinate = versionedThreshold(id, "packet-sanity", "max-absolute-coordinate", 30_000_000.0);
+                    double maxY = versionedThreshold(id, "packet-sanity", "max-absolute-y", 4096.0);
+                    boolean coordinatesValid = PacketMovementSanity.hasValidCoordinates(
+                            x, y, z, maxCoordinate, maxY);
+                    boolean suspiciousStep = observePacketMovement(id, x, y, z, nowMs);
+                    boolean cancelInvalidCoordinates = plugin.getConfig().getBoolean(
+                            "checks.packet-sanity.cancel-invalid-coordinate-packets", true);
+                    boolean cancelExtremeSteps = plugin.getConfig().getBoolean(
+                            "checks.packet-sanity.cancel-extreme-step-packets", false);
+                    if (PacketMovementSanity.shouldCancel(coordinatesValid, suspiciousStep,
+                            cancelInvalidCoordinates, cancelExtremeSteps)) {
+                        // Clear the sample so the next accepted packet establishes a fresh baseline.
+                        event.setCancelled(true);
+                        packetMovementPositions.remove(id);
+                        return;
+                    }
                 }
                 if (!packetRateEnabled && !timerEnabled) return;
 
@@ -173,23 +189,23 @@ public final class PacketEventsBridge implements Listener {
         PacketEvents.getAPI().getEventManager().registerListener(listener);
     }
 
-    private void observePacketMovement(UUID id, double x, double y, double z, long nowMs) {
+    private boolean observePacketMovement(UUID id, double x, double y, double z, long nowMs) {
         double maxCoordinate = versionedThreshold(id, "packet-sanity", "max-absolute-coordinate", 30_000_000.0);
         double maxY = versionedThreshold(id, "packet-sanity", "max-absolute-y", 4096.0);
         if (!PacketMovementSanity.hasValidCoordinates(x, y, z, maxCoordinate, maxY)) {
             packetMovementPositions.remove(id);
             schedulePacketMovementSanitySignal(id,
                     "invalid client movement coordinates (finite/configured-bound validation failed)");
-            return;
+            return false;
         }
 
         PacketMovementSample previous = packetMovementPositions.put(id, new PacketMovementSample(x, y, z, nowMs));
-        if (previous == null) return;
+        if (previous == null) return false;
 
         long maxGapMs = Math.max(250L, Math.min(10_000L,
                 Math.round(versionedThreshold(id, "packet-sanity", "baseline-reset-gap-ms", 1500.0))));
         long elapsed = nowMs - previous.timeMs();
-        if (elapsed < 0L || elapsed > maxGapMs) return;
+        if (elapsed < 0L || elapsed > maxGapMs) return false;
 
         double maxHorizontalStep = Math.max(1.0, Math.min(128.0,
                 versionedThreshold(id, "packet-sanity", "max-horizontal-step-per-packet", 16.0)));
@@ -197,11 +213,12 @@ public final class PacketEventsBridge implements Listener {
                 versionedThreshold(id, "packet-sanity", "max-vertical-step-per-packet", 16.0)));
         PacketMovementSanity.StepResult result = PacketMovementSanity.evaluateStep(
                 previous.x(), previous.y(), previous.z(), x, y, z, maxHorizontalStep, maxVerticalStep);
-        if (!result.suspicious()) return;
+        if (!result.suspicious()) return false;
 
         schedulePacketMovementSanitySignal(id, String.format(java.util.Locale.ROOT,
                 "raw movement packet step exceeds conservative bounds: horizontal=%.3f/%.3f vertical=%.3f/%.3f elapsed=%dms",
                 result.horizontalDistance(), maxHorizontalStep, result.verticalDistance(), maxVerticalStep, elapsed));
+        return true;
     }
 
     private void schedulePacketMovementSanitySignal(UUID id, String detail) {

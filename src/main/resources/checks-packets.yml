@@ -20,6 +20,12 @@ checks:
     max-absolute-coordinate: 30000000.0
     # Maximum allowed absolute Y coordinate before flagging a raw packet.
     max-absolute-y: 4096.0
+    # Reject non-finite or out-of-configured-bounds coordinates when packet-sanity is enabled.
+    # These are malformed/extreme coordinates, not a general hack-client detector.
+    cancel-invalid-coordinate-packets: true
+    # Optionally cancel a finite position packet whose one-step displacement exceeds configured bounds.
+    # Leave false until validated for elytra, vehicles, latency, proxy and all intended client versions.
+    cancel-extreme-step-packets: false
     # Maximum horizontal displacement between sequential client position packets (effective range 1–128).
     # Kept very high to flag only extreme outliers; tune only with staging evidence.
     max-horizontal-step-per-packet: 16.0

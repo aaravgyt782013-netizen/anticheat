@@ -33,5 +33,15 @@ public final class PacketMovementSanity {
                 horizontal, vertical);
     }
 
+    /**
+     * Cancels only packet classes explicitly enabled by the administrator.
+     * Invalid absolute coordinates are distinct from a large but finite movement step.
+     */
+    public static boolean shouldCancel(boolean coordinatesValid, boolean suspiciousStep,
+                                       boolean cancelInvalidCoordinates, boolean cancelExtremeSteps) {
+        return (!coordinatesValid && cancelInvalidCoordinates)
+                || (coordinatesValid && suspiciousStep && cancelExtremeSteps);
+    }
+
     public record StepResult(boolean suspicious, double horizontalDistance, double verticalDistance) {}
 }

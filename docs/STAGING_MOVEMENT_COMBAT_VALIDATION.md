@@ -47,6 +47,10 @@ For each test, record Paper build, Minecraft client version, ping range, TPS/MSP
 7. **Controlled adversarial tests:** on a private staging server, test one cheat behavior at a time, capture server logs/evidence, and verify that flags are reproducible. Do not use these tests on public players or treat one sample as a ban verdict.
 8. **Punishment rehearsal:** keep `punishments.enabled: false` while tuning. Then use alerts only, next review-only warnings, and only later enable a per-check kick with a conservative threshold. Keep independent-family corroboration enabled.
 
+## Packet rejection rehearsal
+
+Keep `checks.packet-sanity.cancel-extreme-step-packets: false` initially. Test invalid-coordinate rejection on staging with normal 1.21 through 1.21.11 clients and any legacy protocols exposed by your proxy. Only enable extreme-step rejection after verifying elytra, vehicles, latency spikes, proxies, teleports, respawns, world changes, and custom movement plugins. An extreme-step cancellation policy can block legitimate movement if thresholds are not calibrated.
+
 ## Promotion gate
 
 Promote a check from staging only after:

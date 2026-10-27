@@ -33,6 +33,15 @@ class PacketMovementSanityTest {
     }
 
     @Test
+    void cancellationPolicySeparatesInvalidCoordinatesFromExtremeMovementSteps() {
+        assertTrue(PacketMovementSanity.shouldCancel(false, false, true, false));
+        assertFalse(PacketMovementSanity.shouldCancel(false, false, false, false));
+        assertFalse(PacketMovementSanity.shouldCancel(true, true, true, false));
+        assertTrue(PacketMovementSanity.shouldCancel(true, true, true, true));
+        assertFalse(PacketMovementSanity.shouldCancel(true, false, true, true));
+    }
+
+    @Test
     void invalidStepInputsFailClosedAsSuspicious() {
         assertTrue(PacketMovementSanity.evaluateStep(Double.NaN, 64, 0, 0, 64, 0, 16, 16).suspicious());
         assertTrue(PacketMovementSanity.evaluateStep(0, 64, 0, 0, 64, 0, -1, 16).suspicious());
