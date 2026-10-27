@@ -16,6 +16,8 @@ Run each case for at least 10 minutes and record alerts per detector.
 
 - Walk, sprint, jump, sprint-jump, stairs, slabs, fences, ladders, swimming, elytra, riptide, vehicles and water transitions.
 - Flight-hover false-positive tests: jump apexes, ladders/vines, slime/honey, water, slow falling, levitation, elytra, vehicles, knockback, and custom movement/flight plugins; verify real hover-like behavior only generates alerts after the configured sustained sample count.
+- Jesus/liquid-walk tests: shallow water, deep water, swimming, boats, bubble columns, waterlogged blocks, ice, server lag, and custom water/movement plugins. Confirm normal swimming/wading does not create alerts.
+- Spider tests: repeated jumps against walls, parkour, ladders, vines, scaffolding, bubble columns, jump effects, wall-adjacent blocks, and custom movement plugins. Keep automatic punishment disabled even if alert tests pass initially.
 - Mace combat tests: normal hits, legitimate smash attacks at varied heights, Density/Breach/Wind Burst enchantments where supported, high ping, custom damage modifiers and protection plugins. The Mace check must stay alert-only until logs show no unexplained legitimate alerts.
 - Speed potion levels, jump effects, ice, slime, honey, soul sand, cobwebs, knockback from multiple sources and landing on uneven terrain.
 - Teleports, respawn, world changes, server lag spikes, proxy reconnects and ping changes.
