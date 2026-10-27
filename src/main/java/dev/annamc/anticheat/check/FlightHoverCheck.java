@@ -72,7 +72,7 @@ public final class FlightHoverCheck implements Listener {
             return;
         }
         double verticalTolerance = Math.max(0.0,
-                CheckUtil.getVersionedDouble(plugin, "flight", "max-hover-vertical-delta", 0.025));
+                CheckUtil.getVersionedDouble(plugin, player, "flight", "max-hover-vertical-delta", 0.025));
         double minimumHorizontal = Math.max(0.0,
                 plugin.getConfig().getDouble("checks.flight.minimum-horizontal-distance", 0.08));
 

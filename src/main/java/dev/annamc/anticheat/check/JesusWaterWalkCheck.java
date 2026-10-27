@@ -68,7 +68,7 @@ public final class JesusWaterWalkCheck implements Listener {
         }
 
         double verticalTolerance = Math.max(0.0,
-                CheckUtil.getVersionedDouble(plugin, "jesus", "max-vertical-delta", 0.04));
+                CheckUtil.getVersionedDouble(plugin, player, "jesus", "max-vertical-delta", 0.04));
         double minHorizontal = Math.max(0.0,
                 plugin.getConfig().getDouble("checks.jesus.minimum-horizontal-distance", 0.06));
         int count = Math.abs(dy) <= verticalTolerance && horizontal >= minHorizontal

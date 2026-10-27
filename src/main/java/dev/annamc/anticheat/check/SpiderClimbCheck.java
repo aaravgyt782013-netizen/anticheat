@@ -64,7 +64,7 @@ public final class SpiderClimbCheck implements Listener {
         double maxStep = Math.max(0.5,
                 plugin.getConfig().getDouble("checks.spider-signal.max-horizontal-distance-per-sample", 2.5));
         double minimumRise = Math.max(0.0,
-                CheckUtil.getVersionedDouble(plugin, "spider-signal", "minimum-upward-delta", 0.08));
+                CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "minimum-upward-delta", 0.08));
         if (horizontal > maxStep || Math.abs(dy) > 1.25) {
             samples.put(id, new Sample(to, now, 0));
             return;

@@ -34,24 +34,24 @@ public final class MaceDamageCheck implements Listener {
         if (weapon.getType() != Material.MACE) return;
 
         double fallDistance = Math.max(0.0, player.getFallDistance());
-        double baseAllowance = CheckUtil.getVersionedDouble(plugin, "mace-damage", "base-damage-allowance", 10.0);
-        double tolerance = CheckUtil.getVersionedDouble(plugin, "mace-damage", "extra-tolerance", 12.0);
+        double baseAllowance = CheckUtil.getVersionedDouble(plugin, player, "mace-damage", "base-damage-allowance", 10.0);
+        double tolerance = CheckUtil.getVersionedDouble(plugin, player, "mace-damage", "extra-tolerance", 12.0);
         double maximumExpected;
         if (plugin.getConfig().getBoolean("checks.mace-damage.vanilla-smash-model-enabled", true)) {
             int densityLevel = weapon.getEnchantmentLevel(Enchantment.DENSITY);
-            double densityAllowance = CheckUtil.getVersionedDouble(plugin, "mace-damage", "density-damage-per-block-per-level", 0.5);
+            double densityAllowance = CheckUtil.getVersionedDouble(plugin, player, "mace-damage", "density-damage-per-block-per-level", 0.5);
             maximumExpected = MaceDamageMath.expectedAllowance(
                     fallDistance, densityLevel, baseAllowance, tolerance, densityAllowance);
         } else {
             // Compatibility mode for servers with custom mace damage formulas.
-            double perBlockAllowance = CheckUtil.getVersionedDouble(plugin, "mace-damage", "damage-per-fall-block-allowance", 4.5);
+            double perBlockAllowance = CheckUtil.getVersionedDouble(plugin, player, "mace-damage", "damage-per-fall-block-allowance", 4.5);
             maximumExpected = baseAllowance + fallDistance * Math.max(0.0, perBlockAllowance) + tolerance;
         }
         double observed = event.getDamage();
 
         if (observed > maximumExpected) {
             violations.add(player, "mace-damage",
-                    CheckUtil.getVersionedDouble(plugin, "mace-damage", "violation-add", 1.0),
+                    CheckUtil.getVersionedDouble(plugin, player, "mace-damage", "violation-add", 1.0),
                     String.format(java.util.Locale.ROOT,
                             "mace-damage-anomaly observed=%.2f allowance=%.2f fall-distance=%.2f target=%s",
                             observed, maximumExpected, fallDistance, event.getEntity().getType().name()));

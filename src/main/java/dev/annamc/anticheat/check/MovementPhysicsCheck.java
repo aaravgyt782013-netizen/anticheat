@@ -75,26 +75,26 @@ public final class MovementPhysicsCheck implements Listener {
         // Multiple PlayerMoveEvents may occur in one tick. Scale a conservative
         // per-tick envelope by observed elapsed time and allow ping/jitter slack.
         double ticks = Math.max(1.0, elapsedMs / 50.0);
-        double base = CheckUtil.getVersionedDouble(plugin, "movement-physics", "base-horizontal-per-tick", 0.72);
-        if (player.isSprinting()) base *= CheckUtil.getVersionedDouble(plugin, "movement-physics", "sprint-multiplier", 1.3);
+        double base = CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "base-horizontal-per-tick", 0.72);
+        if (player.isSprinting()) base *= CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "sprint-multiplier", 1.3);
         if (player.hasPotionEffect(PotionEffectType.SPEED)) {
             int amplifier = player.getPotionEffect(PotionEffectType.SPEED).getAmplifier() + 1;
             base *= 1.0 + 0.20 * amplifier;
         }
         if (player.getGameMode() == GameMode.ADVENTURE) base *= 1.03;
-        double pingSlack = Math.min(CheckUtil.getVersionedDouble(plugin, "movement-physics", "max-ping-slack", 0.75),
-                Math.max(0, player.getPing()) * CheckUtil.getVersionedDouble(plugin, "movement-physics", "ping-slack-per-ms", 0.001));
+        double pingSlack = Math.min(CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "max-ping-slack", 0.75),
+                Math.max(0, player.getPing()) * CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "ping-slack-per-ms", 0.001));
         double allowance = base * ticks + pingSlack;
-        if (isOnSlipperyOrSpecialBlock(player)) allowance += CheckUtil.getVersionedDouble(plugin, "movement-physics", "special-block-allowance-per-tick", 0.18) * ticks;
+        if (isOnSlipperyOrSpecialBlock(player)) allowance += CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "special-block-allowance-per-tick", 0.18) * ticks;
 
         double ratio = distance / Math.max(0.01, allowance);
-        if (DetectionMath.isMovementOutlier(distance, allowance, CheckUtil.getVersionedDouble(plugin, "movement-physics", "outlier-ratio", 2.2))) {
+        if (DetectionMath.isMovementOutlier(distance, allowance, CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "outlier-ratio", 2.2))) {
             int streak = previous.outlierStreak + 1;
             samples.put(player.getUniqueId(), new Sample(to.clone(), now, streak));
             int required = plugin.getConfig().getInt("checks.movement-physics.required-consecutive-outliers", 3);
             if (streak >= required) {
                 violations.add(player, "movement-physics",
-                        CheckUtil.getVersionedDouble(plugin, "movement-physics", "violation-add", 1.0),
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "violation-add", 1.0),
                         String.format(java.util.Locale.ROOT,
                                 "repeated movement-envelope outlier ratio=%.2f distance=%.3f allowance=%.3f ping=%dms",
                                 ratio, distance, allowance, player.getPing()));
