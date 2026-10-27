@@ -6,8 +6,10 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 
 - **Movement displacement:** legacy conservative displacement heuristic; disabled by default.
 - **Movement physics envelope:** repeated movement-envelope outlier heuristic with sprint/speed and ping slack. This is not a deterministic per-tick physics simulator; disabled by default.
+- **Flight / hover:** detects sustained near-horizontal movement while airborne and excludes common legitimate states such as flight permissions, elytra, vehicles, swimming, climbing, slow falling, levitation and several special blocks. Experimental and disabled by default; it is not a full movement simulator.
 - **Knockback telemetry:** compares movement observed after server velocity. Collisions, player input and ping affect results; disabled by default.
 - **Reach:** eye-to-nearest-point-on-target-hitbox signal without full historical hitbox/interpolation compensation; disabled by default.
+- **Mace damage:** a conservative anomaly threshold for implausible Mace hit damage, with per-server configurable fall-distance allowance and tolerance. Enchantments and combat plugins can change damage; disabled by default.
 - **Wall-hit:** configurable multi-point target-hitbox occlusion signal; not latency-compensated and disabled by default.
 - **Nuker burst:** counts completed block-break events in a configurable rolling window, with ignored materials and repeated-window threshold; this does not simulate individual block mining speed and is disabled by default.
 - **FastBreak:** compares Paper’s current per-player block break-progress estimate with observed start-to-break time, allows configurable ping slack, ignores short expected sessions, and requires repeated evidence. This is not packet-level replay and remains disabled by default.
@@ -17,7 +19,7 @@ Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
 - **No-fall signal:** checks a narrow pattern of landing after a significant fall without observed fall damage. Protection plugins and gameplay effects can create the same pattern; disabled by default.
 - **Packet rate:** optional PacketEvents rolling packet-rate and short-interval telemetry; disabled by default.
 - **Timer telemetry:** a separate sustained movement-packet-rate signal with a configurable sample duration and ping/proxy caveat. It is not a deterministic client-tick simulator; disabled by default.
-- **Force OP guard:** blocks configured privilege-management commands from players lacking annaac.admin, audits console commands, and monitors operator-list changes and can compare a saved operator baseline across restarts. It cannot prevent malicious plugins, direct server-file edits, console compromise, or every permission-plugin alias.
+- **Force OP guard:** blocks configured privilege-management commands (including execute-wrapped OP/permission commands) from players lacking annaac.admin, audits console commands, and detects operator grants and removals using live checks plus a saved operator baseline across restarts. It cannot prevent malicious plugins, direct server-file edits, console compromise, or every permission-plugin alias.
 
 Shared features: startup/reload configuration diagnostics, `/annaac status` system summary, per-check violation levels/decay across reconnects with bounded retention, alert throttling, console/staff/Discord alerts, JSONL evidence with retention caps, per-staff alert toggles, admin commands, pure detection-math and plugin-risk tests, YAML syntax/config regression tests, and GitHub Actions build/tests. The separate security subsystem adds anti-nuke bulk-command protection, configurable explosion-block caps, optional mining-rate limits, SHA-256 plugin JAR inventory, plugin lifecycle audits, suspicious-filename review hints, and a bounded static plugin-risk scan. Use `/annaac securityhistory` to review recent system-level security evidence.
 
