@@ -70,6 +70,28 @@ class ConfigurationYamlSyntaxTest {
     }
 
     @Test
+    void packetSanityIsPresentConfigurableAndOptIn() throws Exception {
+        Yaml yaml = new Yaml();
+        for (String file : List.of("checks-packets.yml", "checks.yml")) {
+            try (InputStream in = Files.newInputStream(Path.of("src/main/resources", file))) {
+                Map<?, ?> root = yaml.load(in);
+                Map<?, ?> checks = (Map<?, ?>) root.get("checks");
+                Map<?, ?> options = (Map<?, ?>) checks.get("packet-sanity");
+                assertNotNull(options, file + " must include packet-sanity");
+                assertEquals(Boolean.FALSE, options.get("enabled"),
+                        "Packet sanity must remain opt-in until staging validation is complete.");
+                assertNotNull(options.get("max-horizontal-step-per-packet"));
+                assertNotNull(options.get("max-vertical-step-per-packet"));
+                assertNotNull(options.get("max-absolute-coordinate"));
+                assertNotNull(options.get("max-absolute-y"));
+                assertNotNull(options.get("baseline-reset-gap-ms"));
+                assertNotNull(options.get("version-overrides"));
+                assertNotNull(options.get("client-version-overrides"));
+            }
+        }
+    }
+
+    @Test
     void movementVelocityGraceIsConfigurableInBothModernAndLegacyFiles() throws Exception {
         Yaml yaml = new Yaml();
         for (String file : List.of("checks-movement.yml", "checks.yml")) {

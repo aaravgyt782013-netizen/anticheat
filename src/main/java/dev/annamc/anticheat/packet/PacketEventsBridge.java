@@ -9,6 +9,7 @@ import dev.annamc.anticheat.check.CheckUtil;
 import dev.annamc.anticheat.check.VersionedThresholds;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,6 +46,8 @@ public final class PacketEventsBridge implements Listener {
     private final Map<UUID, Integer> attackPatternOverLimitWindows = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastAttackPatternEvaluation = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastAttackPatternFlag = new ConcurrentHashMap<>();
+    private final Map<UUID, PacketMovementSample> packetMovementPositions = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastPacketMovementSanityFlag = new ConcurrentHashMap<>();
     private PacketListenerAbstract listener;
 
     public PacketEventsBridge(JavaPlugin plugin, ViolationManager violations) {
@@ -90,10 +93,25 @@ public final class PacketEventsBridge implements Listener {
                     return;
                 }
 
-                if (!plugin.getConfig().getBoolean("checks.packet-rate.enabled", false)
-                        && !plugin.getConfig().getBoolean("checks.timer.enabled", false)) return;
-                if (!(type.contains("PLAYER_POSITION") || type.contains("PLAYER_ROTATION")
-                        || type.endsWith("FLYING") || type.contains("PLAYER_POSITION_AND_ROTATION"))) return;
+                boolean packetSanityEnabled = plugin.getConfig().getBoolean("checks.packet-sanity.enabled", false);
+                boolean packetRateEnabled = plugin.getConfig().getBoolean("checks.packet-rate.enabled", false);
+                boolean timerEnabled = plugin.getConfig().getBoolean("checks.timer.enabled", false);
+                if (!packetSanityEnabled && !packetRateEnabled && !timerEnabled) return;
+                if (!WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) return;
+
+                WrapperPlayClientPlayerFlying movementPacket;
+                try {
+                    movementPacket = new WrapperPlayClientPlayerFlying(event);
+                } catch (RuntimeException malformedMovementPacket) {
+                    plugin.getLogger().fine("ANNA AC could not parse a client movement packet.");
+                    return;
+                }
+                if (packetSanityEnabled && movementPacket.hasPositionChanged()) {
+                    var position = movementPacket.getLocation().getPosition();
+                    observePacketMovement(id, position.getX(), position.getY(), position.getZ(), nowMs);
+                }
+                if (!packetRateEnabled && !timerEnabled) return;
+
                 Long previous = lastMovementPacket.put(id, nowNanos);
                 long intervalMs = previous == null ? Long.MAX_VALUE : (nowNanos - previous) / 1_000_000L;
                 if (previous == null || intervalMs > 1500L) movementStreamStarted.put(id, nowMs);
@@ -112,7 +130,7 @@ public final class PacketEventsBridge implements Listener {
                     pps = TimestampWindow.addAndTrim(times, nowMs, 1000L, maxMovementSamples);
                 }
 
-                if (plugin.getConfig().getBoolean("checks.packet-rate.enabled", false)) {
+                if (packetRateEnabled) {
                     int maxPps = (int) Math.round(versionedThreshold(id, "packet-rate", "max-movement-packets-per-second", 45.0));
                     int sampleWindow = (int) Math.round(versionedThreshold(id, "packet-rate", "sample-window", 40.0));
                     long cooldown = plugin.getConfig().getLong("checks.packet-rate.flag-cooldown-ms", 3000L);
@@ -132,7 +150,7 @@ public final class PacketEventsBridge implements Listener {
                     }
                 }
 
-                if (plugin.getConfig().getBoolean("checks.timer.enabled", false)) {
+                if (timerEnabled) {
                     long firstPacket = movementStreamStarted.getOrDefault(id, nowMs);
                     long sampleDuration = Math.round(versionedThreshold(id, "timer", "minimum-sample-duration-ms", 1200.0));
                     int timerMaxPps = (int) Math.round(versionedThreshold(id, "timer", "max-movement-packets-per-second", 23.0));
@@ -154,6 +172,64 @@ public final class PacketEventsBridge implements Listener {
         };
         PacketEvents.getAPI().getEventManager().registerListener(listener);
     }
+
+    private void observePacketMovement(UUID id, double x, double y, double z, long nowMs) {
+        double maxCoordinate = versionedThreshold(id, "packet-sanity", "max-absolute-coordinate", 30_000_000.0);
+        double maxY = versionedThreshold(id, "packet-sanity", "max-absolute-y", 4096.0);
+        if (!PacketMovementSanity.hasValidCoordinates(x, y, z, maxCoordinate, maxY)) {
+            packetMovementPositions.remove(id);
+            schedulePacketMovementSanitySignal(id,
+                    "invalid client movement coordinates (finite/configured-bound validation failed)");
+            return;
+        }
+
+        PacketMovementSample previous = packetMovementPositions.put(id, new PacketMovementSample(x, y, z, nowMs));
+        if (previous == null) return;
+
+        long maxGapMs = Math.max(250L, Math.min(10_000L,
+                Math.round(versionedThreshold(id, "packet-sanity", "baseline-reset-gap-ms", 1500.0))));
+        long elapsed = nowMs - previous.timeMs();
+        if (elapsed < 0L || elapsed > maxGapMs) return;
+
+        double maxHorizontalStep = Math.max(1.0, Math.min(128.0,
+                versionedThreshold(id, "packet-sanity", "max-horizontal-step-per-packet", 16.0)));
+        double maxVerticalStep = Math.max(1.0, Math.min(128.0,
+                versionedThreshold(id, "packet-sanity", "max-vertical-step-per-packet", 16.0)));
+        PacketMovementSanity.StepResult result = PacketMovementSanity.evaluateStep(
+                previous.x(), previous.y(), previous.z(), x, y, z, maxHorizontalStep, maxVerticalStep);
+        if (!result.suspicious()) return;
+
+        schedulePacketMovementSanitySignal(id, String.format(java.util.Locale.ROOT,
+                "raw movement packet step exceeds conservative bounds: horizontal=%.3f/%.3f vertical=%.3f/%.3f elapsed=%dms",
+                result.horizontalDistance(), maxHorizontalStep, result.verticalDistance(), maxVerticalStep, elapsed));
+    }
+
+    private void schedulePacketMovementSanitySignal(UUID id, String detail) {
+        long nowMs = System.nanoTime() / 1_000_000L;
+        long cooldown = Math.max(0L, Math.min(120_000L,
+                Math.round(versionedThreshold(id, "packet-sanity", "flag-cooldown-ms", 5000.0))));
+        boolean[] shouldEmit = {false};
+        lastPacketMovementSanityFlag.compute(id, (key, previous) -> {
+            if (previous == null || nowMs - previous >= cooldown) {
+                shouldEmit[0] = true;
+                return nowMs;
+            }
+            return previous;
+        });
+        if (!shouldEmit[0]) return;
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Player player = Bukkit.getPlayer(id);
+            if (player != null) violations.add(player, "packet-sanity",
+                    CheckUtil.getVersionedDouble(plugin, player, "packet-sanity", "violation-add", 1.0), detail);
+        });
+    }
+
+    @EventHandler
+    public void onPacketSanityTeleport(org.bukkit.event.player.PlayerTeleportEvent event) {
+        packetMovementPositions.remove(event.getPlayer().getUniqueId());
+    }
+
+    private record PacketMovementSample(double x, double y, double z, long timeMs) {}
 
     private void observeAttack(UUID id, long nowMs) {
         boolean rateDetectionEnabled = plugin.getConfig().getBoolean(
@@ -298,6 +374,8 @@ public final class PacketEventsBridge implements Listener {
         attackPatternOverLimitWindows.remove(id);
         lastAttackPatternEvaluation.remove(id);
         lastAttackPatternFlag.remove(id);
+        packetMovementPositions.remove(id);
+        lastPacketMovementSanityFlag.remove(id);
     }
 
     public void unregister() {
@@ -316,5 +394,7 @@ public final class PacketEventsBridge implements Listener {
         attackPatternOverLimitWindows.clear();
         lastAttackPatternEvaluation.clear();
         lastAttackPatternFlag.clear();
+        packetMovementPositions.clear();
+        lastPacketMovementSanityFlag.clear();
     }
 }

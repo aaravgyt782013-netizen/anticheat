@@ -67,6 +67,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `scaffold-signal` | Repeated placement-angle pattern | Disabled |
 | `no-fall` | Fall/landing damage correlation | Disabled |
 | `packet-rate` | PacketEvents rate telemetry | Disabled |
+| `packet-sanity` | Raw client position packet coordinate and extreme-step sanity checks | Disabled |
 | `timer` | Sustained movement packet-rate telemetry | Disabled |
 | `force-op` | Alias-aware OP/deop blocking, configurable permission-mutation patterns, operator-list auditing | Enabled |
 
@@ -107,6 +108,12 @@ The detector and its punishment action are disabled by default. Test double ches
 `checks.container-move.enabled` opts in to observing repeated horizontal movement while a server-side container GUI is open. It does not observe movement with the player's client-only inventory screen open, and it cannot reliably infer a particular cheat-client brand.
 
 The `checks-world.yml` section exposes the rolling sample window, minimum per-event movement, maximum accepted horizontal/vertical step, sample buffer cap, required movement samples, total path distance, velocity grace, signal cooldown, ignored inventory types/title substrings, and server/client-version overrides. Exclude custom GUI titles or types used by plugins that permit moving while inventories are open. A server velocity event clears evidence and provides a configurable grace period. Keep it disabled until staging tests cover ordinary containers, custom GUI plugins, knockback, latency, teleports, and legitimate menu interactions.
+
+## Raw movement-packet sanity signal
+
+`checks-packets.yml` contains the optional `packet-sanity` detector. When enabled, it inspects position-bearing PacketEvents movement packets for non-finite/out-of-bounds coordinates and unusually large horizontal or vertical changes between sequential client position packets. It starts a fresh baseline after a Bukkit teleport and after a long packet gap, and keeps one position sample per connected player.
+
+The principal controls are `max-absolute-coordinate`, `max-absolute-y`, `max-horizontal-step-per-packet`, `max-vertical-step-per-packet`, `baseline-reset-gap-ms`, `flag-cooldown-ms`, and the normal violation/alert/version override settings. Thresholds are intentionally conservative; tune them only with reproducible staging evidence. PacketEvents must be installed and compatible with the protocol. The detector is disabled by default, uses the existing per-check punishment safety gates, and is not a deterministic replay of Minecraft physics. If the network has plugins that legitimately teleport or allow extreme movement, keep this signal disabled or validate the relevant reset paths before use.
 
 ## Configuration validation
 

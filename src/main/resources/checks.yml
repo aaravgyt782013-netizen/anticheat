@@ -697,6 +697,44 @@ checks:
     # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 10.0
 
+  # Raw incoming position-packet sanity checks; supplemental signal, disabled until staging-tested.
+  packet-sanity:
+    # Enable extreme coordinate/step telemetry from PacketEvents. Not a complete movement simulator.
+    enabled: false
+    # Emit staff alerts when invalid coordinates or extreme single-packet steps repeat past cooldown.
+    alert: true
+    # Minimum time between repeated alerts for this player/check.
+    alert-cooldown-ms: 5000
+    # World names where this check should not run.
+    ignored-worlds: []
+    # Player permissions exempt from this check.
+    ignored-permissions: []
+    # Game modes exempt from this check (creative flight/server mechanics may differ).
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Reset the first-position baseline after this much time without a position packet; effective 250–10000ms.
+    baseline-reset-gap-ms: 1500
+    # Maximum allowed absolute X/Z coordinate before flagging a raw packet.
+    max-absolute-coordinate: 30000000.0
+    # Maximum allowed absolute Y coordinate before flagging a raw packet.
+    max-absolute-y: 4096.0
+    # Maximum horizontal displacement between sequential client position packets.
+    # Kept very high to flag only extreme outliers; tune only with staging evidence.
+    max-horizontal-step-per-packet: 16.0
+    # Maximum vertical displacement between sequential client position packets.
+    max-vertical-step-per-packet: 16.0
+    # Server-version numeric overrides; version keys must use underscores such as '1_21_11'.
+    version-overrides: {}
+    # Client-protocol numeric overrides require compatible PacketEvents; they are not client-brand detection.
+    client-version-overrides: {}
+    # Violation level added for one invalid coordinate or extreme step.
+    violation-add: 1.0
+    # How quickly violation level decreases per second.
+    violation-decay-per-second: 0.5
+    # Violation level at which staff alerts are eligible.
+    alert-vl: 2.0
+    # Threshold for configured automatic action; action is disabled by default in punishments.yml.
+    kick-vl: 10.0
+
   # PacketEvents-based movement packet-rate signal. Requires compatible PacketEvents.
   packet-rate:
     # Enable this feature. For experimental checks, leave false until tested on a staging server.

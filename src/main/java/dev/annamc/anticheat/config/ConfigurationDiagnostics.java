@@ -13,7 +13,7 @@ public final class ConfigurationDiagnostics {
     public static final List<String> DETECTORS = List.of(
             "movement", "movement-physics", "flight", "jesus", "spider-signal", "knockback", "reach", "mace-damage", "wall-hit",
             "fast-break", "nuker-burst", "block-reach", "click-rate", "container-steal", "container-move", "combat-pattern",
-            "scaffold-signal", "no-fall", "packet-rate", "timer");
+            "scaffold-signal", "no-fall", "packet-sanity", "packet-rate", "timer");
 
     private ConfigurationDiagnostics() {}
 
@@ -94,7 +94,7 @@ public final class ConfigurationDiagnostics {
             if (action && !enabled) {
                 notes.add("Punishment action '" + check + "' is enabled while its detector is disabled; it cannot trigger.");
             }
-            if (("packet-rate".equals(check) || "timer".equals(check)) && enabled) packetRequired = true;
+            if (("packet-rate".equals(check) || "timer".equals(check) || "packet-sanity".equals(check)) && enabled) packetRequired = true;
             if ("click-rate".equals(check) && enabled
                     && (plugin.getConfig().getBoolean("checks.click-rate.attack-packets-enabled", true)
                     || plugin.getConfig().getBoolean("checks.click-rate.pattern-detection-enabled", false))) {

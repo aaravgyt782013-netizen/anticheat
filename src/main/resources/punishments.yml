@@ -232,6 +232,14 @@ punishments:
       # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
       # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
       commands: []
+    # Raw movement-packet coordinate/step sanity signal; supplemental, staging-only until calibrated.
+    packet-sanity:
+      enabled: false
+      type: "KICK"
+      threshold-vl: 10.0
+      cooldown-ms: 30000
+      message: ""
+      commands: []
     # PacketEvents-based movement packet-rate signal. Requires compatible PacketEvents.
     packet-rate:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
