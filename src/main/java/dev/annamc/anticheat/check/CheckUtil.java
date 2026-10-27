@@ -31,23 +31,8 @@ public final class CheckUtil {
      * This keeps tuning explicit instead of silently applying guessed physics constants.
      */
     public static double getVersionedDouble(JavaPlugin plugin, String check, String key, double fallback) {
-        String base = "checks." + check + ".";
-        String version = org.bukkit.Bukkit.getMinecraftVersion();
-        if (version != null && !version.isBlank()) {
-            String exact = base + "version-overrides." + version + "." + key;
-            if (plugin.getConfig().isDouble(exact) || plugin.getConfig().isInt(exact)) {
-                return plugin.getConfig().getDouble(exact, fallback);
-            }
-            String[] parts = version.split("\\.");
-            if (parts.length >= 2) {
-                String minor = parts[0] + "." + parts[1];
-                String compatible = base + "version-overrides." + minor + "." + key;
-                if (plugin.getConfig().isDouble(compatible) || plugin.getConfig().isInt(compatible)) {
-                    return plugin.getConfig().getDouble(compatible, fallback);
-                }
-            }
-        }
-        return plugin.getConfig().getDouble(base + key, fallback);
+        return VersionedThresholds.resolve(plugin.getConfig(), org.bukkit.Bukkit.getMinecraftVersion(),
+                check, key, fallback);
     }
 
     private static boolean contains(List<String> values, String value) {
