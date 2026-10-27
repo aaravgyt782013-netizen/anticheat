@@ -12,7 +12,7 @@
 
 Numeric settings for the supported movement/combat checks may be overridden at:
 
-`checks.<check>.version-overrides.<version>.<setting>`
+`checks.<check>.version-overrides.<version_key>.<setting>` (replace dots in version keys with underscores)
 
 Resolution order is exact Minecraft version (for example `1.21.11`), then major.minor (for example `1.21`), then the ordinary `checks.<check>.<setting>` default. Only add an override when staging data demonstrates a real version-specific difference. Avoid assuming every patch release has identical movement behavior.
 
@@ -20,14 +20,14 @@ Example for `checks.movement-physics`:
 
 ```yaml
 version-overrides:
-  '1.21.11':
+  '1_21_11':
     base-horizontal-per-tick: 0.72
     sprint-multiplier: 1.3
-  '1.21':
+  '1_21':
     max-ping-slack: 0.75
 ```
 
-This currently supports numeric tuning for `movement-physics`, `reach`, and `mace-damage`. Other checks continue to use their standard settings until version-aware accessors are added to them.
+Version-aware numeric tuning now covers `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, and `mace-damage`. Only settings explicitly wired to the resolver can be overridden; use exact-version and major/minor keys with underscores.
 
 ## Baseline and test matrix
 

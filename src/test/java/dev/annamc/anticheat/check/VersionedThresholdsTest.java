@@ -73,6 +73,39 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void combatAndMiningSignalsSupportVersionOverrides() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  knockback:
+                    minimum-horizontal-velocity: 0.25
+                    version-overrides:
+                      '1_21': { minimum-horizontal-velocity: 0.28 }
+                  wall-hit:
+                    minimum-occluded-sample-ratio: 1.0
+                    version-overrides:
+                      '1_21_11': { minimum-occluded-sample-ratio: 0.85 }
+                  fast-break:
+                    minimum-time-ratio: 0.5
+                    version-overrides:
+                      '1_21_11': { minimum-time-ratio: 0.65 }
+                  nuker-burst:
+                    max-block-breaks-per-window: 18
+                    version-overrides:
+                      '1_21': { max-block-breaks-per-window: 16 }
+                """);
+
+        assertEquals(0.28, VersionedThresholds.resolve(config, "1.21.11",
+                "knockback", "minimum-horizontal-velocity", 0.20));
+        assertEquals(0.85, VersionedThresholds.resolve(config, "1.21.11",
+                "wall-hit", "minimum-occluded-sample-ratio", 0.95));
+        assertEquals(0.65, VersionedThresholds.resolve(config, "1.21.11",
+                "fast-break", "minimum-time-ratio", 0.40));
+        assertEquals(16.0, VersionedThresholds.resolve(config, "1.21.11",
+                "nuker-burst", "max-block-breaks-per-window", 20.0));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 

@@ -53,7 +53,7 @@ public final class KnockbackPredictionCheck implements Listener {
         }
         Vector velocity = event.getVelocity();
         double horizontal = Math.hypot(velocity.getX(), velocity.getZ());
-        double min = plugin.getConfig().getDouble("checks.knockback.minimum-horizontal-velocity", 0.25);
+        double min = CheckUtil.getVersionedDouble(plugin, "knockback", "minimum-horizontal-velocity", 0.25);
         if (horizontal < min) return;
         pending.put(player.getUniqueId(), new Pending(player.getLocation().clone(),
                 System.currentTimeMillis(), 0, null, velocity.clone()));
@@ -80,7 +80,7 @@ public final class KnockbackPredictionCheck implements Listener {
         long age = System.currentTimeMillis() - p.startedAt;
         int baseMaxAge = plugin.getConfig().getInt("checks.knockback.observation-window-ms", 350);
         int pingExtension = (int) Math.min(plugin.getConfig().getInt("checks.knockback.max-ping-window-extension-ms", 200),
-                Math.max(0, player.getPing()) * plugin.getConfig().getDouble("checks.knockback.ping-window-extension-per-ms", 0.5));
+                Math.max(0, player.getPing()) * CheckUtil.getVersionedDouble(plugin, "knockback", "ping-window-extension-per-ms", 0.5));
         int maxAge = baseMaxAge + pingExtension;
         if (age > maxAge) {
             pending.remove(player.getUniqueId());
@@ -95,15 +95,15 @@ public final class KnockbackPredictionCheck implements Listener {
         pending.put(player.getUniqueId(), updated);
         int required = plugin.getConfig().getInt("checks.knockback.minimum-observations", 4);
         double velocityLength = Math.hypot(p.velocity.getX(), p.velocity.getZ());
-        if (velocityLength < plugin.getConfig().getDouble("checks.knockback.minimum-horizontal-velocity", 0.25)) {
+        if (velocityLength < CheckUtil.getVersionedDouble(plugin, "knockback", "minimum-horizontal-velocity", 0.25)) {
             pending.remove(player.getUniqueId());
             return;
         }
         if (observations >= required && age >= plugin.getConfig().getInt("checks.knockback.minimum-age-ms", 120)) {
             double projection = (dx * p.velocity.getX() + dz * p.velocity.getZ()) / velocityLength;
-            double threshold = plugin.getConfig().getDouble("checks.knockback.minimum-forward-projection", 0.04);
+            double threshold = CheckUtil.getVersionedDouble(plugin, "knockback", "minimum-forward-projection", 0.04);
             double minimumDisplacement = Math.max(0.0,
-                    plugin.getConfig().getDouble("checks.knockback.minimum-observed-displacement", 0.08));
+                    CheckUtil.getVersionedDouble(plugin, "knockback", "minimum-observed-displacement", 0.08));
             if (displacement < minimumDisplacement || projection < threshold) {
                 violations.add(player, "knockback",
                         plugin.getConfig().getDouble("checks.knockback.violation-add", 1.0),

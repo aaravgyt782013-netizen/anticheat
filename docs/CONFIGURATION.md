@@ -74,7 +74,7 @@ checks:
         max-horizontal-distance-per-tick: 1.30
 ```
 
-Version overrides are currently wired for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `reach`, and `mace-damage`. For each check, only threshold fields actually read through the version-aware resolver are affected; other settings remain normal global settings. The example numbers are illustrative, not recommended anti-cheat defaults. Keep experimental checks disabled until staging tests confirm they do not flag legitimate movement.
+Version overrides are currently wired for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, and `mace-damage`. For each check, only the numeric settings explicitly read through the version-aware resolver are affected; all other settings remain normal global settings. The example numbers are illustrative, not recommended anti-cheat defaults. Keep experimental checks disabled until staging tests confirm they do not flag legitimate movement.
 
 ## Per-check punishment actions
 

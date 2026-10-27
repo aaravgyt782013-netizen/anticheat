@@ -173,6 +173,8 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Ignore knockback observations below this horizontal velocity.
     minimum-horizontal-velocity: 0.25
+    # Optional version overrides for velocity/projection thresholds; use keys such as '1_21_11'.
+    version-overrides: {}
     # Time window after velocity in which movement is observed.
     observation-window-ms: 350
     # Additional observation-window time per millisecond of ping.
@@ -244,6 +246,8 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Maximum eye-to-sampled-hitbox distance considered by this check.
     max-evaluation-distance: 6.0
+    # Optional overrides for evaluation distance, occlusion margin and required blocked-sample ratio.
+    version-overrides: {}
     # Require this ratio of sampled target points to be occluded before flagging (0.0–1.0).
     minimum-occluded-sample-ratio: 1.0
     # Ignore block hits closer than this margin to a target sample to reduce edge noise.
@@ -278,6 +282,8 @@ checks:
     evaluation-interval-ms: 250
     # Number of non-ignored blocks broken inside the rolling window that triggers suspicion.
     max-block-breaks-per-window: 18
+    # Optional version overrides for block-rate and repeated-window thresholds.
+    version-overrides: {}
     # Consecutive over-limit evaluations required before the check flags.
     required-over-limit-windows: 3
     # Block material names excluded from the rolling count; edit for your server's gameplay.
@@ -308,6 +314,8 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Ratio of estimated legal tick duration to require before a break may count as suspicious (0.05–1.0).
     minimum-time-ratio: 0.5
+    # Optional overrides for timing ratio, ping slack and minimum observed-time threshold.
+    version-overrides: {}
     # Minimum observed time threshold in milliseconds after latency slack is applied.
     minimum-required-time-ms: 60
     # Latency allowance subtracted from the expected-time threshold per ping millisecond.
