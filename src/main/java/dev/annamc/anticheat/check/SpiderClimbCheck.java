@@ -43,7 +43,7 @@ public final class SpiderClimbCheck implements Listener {
         }
 
         long now = System.currentTimeMillis();
-        long interval = Math.max(35L, plugin.getConfig().getLong("checks.spider-signal.sample-interval-ms", 75L));
+        long interval = Math.max(35L, Math.round(CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "sample-interval-ms", 75.0)));
         Sample previous = samples.get(id);
         if (previous == null || !previous.world.equals(to.getWorld().getUID())) {
             samples.put(id, new Sample(to, now, 0));
@@ -51,7 +51,7 @@ public final class SpiderClimbCheck implements Listener {
         }
         if (now - previous.sampledAt < interval) return;
         long gap = now - previous.sampledAt;
-        long maxGap = Math.max(interval, plugin.getConfig().getLong("checks.spider-signal.max-sample-gap-ms", 250L));
+        long maxGap = Math.max(interval, Math.round(CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "max-sample-gap-ms", 250.0)));
         if (gap > maxGap) {
             samples.put(id, new Sample(to, now, 0));
             return;
@@ -62,7 +62,7 @@ public final class SpiderClimbCheck implements Listener {
         double dz = to.getZ() - previous.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
         double maxStep = Math.max(0.5,
-                plugin.getConfig().getDouble("checks.spider-signal.max-horizontal-distance-per-sample", 2.5));
+                CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "max-horizontal-distance-per-sample", 2.5));
         double minimumRise = Math.max(0.0,
                 CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "minimum-upward-delta", 0.08));
         if (horizontal > maxStep || Math.abs(dy) > 1.25) {
@@ -72,7 +72,7 @@ public final class SpiderClimbCheck implements Listener {
 
         int count = dy >= minimumRise ? previous.upwardSamples + 1 : 0;
         int required = Math.max(5, Math.min(100,
-                plugin.getConfig().getInt("checks.spider-signal.required-upward-samples", 10)));
+                (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "spider-signal", "required-upward-samples", 10.0))));
         samples.put(id, new Sample(to, now, count));
         if (count >= required) {
             samples.put(id, new Sample(to, now, 0));
