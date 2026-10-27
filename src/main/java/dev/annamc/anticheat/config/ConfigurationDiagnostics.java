@@ -28,6 +28,21 @@ public final class ConfigurationDiagnostics {
         if (!Double.isFinite(minimumTps) || minimumTps < 1.0 || minimumTps > 20.0) {
             notes.add("settings.performance.minimum-tps must be finite and between 1.0 and 20.0; the lag guard ignores invalid values.");
         }
+        if (plugin.getConfig().getBoolean("settings.performance.pause-detection-under-tps-enabled", true)) {
+            java.util.Set<String> knownChecks = new java.util.HashSet<>(DETECTORS);
+            for (String configured : plugin.getConfig().getStringList("settings.performance.pause-checks-on-low-tps")) {
+                if (configured == null || configured.isBlank()) continue;
+                if (!configured.trim().equals("*") && !knownChecks.contains(configured.trim().toLowerCase(java.util.Locale.ROOT))) {
+                    notes.add("Unknown detector '" + configured + "' in settings.performance.pause-checks-on-low-tps; it will not pause detection unless the name matches an active check.");
+                }
+            }
+            if (plugin.getConfig().getStringList("settings.performance.pause-checks-on-low-tps").isEmpty()) {
+                notes.add("The low-TPS guard is enabled but pause-checks-on-low-tps is empty; no detectors will be paused.");
+            }
+            if (plugin.getConfig().getStringList("settings.performance.pause-checks-on-low-tps").contains("*")) {
+                notes.add("Low-TPS pause policy contains '*'; all checks that use CheckUtil will pause during low TPS, including packet/client telemetry.");
+            }
+        }
         for (String warning : dev.annamc.anticheat.check.VersionedThresholds.validateOverrides(plugin.getConfig())) {
             notes.add("Threshold override configuration: " + warning);
         }

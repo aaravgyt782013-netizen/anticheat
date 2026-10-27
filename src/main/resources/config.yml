@@ -10,8 +10,26 @@ settings:
   ignored-worlds: []
   # Reduce false positives when the server is overloaded. Applies to gameplay detector checks only.
   performance:
-    # Pause gameplay detector evaluation when the one-minute average TPS falls below minimum-tps.
-    # Security protections such as Force OP and anti-nuke are not paused by this setting.
+    # Enable a lag guard for only the checks listed below; never pause every detector implicitly.
+    # Packet-rate, timer, and click-rate stay active by default because packet telemetry can remain useful during tick lag.
     pause-detection-under-tps-enabled: true
-    # Valid range: 1.0–20.0. Set lower for more detection during lag, higher for a safer posture.
+    # Detectors whose event/tick-based evidence is unreliable under low server TPS.
+    # Add/remove names to customize the policy. Use ['*'] only if you deliberately want every detector paused.
+    pause-checks-on-low-tps:
+      - movement
+      - movement-physics
+      - flight
+      - jesus
+      - spider-signal
+      - knockback
+      - reach
+      - wall-hit
+      - mace-damage
+      - fast-break
+      - nuker-burst
+      - container-steal
+      - scaffold-signal
+      - no-fall
+      - combat-pattern
+    # Valid range: 1.0–20.0. The guard uses Paper's one-minute TPS sample.
     minimum-tps: 17.0

@@ -6,6 +6,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ServerPerformanceGuardTest {
     @Test
+    void lowTpsPausePolicyOnlyAffectsExplicitlyListedChecks() {
+        assertTrue(ServerPerformanceGuard.shouldPauseCheck("movement", java.util.List.of("movement", "reach")));
+        assertTrue(ServerPerformanceGuard.shouldPauseCheck("REACH", java.util.List.of("movement", "reach")));
+        assertFalse(ServerPerformanceGuard.shouldPauseCheck("packet-rate", java.util.List.of("movement", "reach")));
+        assertFalse(ServerPerformanceGuard.shouldPauseCheck("click-rate", java.util.List.of("movement", "reach")));
+        assertFalse(ServerPerformanceGuard.shouldPauseCheck("movement", java.util.List.of()));
+        assertFalse(ServerPerformanceGuard.shouldPauseCheck("movement", null));
+        assertTrue(ServerPerformanceGuard.shouldPauseCheck("packet-rate", java.util.List.of("*")));
+    }
+
+    @Test
     void pausesOnlyWhenOneMinuteTpsIsBelowThreshold() {
         assertTrue(ServerPerformanceGuard.isLagging(new double[]{16.9, 19.0, 20.0}, 17.0));
         assertFalse(ServerPerformanceGuard.isLagging(new double[]{17.0, 16.0, 15.0}, 17.0));

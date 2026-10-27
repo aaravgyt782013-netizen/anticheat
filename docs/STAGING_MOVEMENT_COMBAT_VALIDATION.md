@@ -4,6 +4,7 @@
 
 - Do not validate new heuristics on the live Anna MC network first.
 - Keep experimental movement/combat checks disabled and all automatic actions disabled during baseline collection.
+- Test the low-TPS policy with both normal TPS and deliberate staging load. Confirm only the configured `settings.performance.pause-checks-on-low-tps` detector names are suspended; packet-rate, timer and click-rate telemetry should remain active unless explicitly added.
 - Collect evidence from legitimate play before setting thresholds. A high ping, custom enchantment, knockback, velocity-changing plugin, or server lag must not be treated as proof by itself.
 - A detector flag is a signal, not proof. Automatic punishment should require corroboration from independent detector families and a reviewable evidence trail.
 - Run the matrix on the exact Paper build, Java version, plugin set, world settings, and proxy path used in production.
