@@ -39,6 +39,8 @@ public final class FlightHoverCheck implements Listener {
                 && from.getZ() == to.getZ())) return;
 
         UUID id = player.getUniqueId();
+        // Avoid per-move map work for every player while the experimental detector is disabled.
+        if (!plugin.getConfig().getBoolean("checks.flight.enabled", false)) return;
         if (CheckUtil.shouldSkip(plugin, player, "flight") || legitimateMovementState(player, to)) {
             samples.remove(id);
             return;
