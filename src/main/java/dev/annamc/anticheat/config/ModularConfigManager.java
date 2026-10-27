@@ -153,7 +153,8 @@ public final class ModularConfigManager {
             String path = "checks." + check;
             ConfigurationSection sourceSection = source.getConfigurationSection(path);
             if (sourceSection == null) continue;
-            target.set(path, null);
+            // Overlay the legacy value onto the bundled module defaults without deleting
+            // the resource comments. This preserves both existing tuning and readable docs.
             for (String key : sourceSection.getKeys(true)) {
                 if (!sourceSection.isConfigurationSection(key)) {
                     target.set(path + "." + key, sourceSection.get(key));
