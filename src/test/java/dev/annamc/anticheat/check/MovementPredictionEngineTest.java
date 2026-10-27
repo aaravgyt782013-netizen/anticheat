@@ -32,7 +32,7 @@ class MovementPredictionEngineTest {
     @Test
     void recentVelocityAddsBoundedAllowanceAndDecays() {
         var fresh = MovementPredictionEngine.predict(withVelocity(baseInput(), 100));
-        var old = MovementPredictionEngine.predict(withVelocity(baseInput(), 600));
+        var old = MovementPredictionEngine.predict(withVelocity(baseInput(), 700));
         assertTrue(fresh.velocityAllowance() > old.velocityAllowance());
         assertTrue(fresh.velocityAllowance() <= 0.8);
         assertEquals(0.0, old.velocityAllowance(), 1.0e-9);
