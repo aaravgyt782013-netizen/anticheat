@@ -80,7 +80,7 @@ public final class FlightHoverCheck implements Listener {
 
     private boolean legitimateMovementState(Player player, Location location) {
         if (player.isOnGround() || player.isFlying() || player.getAllowFlight()
-                || player.isGliding() || player.isInsideVehicle() || player.isSwimming()
+                || player.isGliding() || player.isInsideVehicle() || player.isSwimming() || player.isClimbing()
                 || player.hasPotionEffect(PotionEffectType.LEVITATION)
                 || player.hasPotionEffect(PotionEffectType.SLOW_FALLING)) return true;
 
@@ -92,7 +92,10 @@ public final class FlightHoverCheck implements Listener {
         Material beneath = below.getBlock().getType();
         return beneath == Material.SLIME_BLOCK || beneath == Material.HONEY_BLOCK
                 || beneath == Material.SOUL_SAND || beneath == Material.SOUL_SOIL
-                || beneath == Material.COBWEB;
+                || beneath == Material.COBWEB || beneath == Material.LADDER
+                || beneath == Material.VINE || beneath == Material.TWISTING_VINES
+                || beneath == Material.TWISTING_VINES_PLANT || beneath == Material.WEEPING_VINES
+                || beneath == Material.WEEPING_VINES_PLANT;
     }
 
     @EventHandler
