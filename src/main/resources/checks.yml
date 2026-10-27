@@ -204,6 +204,8 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Maximum approximate eye-to-target hitbox distance before adding violation.
     max-distance: 3.6
+    # Optional exact server version or major.minor numeric overrides for this check.
+    version-overrides: {}
     # Extra movement allowance per millisecond of measured ping.
     ping-slack-per-ms: 0.001
     # Maximum extra movement allowance granted for ping.
@@ -549,6 +551,8 @@ checks:
     vanilla-smash-model-enabled: true
     # Conservative base-damage allowance for the mace's base hit, critical hit, and ordinary combat effects.
     base-damage-allowance: 10.0
+    # Optional exact server version or major.minor numeric overrides for mace damage constants.
+    version-overrides: {}
     # Density adds 0.5 raw damage per block per level in vanilla Java; tune upward only if server mechanics require it.
     density-damage-per-block-per-level: 0.5
     # Additional tolerance for plugin-modified damage, effects, timing, and engine differences.
