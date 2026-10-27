@@ -14,7 +14,7 @@ Legend:
 | X-ray / cave finder / ore ESP | Meteor, Wurst, resource packs | **Server configuration:** Paper Anti-Xray. ANNA AC does not hide blocks itself. |
 | KillAura / automated attacks | Meteor, Wurst, custom clients | **Current signal:** combat-pattern and reach heuristics. Not proof; needs stronger packet/history analysis. |
 | Aim assist / aim bot | Meteor add-ons, custom clients | **Current signal:** weak repeated-rotation / hit-angle pattern. Needs calibrated multi-signal analysis; legitimate aim can look similar. |
-| Reach | extended attack distance | **Current signal:** approximate hitbox-distance check; lacks complete historical hitbox/interpolation compensation. |
+| Reach | extended attack distance | **Current signal:** approximate hitbox-distance check; lacks complete historical hitbox/interpolation compensation. |\n| Mace damage anomalies | abnormal mace smash damage / damage amplification | **Current signal:** configurable vanilla Java smash curve with Density allowance and legacy formula fallback. Not a complete combat simulator; disabled by default. |
 | Wall hits / attacks through blocks | attack while target is occluded | **Current signal:** samples target hitbox sight lines and flags only if the configured ratio is blocked. No full packet-history or latency compensation; keep disabled until staging-tested. |
 | AutoClicker / TriggerBot | automated clicks or attack timing | **Current signal:** arm-swing rate plus optional PacketEvents rolling attack-packet rate with repeated-window threshold. Still not a statistical click-pattern model; CPS or attack rate alone is not proof. |
 | Velocity / Anti-knockback | reduced or ignored knockback | **Current signal:** observed displacement after velocity. Needs robust collision, input, and latency modelling. |
@@ -30,7 +30,7 @@ Legend:
 | Elytra / boat / vehicle movement exploits | abnormal gliding or vehicle motion | **Needs implementation:** separate movement models per movement mode and version. |
 | Packet exploits / malformed or abusive packet rates | custom clients, protocol abuse | **Current signal:** optional PacketEvents packet-rate telemetry. Needs packet-specific validation, limits and regression tests. |
 | Chat spam / command spam / botting | automated chat and requests | **Needs implementation:** rate limits and account/session signals; avoid punishing shared networks or legitimate bursts. |
-| Force OP / privilege escalation attempts | unauthorized op/deop and permission commands | **Current signal:** command guard and operator-list audit. Cannot stop malicious plugins, host/file access, or a compromised console. |
+| Force OP / privilege escalation attempts | unauthorized op/deop and permission commands | **Current signal:** alias-aware root matching, execute-wrapped command inspection, configurable permission-mutation patterns, and operator-list audit. Cannot stop malicious plugins, host/file access, or a compromised console. |
 | Skin / nametag / fullbright / cosmetic-only modules | visual-only client features | Often **not server-detectable** and not necessarily a gameplay cheat. Enforce a clear server policy rather than claiming detection. |
 
 ## Detection and punishment policy
