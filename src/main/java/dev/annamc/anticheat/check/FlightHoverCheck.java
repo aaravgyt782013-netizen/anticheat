@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -114,6 +115,11 @@ public final class FlightHoverCheck implements Listener {
                 || beneath == Material.VINE || beneath == Material.TWISTING_VINES
                 || beneath == Material.TWISTING_VINES_PLANT || beneath == Material.WEEPING_VINES
                 || beneath == Material.WEEPING_VINES_PLANT;
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) {
+        samples.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler

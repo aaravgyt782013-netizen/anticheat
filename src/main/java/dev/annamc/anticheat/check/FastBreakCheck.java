@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayDeque;
@@ -142,6 +143,14 @@ public final class FastBreakCheck implements Listener {
                         "repeated fast block breaks=%d expected-ticks=%d observed-ms=%d conservative-threshold-ms=%.1f ping=%dms block=%s; review effects, tools and server plugins",
                         sampleCount, session.expectedTicks, elapsed, thresholdMs, player.getPing(),
                         event.getBlock().getType().name()));
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) {
+        UUID id = event.getPlayer().getUniqueId();
+        sessions.remove(id);
+        impossibleBreaks.remove(id);
+        lastFlag.remove(id);
     }
 
     @EventHandler

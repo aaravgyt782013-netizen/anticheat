@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
@@ -65,6 +66,11 @@ public final class ScaffoldSignalCheck implements Listener {
                             count, pitch, horizontal, speed));
             patterns.put(id, new PlacementPattern(0, pitch, now));
         }
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) {
+        patterns.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler

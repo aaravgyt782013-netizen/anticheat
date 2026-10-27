@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
@@ -96,6 +97,12 @@ public final class CombatPatternCheck implements Listener {
         Vector look = eye.getDirection().normalize();
         double dot = Math.max(-1.0, Math.min(1.0, look.dot(toward.normalize())));
         return Math.toDegrees(Math.acos(dot));
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) {
+        rotations.remove(event.getPlayer().getUniqueId());
+        patterns.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler public void onQuit(PlayerQuitEvent event) {

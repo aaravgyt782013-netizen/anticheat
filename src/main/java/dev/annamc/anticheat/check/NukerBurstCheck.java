@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayDeque;
@@ -86,6 +87,8 @@ public final class NukerBurstCheck implements Listener {
                         "block-break burst=%d in %dms (limit=%d, repeated-windows=%d); validate tool, effects and server plugins",
                         count, windowMs, maxBreaks, streak));
     }
+
+    @EventHandler public void onTeleport(PlayerTeleportEvent event) { clear(event.getPlayer().getUniqueId()); }
 
     @EventHandler public void onQuit(PlayerQuitEvent event) { clear(event.getPlayer().getUniqueId()); }
 

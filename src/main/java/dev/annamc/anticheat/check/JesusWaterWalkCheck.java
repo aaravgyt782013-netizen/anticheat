@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -102,6 +103,11 @@ public final class JesusWaterWalkCheck implements Listener {
                 || player.isRiptiding()
                 || player.hasPotionEffect(PotionEffectType.LEVITATION)
                 || player.hasPotionEffect(PotionEffectType.SLOW_FALLING);
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) {
+        samples.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
