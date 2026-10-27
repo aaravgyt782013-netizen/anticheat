@@ -8,7 +8,7 @@ public final class SignalCorrelation {
         if (check == null) return "unknown";
         return switch (check.toLowerCase(java.util.Locale.ROOT)) {
             case "movement", "movement-physics", "knockback" -> "movement";
-            case "reach", "wall-hit", "click-rate", "combat-pattern" -> "combat";
+            case "reach", "wall-hit", "click-rate", "combat-pattern", "mace-damage" -> "combat";
             case "scaffold-signal", "fast-break", "nuker-burst", "no-fall" -> "world-interaction";
             case "packet-rate", "timer" -> "packet";
             default -> check.toLowerCase(java.util.Locale.ROOT);
