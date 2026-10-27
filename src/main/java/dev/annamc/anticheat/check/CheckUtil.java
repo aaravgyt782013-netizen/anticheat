@@ -35,6 +35,19 @@ public final class CheckUtil {
                 check, key, fallback);
     }
 
+    /**
+     * Resolves a threshold using the connected player's protocol version when PacketEvents
+     * has observed it. Client-specific overrides take priority; server-specific overrides
+     * remain the fallback so the detector still works when PacketEvents is absent.
+     */
+    public static double getVersionedDouble(JavaPlugin plugin, Player player, String check,
+                                            String key, double fallback) {
+        String clientVersion = player == null ? null
+                : ClientVersionRegistry.get(player.getUniqueId());
+        return VersionedThresholds.resolveForClient(plugin.getConfig(), clientVersion,
+                org.bukkit.Bukkit.getMinecraftVersion(), check, key, fallback);
+    }
+
     private static boolean contains(List<String> values, String value) {
         return values.stream().anyMatch(v -> v.equalsIgnoreCase(value));
     }

@@ -4,6 +4,8 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import dev.annamc.anticheat.check.ViolationManager;
+import dev.annamc.anticheat.check.ClientVersionRegistry;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -48,6 +50,16 @@ public final class PacketEventsBridge implements Listener {
             @Override
             public void onPacketReceive(PacketReceiveEvent event) {
                 UUID id = event.getUser().getUUID();
+                // Capture protocol release name for optional client-version threshold overrides.
+                // Unknown/unparseable versions are ignored; checks fall back to server defaults.
+                try {
+                    ClientVersion clientVersion = event.getUser().getClientVersion();
+                    if (clientVersion != null) {
+                        ClientVersionRegistry.remember(id, clientVersion.getReleaseName());
+                    }
+                } catch (RuntimeException ignored) {
+                    // Version-specific tuning is optional; packet telemetry must remain resilient.
+                }
                 String type = String.valueOf(event.getPacketType()).toUpperCase(java.util.Locale.ROOT);
                 long nowNanos = System.nanoTime();
                 long nowMs = nowNanos / 1_000_000L;
@@ -177,6 +189,7 @@ public final class PacketEventsBridge implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         UUID id = event.getPlayer().getUniqueId();
+        ClientVersionRegistry.forget(id);
         lastMovementPacket.remove(id);
         movementStreamStarted.remove(id);
         fastIntervals.remove(id);
@@ -191,6 +204,7 @@ public final class PacketEventsBridge implements Listener {
 
     public void unregister() {
         if (listener != null) PacketEvents.getAPI().getEventManager().unregisterListener(listener);
+        ClientVersionRegistry.clear();
         lastMovementPacket.clear();
         movementStreamStarted.clear();
         fastIntervals.clear();
