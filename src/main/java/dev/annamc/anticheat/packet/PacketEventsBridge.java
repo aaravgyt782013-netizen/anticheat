@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import dev.annamc.anticheat.check.ViolationManager;
 import dev.annamc.anticheat.check.ClientVersionRegistry;
+import dev.annamc.anticheat.check.VersionedThresholds;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import org.bukkit.Bukkit;
@@ -28,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class PacketEventsBridge implements Listener {
     private final JavaPlugin plugin;
     private final ViolationManager violations;
+    private final String serverVersion;
     private final Map<UUID, Long> lastMovementPacket = new ConcurrentHashMap<>();
     private final Map<UUID, Long> movementStreamStarted = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> fastIntervals = new ConcurrentHashMap<>();
@@ -43,6 +45,7 @@ public final class PacketEventsBridge implements Listener {
     public PacketEventsBridge(JavaPlugin plugin, ViolationManager violations) {
         this.plugin = plugin;
         this.violations = violations;
+        this.serverVersion = Bukkit.getMinecraftVersion();
     }
 
     public void register() {
@@ -88,7 +91,7 @@ public final class PacketEventsBridge implements Listener {
                 Long previous = lastMovementPacket.put(id, nowNanos);
                 long intervalMs = previous == null ? Long.MAX_VALUE : (nowNanos - previous) / 1_000_000L;
                 if (previous == null || intervalMs > 1500L) movementStreamStarted.put(id, nowMs);
-                long minimum = plugin.getConfig().getLong("checks.packet-rate.minimum-interval-ms", 5);
+                long minimum = Math.round(versionedThreshold(id, "packet-rate", "minimum-interval-ms", 5.0));
                 int fast = intervalMs < minimum ? fastIntervals.merge(id, 1, Integer::sum)
                         : fastIntervals.compute(id, (key, value) -> value == null ? 0 : Math.max(0, value - 1));
 
@@ -102,8 +105,8 @@ public final class PacketEventsBridge implements Listener {
                 }
 
                 if (plugin.getConfig().getBoolean("checks.packet-rate.enabled", false)) {
-                    int maxPps = plugin.getConfig().getInt("checks.packet-rate.max-movement-packets-per-second", 45);
-                    int sampleWindow = plugin.getConfig().getInt("checks.packet-rate.sample-window", 40);
+                    int maxPps = (int) Math.round(versionedThreshold(id, "packet-rate", "max-movement-packets-per-second", 45.0));
+                    int sampleWindow = (int) Math.round(versionedThreshold(id, "packet-rate", "sample-window", 40.0));
                     long cooldown = plugin.getConfig().getLong("checks.packet-rate.flag-cooldown-ms", 3000L);
                     long previousFlag = lastFlag.getOrDefault(id, 0L);
                     if ((fast >= sampleWindow || dev.annamc.anticheat.check.DetectionMath.exceedsPacketRate(pps, maxPps))
@@ -122,8 +125,8 @@ public final class PacketEventsBridge implements Listener {
 
                 if (plugin.getConfig().getBoolean("checks.timer.enabled", false)) {
                     long firstPacket = movementStreamStarted.getOrDefault(id, nowMs);
-                    long sampleDuration = plugin.getConfig().getLong("checks.timer.minimum-sample-duration-ms", 1200L);
-                    int timerMaxPps = plugin.getConfig().getInt("checks.timer.max-movement-packets-per-second", 23);
+                    long sampleDuration = Math.round(versionedThreshold(id, "timer", "minimum-sample-duration-ms", 1200.0));
+                    int timerMaxPps = (int) Math.round(versionedThreshold(id, "timer", "max-movement-packets-per-second", 23.0));
                     long timerCooldown = plugin.getConfig().getLong("checks.timer.flag-cooldown-ms", 5000L);
                     long timerPrevious = lastTimerFlag.getOrDefault(id, 0L);
                     if (nowMs - firstPacket >= sampleDuration && pps >= timerMaxPps
@@ -134,7 +137,7 @@ public final class PacketEventsBridge implements Listener {
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             Player player = Bukkit.getPlayer(id);
                             if (player != null) violations.add(player, "timer",
-                                    plugin.getConfig().getDouble("checks.timer.violation-add", 1.0), detail);
+                                    CheckUtil.getVersionedDouble(plugin, player, "timer", "violation-add", 1.0), detail);
                         });
                     }
                 }
@@ -145,7 +148,7 @@ public final class PacketEventsBridge implements Listener {
 
     private void observeAttack(UUID id, long nowMs) {
         long windowMs = Math.max(250L, Math.min(5000L,
-                plugin.getConfig().getLong("checks.click-rate.attack-window-ms", 1000L)));
+                Math.round(versionedThreshold(id, "click-rate", "attack-window-ms", 1000.0))));
         Deque<Long> times = attackTimes.computeIfAbsent(id, ignored -> new ArrayDeque<>());
         int count;
         synchronized (times) {
@@ -156,21 +159,21 @@ public final class PacketEventsBridge implements Listener {
         }
 
         long evaluationInterval = Math.max(100L,
-                plugin.getConfig().getLong("checks.click-rate.attack-evaluation-interval-ms", 250L));
+                Math.round(versionedThreshold(id, "click-rate", "attack-evaluation-interval-ms", 250.0)));
         long previousEvaluation = lastAttackEvaluation.getOrDefault(id, 0L);
         if (nowMs - previousEvaluation < evaluationInterval) return;
         lastAttackEvaluation.put(id, nowMs);
 
         int maximum = Math.max(1,
-                plugin.getConfig().getInt("checks.click-rate.max-attacks-per-window", 24));
+                (int) Math.round(versionedThreshold(id, "click-rate", "max-attacks-per-window", 24.0)));
         int streak = count >= maximum
                 ? attackOverLimitWindows.getOrDefault(id, 0) + 1 : 0;
         attackOverLimitWindows.put(id, streak);
 
         int required = Math.max(1, Math.min(20,
-                plugin.getConfig().getInt("checks.click-rate.minimum-over-limit-windows", 3)));
+                (int) Math.round(versionedThreshold(id, "click-rate", "minimum-over-limit-windows", 3.0))));
         long cooldown = Math.max(0L,
-                plugin.getConfig().getLong("checks.click-rate.attack-flag-cooldown-ms", 3000L));
+                Math.round(versionedThreshold(id, "click-rate", "attack-flag-cooldown-ms", 3000.0)));
         long previousFlag = lastAttackFlag.getOrDefault(id, 0L);
         if (streak < required || nowMs - previousFlag < cooldown) return;
 
@@ -182,8 +185,13 @@ public final class PacketEventsBridge implements Listener {
         Bukkit.getScheduler().runTask(plugin, () -> {
             Player player = Bukkit.getPlayer(id);
             if (player != null) violations.add(player, "click-rate",
-                    plugin.getConfig().getDouble("checks.click-rate.violation-add", 1.0), detail);
+                    CheckUtil.getVersionedDouble(plugin, player, "click-rate", "violation-add", 1.0), detail);
         });
+    }
+
+    private double versionedThreshold(UUID id, String check, String key, double fallback) {
+        return VersionedThresholds.resolveForClient(plugin.getConfig(),
+                ClientVersionRegistry.get(id), serverVersion, check, key, fallback);
     }
 
     @EventHandler

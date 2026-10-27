@@ -42,24 +42,24 @@ public final class ScaffoldSignalCheck implements Listener {
                 eye.getZ() - (event.getBlockPlaced().getZ() + 0.5));
         double vertical = eye.getY() - (event.getBlockPlaced().getY() + 0.5);
         double pitch = player.getLocation().getPitch();
-        double pitchLimit = plugin.getConfig().getDouble("checks.scaffold-signal.minimum-downward-pitch", 65.0);
-        double minHorizontal = plugin.getConfig().getDouble("checks.scaffold-signal.min-horizontal-distance", 0.8);
-        double minSpeed = plugin.getConfig().getDouble("checks.scaffold-signal.minimum-horizontal-speed", 0.10);
+        double pitchLimit = CheckUtil.getVersionedDouble(plugin, player, "scaffold-signal", "minimum-downward-pitch", 65.0);
+        double minHorizontal = CheckUtil.getVersionedDouble(plugin, player, "scaffold-signal", "min-horizontal-distance", 0.8);
+        double minSpeed = CheckUtil.getVersionedDouble(plugin, player, "scaffold-signal", "minimum-horizontal-speed", 0.10);
         double speed = Math.hypot(player.getVelocity().getX(), player.getVelocity().getZ());
         boolean candidate = pitch >= pitchLimit && horizontal >= minHorizontal && vertical > 0 && speed >= minSpeed;
         UUID id = player.getUniqueId();
         long now = System.currentTimeMillis();
         PlacementPattern previous = patterns.get(id);
-        long window = plugin.getConfig().getLong("checks.scaffold-signal.pattern-window-ms", 1500L);
-        double pitchVariance = plugin.getConfig().getDouble("checks.scaffold-signal.maximum-pitch-variance", 2.0);
+        long window = Math.round(CheckUtil.getVersionedDouble(plugin, player, "scaffold-signal", "pattern-window-ms", 1500.0));
+        double pitchVariance = CheckUtil.getVersionedDouble(plugin, player, "scaffold-signal", "maximum-pitch-variance", 2.0);
         int count = candidate && previous != null && now - previous.lastAt <= window
                 && Math.abs(pitch - previous.pitch) <= pitchVariance ? previous.count + 1 : (candidate ? 1 : 0);
         patterns.put(id, new PlacementPattern(count, pitch, now));
 
-        int required = plugin.getConfig().getInt("checks.scaffold-signal.minimum-consecutive-placements", 8);
+        int required = (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "scaffold-signal", "minimum-consecutive-placements", 8.0));
         if (count >= required) {
             violations.add(player, "scaffold-signal",
-                    plugin.getConfig().getDouble("checks.scaffold-signal.violation-add", 0.5),
+                    CheckUtil.getVersionedDouble(plugin, player, "scaffold-signal", "violation-add", 0.5),
                     String.format(java.util.Locale.ROOT,
                             "repeated downward placements while moving count=%d pitch=%.1f horizontal=%.2f speed=%.2f; review bridging style",
                             count, pitch, horizontal, speed));

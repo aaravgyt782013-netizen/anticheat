@@ -40,13 +40,13 @@ public final class ClickRateCheck implements Listener {
             long cutoff = now - 1_000_000_000L;
             while (!times.isEmpty() && times.peekFirst() < cutoff) times.removeFirst();
             int cps = times.size();
-            int threshold = plugin.getConfig().getInt("checks.click-rate.max-cps", 24);
-            long cooldown = plugin.getConfig().getLong("checks.click-rate.flag-cooldown-ms", 1500);
+            int threshold = (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "click-rate", "max-cps", 24.0));
+            long cooldown = Math.round(CheckUtil.getVersionedDouble(plugin, player, "click-rate", "flag-cooldown-ms", 1500.0));
             long previous = lastFlag.getOrDefault(player.getUniqueId(), 0L);
             if (cps >= threshold && (now - previous) / 1_000_000L >= cooldown) {
                 lastFlag.put(player.getUniqueId(), now);
                 violations.add(player, "click-rate",
-                        plugin.getConfig().getDouble("checks.click-rate.violation-add", 1.0),
+                        CheckUtil.getVersionedDouble(plugin, player, "click-rate", "violation-add", 1.0),
                         "arm-swings-in-last-second=" + cps + " threshold=" + threshold);
             }
         }

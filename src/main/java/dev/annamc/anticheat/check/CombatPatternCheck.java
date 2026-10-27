@@ -52,33 +52,34 @@ public final class CombatPatternCheck implements Listener {
         long now = System.currentTimeMillis();
 
         double angle = hitAngleDegrees(p, target);
-        double maxAngle = plugin.getConfig().getDouble("checks.combat-pattern.maximum-hit-angle-degrees", 22.0);
-        double pingAllowance = Math.min(plugin.getConfig().getDouble("checks.combat-pattern.max-ping-angle-allowance", 8.0),
-                Math.max(0, p.getPing()) * plugin.getConfig().getDouble("checks.combat-pattern.ping-angle-allowance-per-ms", 0.02));
+        double maxAngle = CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "maximum-hit-angle-degrees", 22.0);
+        double pingAllowance = Math.min(
+                CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "max-ping-angle-allowance", 8.0),
+                Math.max(0, p.getPing()) * CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "ping-angle-allowance-per-ms", 0.02));
         if (Double.isFinite(angle) && angle > maxAngle + pingAllowance) {
             violations.add(p, "combat-pattern",
-                    plugin.getConfig().getDouble("checks.combat-pattern.hit-angle-violation-add", 0.5),
+                    CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "hit-angle-violation-add", 0.5),
                     String.format(java.util.Locale.ROOT,
                             "hit-angle=%.1f degrees max=%.1f plus ping allowance; review historical hitbox and latency",
                             angle, maxAngle + pingAllowance));
         }
 
         Rotation rotation = rotations.get(p.getUniqueId());
-        if (rotation == null || now - rotation.time > plugin.getConfig().getLong("checks.combat-pattern.rotation-window-ms", 180L)) return;
+        if (rotation == null || now - rotation.time > Math.round(CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "rotation-window-ms", 180.0))) return;
         Pattern previous = patterns.getOrDefault(p.getUniqueId(), new Pattern(0, 0, 0, 0, now));
-        long window = plugin.getConfig().getLong("checks.combat-pattern.pattern-window-ms", 5000L);
+        long window = Math.round(CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "pattern-window-ms", 5000.0));
         if (now - previous.lastHitAt > window) previous = new Pattern(0, 0, 0, 0, now);
-        double quantization = plugin.getConfig().getDouble("checks.combat-pattern.rotation-quantization-degrees", 0.15);
+        double quantization = CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "rotation-quantization-degrees", 0.15);
         boolean same = DetectionMath.sameRotationDelta(rotation.yaw, rotation.pitch,
                 previous.yaw, previous.pitch, quantization);
         int repeated = same ? previous.repeated + 1 : Math.max(0, previous.repeated - 1);
         int hits = previous.hits + 1;
         patterns.put(p.getUniqueId(), new Pattern(rotation.yaw, rotation.pitch, repeated, hits, now));
-        int minHits = plugin.getConfig().getInt("checks.combat-pattern.minimum-hits", 12);
-        int minRepeats = plugin.getConfig().getInt("checks.combat-pattern.minimum-repeated-rotations", 7);
+        int minHits = (int) Math.round(CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "minimum-hits", 12.0));
+        int minRepeats = (int) Math.round(CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "minimum-repeated-rotations", 7.0));
         if (hits >= minHits && repeated >= minRepeats) {
             violations.add(p, "combat-pattern",
-                    plugin.getConfig().getDouble("checks.combat-pattern.rotation-violation-add", 0.5),
+                    CheckUtil.getVersionedDouble(plugin, p, "combat-pattern", "rotation-violation-add", 0.5),
                     "repeated near-identical hit-adjacent rotation deltas; review manually");
             patterns.put(p.getUniqueId(), new Pattern(rotation.yaw, rotation.pitch, 0, 0, now));
         }

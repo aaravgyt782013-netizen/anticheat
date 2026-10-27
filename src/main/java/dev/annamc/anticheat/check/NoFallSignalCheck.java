@@ -48,7 +48,7 @@ public final class NoFallSignalCheck implements Listener {
         if (to == null) return;
         Fall fall = falls.get(p.getUniqueId());
         if (!p.isOnGround()) {
-            double minimum = plugin.getConfig().getDouble("checks.no-fall.minimum-fall-distance", 4.0);
+            double minimum = CheckUtil.getVersionedDouble(plugin, p, "no-fall", "minimum-fall-distance", 4.0);
             if (p.getFallDistance() >= minimum && (fall == null || !fall.airborne))
                 falls.put(p.getUniqueId(), new Fall(true, false, System.currentTimeMillis(), false));
             return;
@@ -56,7 +56,7 @@ public final class NoFallSignalCheck implements Listener {
         if (fall != null && fall.airborne && !fall.landingScheduled) {
             long age = System.currentTimeMillis() - fall.startedAt;
             long observationWindow = Math.max(1L,
-                    plugin.getConfig().getLong("checks.no-fall.landing-observation-window-ms", 1500L));
+                    Math.round(CheckUtil.getVersionedDouble(plugin, p, "no-fall", "landing-observation-window-ms", 1500.0)));
             if (age <= observationWindow) {
                 Fall scheduled = new Fall(true, fall.damageObserved, fall.startedAt, true);
                 falls.put(p.getUniqueId(), scheduled);
@@ -66,11 +66,11 @@ public final class NoFallSignalCheck implements Listener {
                     if (latest == null || latest.startedAt != scheduled.startedAt) return;
                     if (!latest.damageObserved && p.isOnline()) {
                         violations.add(p, "no-fall",
-                                plugin.getConfig().getDouble("checks.no-fall.violation-add", 1.0),
+                                CheckUtil.getVersionedDouble(plugin, p, "no-fall", "violation-add", 1.0),
                                 "landed after a significant fall without observed fall damage; review protection plugins");
                     }
                     falls.remove(id);
-                }, Math.max(1L, plugin.getConfig().getLong("checks.no-fall.landing-delay-ticks", 2L)));
+                }, Math.max(1L, Math.round(CheckUtil.getVersionedDouble(plugin, p, "no-fall", "landing-delay-ticks", 2.0))));
             } else {
                 // A fall that took longer than the observation window is stale.
                 // Clear it instead of preventing the next fall from being tracked.
