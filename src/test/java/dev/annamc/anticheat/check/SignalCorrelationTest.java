@@ -13,6 +13,7 @@ class SignalCorrelationTest {
         assertEquals("combat", SignalCorrelation.familyFor("wall-hit"));
         assertEquals("world-interaction", SignalCorrelation.familyFor("fast-break"));
         assertEquals("world-interaction", SignalCorrelation.familyFor("nuker-burst"));
+        assertEquals("world-interaction", SignalCorrelation.familyFor("container-steal"));
         assertEquals("packet", SignalCorrelation.familyFor("timer"));
     }
 
