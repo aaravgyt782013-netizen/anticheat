@@ -29,6 +29,7 @@ Shared features: startup/reload configuration diagnostics, `/annaac status` syst
 
 - [Paper Anti-Xray setup for ANNA MC](docs/ANTI_XRAY.md): recommended Paper world configuration, restart and verification guidance.
 - [Cheat coverage roadmap](docs/CHEAT_COVERAGE.md): current signals and planned coverage for behaviors associated with Meteor, Wurst, Baritone, and other clients.
+- [Hardening and rollout plan](docs/HARDENING_ROLLOUT.md): X-ray prevention, Force OP/anti-nuke priorities, Discord/config ownership, and a staging acceptance checklist.
 
 Anti-Xray is provided by Paper's block obfuscation, not by a client-brand detector inside ANNA AC. No server-side plugin can reliably identify every client or every feature; experimental checks must be validated before punishments are enabled.
 
