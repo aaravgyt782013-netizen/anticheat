@@ -87,6 +87,10 @@ class ConfigurationYamlSyntaxTest {
                 assertNotNull(options.get("baseline-reset-gap-ms"));
                 assertNotNull(options.get("version-overrides"));
                 assertNotNull(options.get("client-version-overrides"));
+                assertEquals(Boolean.TRUE, options.get("cancel-invalid-coordinate-packets"),
+                        file + " must make invalid-coordinate rejection explicit and configurable");
+                assertEquals(Boolean.FALSE, options.get("cancel-extreme-step-packets"),
+                        file + " must keep false-positive-prone step rejection opt-in");
             }
         }
     }
