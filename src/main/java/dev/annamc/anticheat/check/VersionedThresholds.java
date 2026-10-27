@@ -90,12 +90,42 @@ public final class VersionedThresholds {
                         }
                         if (!(value instanceof Number number) || !Double.isFinite(number.doubleValue())) {
                             warnings.add(path + "." + setting + " must be a finite numeric value.");
+                            continue;
                         }
+                        String rangeWarning = thresholdRangeWarning(check, setting, number.doubleValue());
+                        if (rangeWarning != null) warnings.add(path + "." + setting + " " + rangeWarning);
                     }
                 }
             }
         }
         return java.util.List.copyOf(warnings);
+    }
+
+    private static String thresholdRangeWarning(String check, String setting, double value) {
+        if (setting == null || !Double.isFinite(value)) return "must be finite.";
+        String key = setting.toLowerCase(java.util.Locale.ROOT);
+
+        if (key.equals("minimum-time-ratio") || key.equals("minimum-occluded-sample-ratio")) {
+            return value < 0.0 || value > 1.0 ? "must be between 0 and 1." : null;
+        }
+        if (key.contains("degrees") || key.equals("minimum-downward-pitch")
+                || key.equals("maximum-pitch-variance") || key.equals("rotation-quantization-degrees")) {
+            return value < 0.0 || value > 180.0 ? "must be between 0 and 180 degrees." : null;
+        }
+        if (key.equals("outlier-ratio") || key.equals("sprint-multiplier")) {
+            return value <= 0.0 ? "must be greater than 0." : null;
+        }
+        if (key.startsWith("minimum-") || key.startsWith("max-")
+                || key.contains("slack") || key.equals("violation-add")
+                || key.equals("special-block-allowance-per-tick")
+                || key.equals("base-horizontal-per-tick")
+                || key.equals("base-damage-allowance")
+                || key.equals("damage-per-fall-block-allowance")
+                || key.equals("density-damage-per-block-per-level")
+                || key.equals("extra-tolerance")) {
+            return value < 0.0 ? "must not be negative." : null;
+        }
+        return null;
     }
 
     public static boolean hasClientOverrides(FileConfiguration config) {

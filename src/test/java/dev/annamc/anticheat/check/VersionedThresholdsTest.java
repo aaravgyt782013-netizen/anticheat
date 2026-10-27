@@ -149,6 +149,28 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void overrideValidationWarnsOnOutOfRangeRatiosAndNegativeThresholds() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  reach:
+                    max-distance: 3.6
+                    version-overrides:
+                      '1_21':
+                        max-distance: -1.0
+                  wall-hit:
+                    minimum-occluded-sample-ratio: 1.0
+                    version-overrides:
+                      '1_21':
+                        minimum-occluded-sample-ratio: 1.5
+                """);
+
+        java.util.List<String> warnings = VersionedThresholds.validateOverrides(config);
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("max-distance must not be negative")));
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("minimum-occluded-sample-ratio must be between 0 and 1")));
+    }
+
+    @Test
     void clientOverrideDetectorOnlyReportsNonemptySections() throws Exception {
         YamlConfiguration config = new YamlConfiguration();
         config.loadFromString("""
