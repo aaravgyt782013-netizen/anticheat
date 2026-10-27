@@ -93,16 +93,18 @@ public final class PacketEventsBridge implements Listener {
                 long intervalMs = previous == null ? Long.MAX_VALUE : (nowNanos - previous) / 1_000_000L;
                 if (previous == null || intervalMs > 1500L) movementStreamStarted.put(id, nowMs);
                 long minimum = Math.round(versionedThreshold(id, "packet-rate", "minimum-interval-ms", 5.0));
-                int fast = intervalMs < minimum ? fastIntervals.merge(id, 1, Integer::sum)
-                        : fastIntervals.compute(id, (key, value) -> value == null ? 0 : Math.max(0, value - 1));
+                int fast = intervalMs < minimum
+                        ? fastIntervals.compute(id, (key, value) ->
+                                Math.min(maxMovementSamples, value == null ? 1 : value + 1))
+                        : fastIntervals.compute(id, (key, value) ->
+                                value == null ? 0 : Math.max(0, value - 1));
 
                 Deque<Long> times = packetTimes.computeIfAbsent(id, ignored -> new ArrayDeque<>());
                 int pps;
+                int maxMovementSamples = boundedSampleLimit(
+                        "checks.packet-rate.max-buffered-samples-per-player", 1024);
                 synchronized (times) {
-                    times.addLast(nowMs);
-                    long cutoff = nowMs - 1000L;
-                    while (!times.isEmpty() && times.peekFirst() < cutoff) times.removeFirst();
-                    pps = times.size();
+                    pps = TimestampWindow.addAndTrim(times, nowMs, 1000L, maxMovementSamples);
                 }
 
                 if (plugin.getConfig().getBoolean("checks.packet-rate.enabled", false)) {
@@ -152,11 +154,10 @@ public final class PacketEventsBridge implements Listener {
                 Math.round(versionedThreshold(id, "click-rate", "attack-window-ms", 1000.0))));
         Deque<Long> times = attackTimes.computeIfAbsent(id, ignored -> new ArrayDeque<>());
         int count;
+        int maxAttackSamples = boundedSampleLimit(
+                "checks.click-rate.max-buffered-samples-per-player", 1024);
         synchronized (times) {
-            times.addLast(nowMs);
-            long cutoff = nowMs - windowMs;
-            while (!times.isEmpty() && times.peekFirst() < cutoff) times.removeFirst();
-            count = times.size();
+            count = TimestampWindow.addAndTrim(times, nowMs, windowMs, maxAttackSamples);
         }
 
         long evaluationInterval = Math.max(100L,
@@ -188,6 +189,10 @@ public final class PacketEventsBridge implements Listener {
             if (player != null) violations.add(player, "click-rate",
                     CheckUtil.getVersionedDouble(plugin, player, "click-rate", "violation-add", 1.0), detail);
         });
+    }
+
+    private int boundedSampleLimit(String configPath, int fallback) {
+        return Math.max(128, Math.min(4096, plugin.getConfig().getInt(configPath, fallback)));
     }
 
     private double versionedThreshold(UUID id, String check, String key, double fallback) {

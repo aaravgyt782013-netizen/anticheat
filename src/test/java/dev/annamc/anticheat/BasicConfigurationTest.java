@@ -36,6 +36,7 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("required-consecutive-outliers"));
         assertTrue(yaml.contains("minimum-observed-displacement"));
         assertTrue(yaml.contains("rotation-quantization-degrees"));
+        assertTrue(yaml.contains("max-buffered-samples-per-player: 1024"));
         assertTrue(yaml.contains("max-movement-packets-per-second"));
         assertTrue(yaml.contains("required-hover-samples: 24"));
         assertTrue(yaml.contains("required-stable-samples: 10"));

@@ -409,6 +409,8 @@ checks:
     attack-packets-enabled: true
     # Rolling attack packet window length in milliseconds (effective range 250–5000).
     attack-window-ms: 1000
+    # Memory cap for each connected player's rolling attack-packet window (clamped to 128–4096).
+    max-buffered-samples-per-player: 1024
     # Maximum attacks within the rolling window before a sample counts as over-limit.
     max-attacks-per-window: 24
     # Minimum delay between rolling-window evaluations in milliseconds (effective minimum 100).
@@ -562,6 +564,8 @@ checks:
     minimum-interval-ms: 5
     # Number of recent packet intervals used in the rate estimate.
     sample-window: 40
+    # Memory cap for each connected player's rolling movement-packet window (clamped to 128–4096).
+    max-buffered-samples-per-player: 1024
     # Movement packet-rate threshold for this telemetry check.
     max-movement-packets-per-second: 45
     # Optional server/client-version overrides for packet-rate thresholds.
