@@ -41,6 +41,9 @@ public final class PacketEventsBridge implements Listener {
     private final Map<UUID, Long> lastAttackEvaluation = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> attackOverLimitWindows = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastAttackFlag = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> attackPatternOverLimitWindows = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastAttackPatternEvaluation = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastAttackPatternFlag = new ConcurrentHashMap<>();
     private PacketListenerAbstract listener;
 
     public PacketEventsBridge(JavaPlugin plugin, ViolationManager violations) {
@@ -72,7 +75,8 @@ public final class PacketEventsBridge implements Listener {
                 // callbacks never touch Bukkit entities; violation updates hop to the main thread.
                 if (type.contains("INTERACT_ENTITY")
                         && plugin.getConfig().getBoolean("checks.click-rate.enabled", false)
-                        && plugin.getConfig().getBoolean("checks.click-rate.attack-packets-enabled", true)) {
+                        && (plugin.getConfig().getBoolean("checks.click-rate.attack-packets-enabled", true)
+                        || plugin.getConfig().getBoolean("checks.click-rate.pattern-detection-enabled", false))) {
                     try {
                         WrapperPlayClientInteractEntity interact = new WrapperPlayClientInteractEntity(event);
                         if (interact.getAction() == WrapperPlayClientInteractEntity.InteractAction.ATTACK) {
@@ -150,40 +154,115 @@ public final class PacketEventsBridge implements Listener {
     }
 
     private void observeAttack(UUID id, long nowMs) {
-        long windowMs = Math.max(250L, Math.min(5000L,
+        boolean rateDetectionEnabled = plugin.getConfig().getBoolean(
+                "checks.click-rate.attack-packets-enabled", true);
+        boolean patternDetectionEnabled = plugin.getConfig().getBoolean(
+                "checks.click-rate.pattern-detection-enabled", false);
+        long attackWindowMs = Math.max(250L, Math.min(5000L,
                 Math.round(versionedThreshold(id, "click-rate", "attack-window-ms", 1000.0))));
+        long patternWindowMs = patternDetectionEnabled
+                ? Math.max(500L, Math.min(10000L,
+                        Math.round(versionedThreshold(id, "click-rate", "pattern-window-ms", 3000.0))))
+                : attackWindowMs;
+        long retainedWindowMs = Math.max(attackWindowMs, patternWindowMs);
         Deque<Long> times = attackTimes.computeIfAbsent(id, ignored -> new ArrayDeque<>());
         int count;
+        List<Long> patternSamples = List.of();
         int maxAttackSamples = boundedSampleLimit(
                 "checks.click-rate.max-buffered-samples-per-player", 1024);
         synchronized (times) {
-            count = TimestampWindow.addAndTrim(times, nowMs, windowMs, maxAttackSamples);
+            TimestampWindow.addAndTrim(times, nowMs, retainedWindowMs, maxAttackSamples);
+            count = countRecent(times, nowMs - attackWindowMs);
+            if (patternDetectionEnabled) {
+                patternSamples = recentSamples(times, nowMs - patternWindowMs);
+            }
         }
 
-        long evaluationInterval = Math.max(100L,
-                Math.round(versionedThreshold(id, "click-rate", "attack-evaluation-interval-ms", 250.0)));
-        long previousEvaluation = lastAttackEvaluation.getOrDefault(id, 0L);
+        if (rateDetectionEnabled) {
+            long evaluationInterval = Math.max(100L,
+                    Math.round(versionedThreshold(id, "click-rate", "attack-evaluation-interval-ms", 250.0)));
+            long previousEvaluation = lastAttackEvaluation.getOrDefault(id, 0L);
+            if (nowMs - previousEvaluation >= evaluationInterval) {
+                lastAttackEvaluation.put(id, nowMs);
+                int maximum = Math.max(1,
+                        (int) Math.round(versionedThreshold(id, "click-rate", "max-attacks-per-window", 24.0)));
+                int streak = count >= maximum
+                        ? attackOverLimitWindows.getOrDefault(id, 0) + 1 : 0;
+                attackOverLimitWindows.put(id, streak);
+
+                int required = Math.max(1, Math.min(20,
+                        (int) Math.round(versionedThreshold(id, "click-rate", "minimum-over-limit-windows", 3.0))));
+                long cooldown = Math.max(0L,
+                        Math.round(versionedThreshold(id, "click-rate", "attack-flag-cooldown-ms", 3000.0)));
+                long previousFlag = lastAttackFlag.getOrDefault(id, 0L);
+                if (streak >= required && nowMs - previousFlag >= cooldown) {
+                    lastAttackFlag.put(id, nowMs);
+                    attackOverLimitWindows.put(id, 0);
+                    String detail = "rolling attack packets=" + count + " in " + attackWindowMs
+                            + "ms (configured threshold=" + maximum + ", repeated windows=" + streak
+                            + "); attack-rate alone is not proof of automation";
+                    scheduleClickRateSignal(id, detail);
+                }
+            }
+        }
+
+        if (patternDetectionEnabled) {
+            observeAttackPattern(id, nowMs, patternSamples, patternWindowMs);
+        }
+    }
+
+    private void observeAttackPattern(UUID id, long nowMs, List<Long> timestamps, long windowMs) {
+        long evaluationInterval = Math.max(100L, Math.min(2000L,
+                Math.round(versionedThreshold(id, "click-rate", "pattern-evaluation-interval-ms", 200.0))));
+        long previousEvaluation = lastAttackPatternEvaluation.getOrDefault(id, 0L);
         if (nowMs - previousEvaluation < evaluationInterval) return;
-        lastAttackEvaluation.put(id, nowMs);
+        lastAttackPatternEvaluation.put(id, nowMs);
 
-        int maximum = Math.max(1,
-                (int) Math.round(versionedThreshold(id, "click-rate", "max-attacks-per-window", 24.0)));
-        int streak = count >= maximum
-                ? attackOverLimitWindows.getOrDefault(id, 0) + 1 : 0;
-        attackOverLimitWindows.put(id, streak);
+        int minimumAttacks = Math.max(5, Math.min(200,
+                (int) Math.round(versionedThreshold(id, "click-rate", "minimum-pattern-attacks", 15.0))));
+        double minimumCps = Math.max(1.0, Math.min(30.0,
+                versionedThreshold(id, "click-rate", "minimum-pattern-cps", 5.0)));
+        double maximumDeviation = Math.max(0.0, Math.min(100.0,
+                versionedThreshold(id, "click-rate", "max-pattern-interval-stddev-ms", 3.0)));
+        double maximumVariation = Math.max(0.0, Math.min(1.0,
+                versionedThreshold(id, "click-rate", "max-pattern-coefficient-variation", 0.08)));
 
-        int required = Math.max(1, Math.min(20,
-                (int) Math.round(versionedThreshold(id, "click-rate", "minimum-over-limit-windows", 3.0))));
-        long cooldown = Math.max(0L,
-                Math.round(versionedThreshold(id, "click-rate", "attack-flag-cooldown-ms", 3000.0)));
-        long previousFlag = lastAttackFlag.getOrDefault(id, 0L);
-        if (streak < required || nowMs - previousFlag < cooldown) return;
+        ClickPatternMath.Stats stats = ClickPatternMath.analyze(timestamps);
+        boolean candidate = ClickPatternMath.isRegular(stats, minimumAttacks, minimumCps,
+                maximumDeviation, maximumVariation);
+        int streak = candidate ? attackPatternOverLimitWindows.getOrDefault(id, 0) + 1 : 0;
+        attackPatternOverLimitWindows.put(id, streak);
 
-        lastAttackFlag.put(id, nowMs);
-        attackOverLimitWindows.put(id, 0);
-        String detail = "rolling attack packets=" + count + " in " + windowMs
-                + "ms (configured threshold=" + maximum + ", repeated windows=" + streak
-                + "); attack-rate alone is not proof of automation";
+        int requiredWindows = Math.max(1, Math.min(20,
+                (int) Math.round(versionedThreshold(id, "click-rate", "minimum-pattern-windows", 3.0))));
+        long cooldown = Math.max(0L, Math.round(
+                versionedThreshold(id, "click-rate", "pattern-flag-cooldown-ms", 5000.0)));
+        long previousFlag = lastAttackPatternFlag.getOrDefault(id, 0L);
+        if (streak < requiredWindows || nowMs - previousFlag < cooldown || stats == null) return;
+
+        lastAttackPatternFlag.put(id, nowMs);
+        attackPatternOverLimitWindows.put(id, 0);
+        String detail = String.format(java.util.Locale.ROOT,
+                "regular attack timing: attacks=%d window=%dms rate=%.2f/s mean-interval=%.2fms stddev=%.2fms cv=%.4f repeated-windows=%d; corroborate with independent evidence",
+                stats.attackCount(), windowMs, stats.attacksPerSecond(),
+                stats.meanIntervalMillis(), stats.standardDeviationMillis(),
+                stats.coefficientOfVariation(), streak);
+        scheduleClickRateSignal(id, detail);
+    }
+
+    private int countRecent(Deque<Long> timestamps, long cutoffMs) {
+        int count = 0;
+        for (long timestamp : timestamps) if (timestamp >= cutoffMs) count++;
+        return count;
+    }
+
+    private List<Long> recentSamples(Deque<Long> timestamps, long cutoffMs) {
+        java.util.ArrayList<Long> result = new java.util.ArrayList<>();
+        for (long timestamp : timestamps) if (timestamp >= cutoffMs) result.add(timestamp);
+        return result;
+    }
+
+    private void scheduleClickRateSignal(UUID id, String detail) {
         Bukkit.getScheduler().runTask(plugin, () -> {
             Player player = Bukkit.getPlayer(id);
             if (player != null) violations.add(player, "click-rate",
@@ -214,6 +293,9 @@ public final class PacketEventsBridge implements Listener {
         lastAttackEvaluation.remove(id);
         attackOverLimitWindows.remove(id);
         lastAttackFlag.remove(id);
+        attackPatternOverLimitWindows.remove(id);
+        lastAttackPatternEvaluation.remove(id);
+        lastAttackPatternFlag.remove(id);
     }
 
     public void unregister() {
@@ -229,5 +311,8 @@ public final class PacketEventsBridge implements Listener {
         lastAttackEvaluation.clear();
         attackOverLimitWindows.clear();
         lastAttackFlag.clear();
+        attackPatternOverLimitWindows.clear();
+        lastAttackPatternEvaluation.clear();
+        lastAttackPatternFlag.clear();
     }
 }
