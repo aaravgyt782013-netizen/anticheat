@@ -37,9 +37,10 @@ For each test, record Paper build, Minecraft client version, ping range, TPS/MSP
 2. **Latency and load:** repeat at low, medium, and high ping; simulate short TPS drops; test after respawn, world change, join, and teleport. There should be no accumulating movement baseline across a teleport or long pause.
 3. **Legitimate combat:** hit targets at several distances and angles, attack moving targets, use different entity hitboxes, test high ping, knockback, shields, critical hits, potions, armor, enchantments, and custom combat plugins.
 4. **Mace:** test ordinary falls, Density enchantment levels, targets with different armor/effects, custom damage modifiers, cancelled damage, and low-TPS conditions. Do not enable automatic mace punishment until false-positive review is clean.
-5. **Negative controls:** players without cheats should not repeatedly trigger the same detector family during routine play. If they do, tune or disable the check rather than raising punishment urgency.
-6. **Controlled adversarial tests:** on a private staging server, test one cheat behavior at a time, capture server logs/evidence, and verify that flags are reproducible. Do not use these tests on public players or treat one sample as a ban verdict.
-7. **Punishment rehearsal:** keep `punishments.enabled: false` while tuning. Then use alerts only, next review-only warnings, and only later enable a per-check kick with a conservative threshold. Keep independent-family corroboration enabled.
+5. **Container looting:** test normal single/double chest shift-clicking, ender chests, shulker boxes, high-ping players, and every custom inventory GUI. Enable `container-steal` only on staging, then confirm ordinary looting does not sustain over-limit windows and controlled burst cases produce reproducible evidence.
+6. **Negative controls:** players without cheats should not repeatedly trigger the same detector family during routine play. If they do, tune or disable the check rather than raising punishment urgency.
+7. **Controlled adversarial tests:** on a private staging server, test one cheat behavior at a time, capture server logs/evidence, and verify that flags are reproducible. Do not use these tests on public players or treat one sample as a ban verdict.
+8. **Punishment rehearsal:** keep `punishments.enabled: false` while tuning. Then use alerts only, next review-only warnings, and only later enable a per-check kick with a conservative threshold. Keep independent-family corroboration enabled.
 
 ## Promotion gate
 
