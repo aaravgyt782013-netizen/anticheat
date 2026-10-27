@@ -180,6 +180,12 @@ checks:
     # Rebase movement samples for this many milliseconds after server-applied velocity changes.
     # Helps avoid knockback/launch-pad impulses being treated as ordinary outliers; 0 disables.
     velocity-grace-ms: 300
+    # Continue a bounded velocity allowance after the initial rebase window.
+    velocity-influence-ms: 650
+    # Multiplier applied to the remaining horizontal impulse estimate.
+    velocity-allowance-multiplier: 1.0
+    # Absolute cap on additional horizontal allowance from a recent velocity impulse.
+    max-velocity-allowance: 0.8
     # Optional exact-version or major.minor overrides; dots are replaced with underscores.
     # Exact version takes priority over major.minor, then the regular setting.
     # Example:
@@ -260,6 +266,11 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Maximum approximate eye-to-target hitbox distance before adding violation.
     max-distance: 3.6
+    # Rewind attacker and player-target snapshots by up to half the attacker's ping.
+    # This is bounded historical compensation, not a complete protocol simulator.
+    latency-compensation-enabled: true
+    # Hard cap for historical reach compensation, in milliseconds (0-300).
+    max-compensation-ms: 150
     # Optional exact server version or major.minor numeric overrides for this check.
     version-overrides: {}
     # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.

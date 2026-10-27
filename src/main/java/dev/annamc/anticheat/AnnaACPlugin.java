@@ -38,6 +38,7 @@ public final class AnnaACPlugin extends JavaPlugin {
     private Messages messages;
     private ModularConfigManager configManager;
     private PluginIntegrityMonitor pluginIntegrityMonitor;
+    private dev.annamc.anticheat.check.EntityPositionHistory positionHistory;
 
     @Override
     public void onEnable() {
@@ -58,13 +59,17 @@ public final class AnnaACPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(pluginIntegrityMonitor, this);
         pluginIntegrityMonitor.start();
 
+        positionHistory = new dev.annamc.anticheat.check.EntityPositionHistory(this);
+        getServer().getPluginManager().registerEvents(positionHistory, this);
+        positionHistory.start();
+
         getServer().getPluginManager().registerEvents(new MovementCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new MovementPhysicsCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new FlightHoverCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new JesusWaterWalkCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new SpiderClimbCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new KnockbackPredictionCheck(this, violations), this);
-        getServer().getPluginManager().registerEvents(new ReachCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new ReachCheck(this, violations, positionHistory), this);
         getServer().getPluginManager().registerEvents(new BlockReachCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new MaceDamageCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new WallHitCheck(this, violations), this);
@@ -116,6 +121,7 @@ public final class AnnaACPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         if (packetBridge != null) packetBridge.unregister();
+        if (positionHistory != null) positionHistory.close();
         if (evidenceStore != null) evidenceStore.close();
     }
 }

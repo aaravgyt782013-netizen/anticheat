@@ -26,7 +26,7 @@ public final class MovementPhysicsCheck implements Listener {
     private final JavaPlugin plugin;
     private final ViolationManager violations;
     private final Map<UUID, Sample> samples = new ConcurrentHashMap<>();
-    private final Map<UUID, Long> recentVelocity = new ConcurrentHashMap<>();
+    private final Map<UUID, VelocityImpulse> recentVelocity = new ConcurrentHashMap<>();
 
     public MovementPhysicsCheck(JavaPlugin plugin, ViolationManager violations) {
         this.plugin = plugin;
@@ -46,7 +46,8 @@ public final class MovementPhysicsCheck implements Listener {
         Player player = event.getPlayer();
         UUID id = player.getUniqueId();
         long now = System.nanoTime();
-        recentVelocity.put(id, now);
+        org.bukkit.util.Vector velocity = event.getVelocity();
+        recentVelocity.put(id, new VelocityImpulse(now, velocity.getX(), velocity.getZ()));
         samples.put(id, new Sample(player.getLocation().clone(), now));
     }
 
@@ -83,14 +84,20 @@ public final class MovementPhysicsCheck implements Listener {
         }
 
         long now = System.nanoTime();
-        Long velocityAt = recentVelocity.get(id);
-        if (velocityAt != null) {
-            long graceMs = CheckUtil.getVersionedGraceMillis(plugin, player, "movement-physics", 300L);
-            if (DetectionMath.isWithinGracePeriod(now, velocityAt, graceMs)) {
-                samples.put(id, new Sample(to.clone(), now));
-                return;
-            }
-            recentVelocity.remove(id, velocityAt);
+        VelocityImpulse impulse = recentVelocity.get(id);
+        long velocityAgeMs = impulse == null ? Long.MAX_VALUE
+                : Math.max(0L, (now - impulse.nanoTime) / 1_000_000L);
+        long graceMs = CheckUtil.getVersionedGraceMillis(plugin, player, "movement-physics", 300L);
+        if (impulse != null && velocityAgeMs <= graceMs) {
+            samples.put(id, new Sample(to.clone(), now));
+            return;
+        }
+        long velocityInfluenceMs = Math.max(0L, Math.min(5000L, Math.round(
+                CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "velocity-influence-ms", 650.0))));
+        if (impulse != null && velocityAgeMs > velocityInfluenceMs) {
+            recentVelocity.remove(id, impulse);
+            impulse = null;
+            velocityAgeMs = Long.MAX_VALUE;
         }
         Sample previous = samples.get(id);
         if (previous == null) { samples.put(player.getUniqueId(), new Sample(to.clone(), now)); return; }
@@ -100,24 +107,34 @@ public final class MovementPhysicsCheck implements Listener {
         double dx = to.getX() - previous.location.getX();
         double dz = to.getZ() - previous.location.getZ();
         double distance = Math.hypot(dx, dz);
-        // Multiple PlayerMoveEvents may occur in one tick. Scale a conservative
-        // per-tick envelope by observed elapsed time and allow ping/jitter slack.
-        double ticks = Math.max(1.0, elapsedMs / 50.0);
-        double base = CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "base-horizontal-per-tick", 0.72);
-        if (player.isSprinting()) base *= CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "sprint-multiplier", 1.3);
-        if (player.hasPotionEffect(PotionEffectType.SPEED)) {
-            int amplifier = player.getPotionEffect(PotionEffectType.SPEED).getAmplifier() + 1;
-            base *= 1.0 + CheckUtil.getVersionedDouble(
-                    plugin, player, "movement-physics", "speed-potion-multiplier-per-level", 0.20) * amplifier;
-        }
-        if (player.getGameMode() == GameMode.ADVENTURE) {
-            base *= CheckUtil.getVersionedDouble(
-                    plugin, player, "movement-physics", "adventure-mode-multiplier", 1.03);
-        }
-        double pingSlack = Math.min(CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "max-ping-slack", 0.75),
-                Math.max(0, player.getPing()) * CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "ping-slack-per-ms", 0.001));
-        double allowance = base * ticks + pingSlack;
-        if (isOnSlipperyOrSpecialBlock(player)) allowance += CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "special-block-allowance-per-tick", 0.18) * ticks;
+        // Build a deterministic envelope from known movement state, latency and
+        // recent server-applied velocity. This remains a heuristic, not exact physics replay.
+        var speedEffect = player.getPotionEffect(PotionEffectType.SPEED);
+        int speedAmplifier = speedEffect == null ? -1 : speedEffect.getAmplifier();
+        MovementPredictionEngine.Prediction prediction = MovementPredictionEngine.predict(
+                new MovementPredictionEngine.Input(
+                        elapsedMs,
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "base-horizontal-per-tick", 0.72),
+                        player.isSprinting(),
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "sprint-multiplier", 1.3),
+                        speedAmplifier,
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "speed-potion-multiplier-per-level", 0.20),
+                        player.getGameMode() == GameMode.ADVENTURE,
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "adventure-mode-multiplier", 1.03),
+                        Math.max(0, player.getPing()),
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "ping-slack-per-ms", 0.001),
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "max-ping-slack", 0.75),
+                        isOnSlipperyOrSpecialBlock(player),
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "special-block-allowance-per-tick", 0.18),
+                        impulse == null ? 0.0 : impulse.velocityX,
+                        impulse == null ? 0.0 : impulse.velocityZ,
+                        velocityAgeMs == Long.MAX_VALUE ? 0.0 : velocityAgeMs,
+                        velocityInfluenceMs,
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "velocity-allowance-multiplier", 1.0),
+                        CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "max-velocity-allowance", 0.8)));
+        double allowance = prediction.horizontalAllowance();
+        double ticks = prediction.elapsedTicks();
+        double pingSlack = prediction.latencyAllowance();
 
         double ratio = distance / Math.max(0.01, allowance);
         if (DetectionMath.isMovementOutlier(distance, allowance, CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "outlier-ratio", 2.2))) {
@@ -145,6 +162,8 @@ public final class MovementPhysicsCheck implements Listener {
         return plugin.getConfig().getStringList("checks.movement-physics.special-block-materials")
                 .stream().anyMatch(name -> name.equalsIgnoreCase(type.name()));
     }
+
+    private record VelocityImpulse(long nanoTime, double velocityX, double velocityZ) {}
 
     private record Sample(Location location, long nanoTime, int outlierStreak) {
         Sample(Location location, long nanoTime) { this(location, nanoTime, 0); }

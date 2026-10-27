@@ -64,3 +64,12 @@ Promote a check from staging only after:
 ## Current limitations
 
 The movement-envelope check is heuristic, not a deterministic replay of vanilla client physics. Reach does not implement full historical hitbox/latency compensation. Mace damage can be altered by server plugins. Bukkit event-level observations cannot reveal every client input packet. These checks cannot promise instant detection of every hack or prove a player is cheating in every flagged case.
+
+
+## Version-aware movement prediction and bounded combat history
+
+The movement-envelope check now routes its estimate through a deterministic prediction helper. Inputs include elapsed sample time, sprint state, Speed potion amplifier, Adventure mode, configured special surfaces, measured ping, and a bounded recent server-applied horizontal velocity impulse. The engine caps sample duration and impulse allowance so a long pause or malformed value cannot create an unbounded movement budget. It is still a conservative heuristic; it does not replay every input and collision rule from every client version.
+
+The reach signal also keeps a short, bounded history of online player positions and hitboxes. When enabled, it compares attacker and player-target snapshots from up to half the attacker's ping ago, capped by `checks.reach.max-compensation-ms`. Missing history, world changes, non-player targets, or disabled compensation use the current hitbox. This is a small lag-compensation improvement, not a complete historical ray-trace or a guarantee against false positives.
+
+Both systems are intentionally conservative and require staging validation. Keep `movement-physics` and `reach` disabled until legitimate movement/combat is tested on the exact Paper build, client protocols, proxy, and movement-modifying plugins. Automatic punishment must remain disabled during this validation.
