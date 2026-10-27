@@ -488,6 +488,8 @@ checks:
     detect-op-grants: true
     # Save known operator UUIDs across restarts to help identify new OP grants.
     persist-operator-baseline: true
+    # Alert when an operator disappears from the list (de-op); actor attribution may be unknown.
+    detect-op-removals: true
     # Log and alert when the console executes configured privilege-management commands.
     audit-console-op-commands: true
     # Command labels/prefixes to audit or block. Add aliases used by your permission plugins.
