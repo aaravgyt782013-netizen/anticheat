@@ -48,6 +48,18 @@ public final class CheckUtil {
                 org.bukkit.Bukkit.getMinecraftVersion(), check, key, fallback);
     }
 
+    /**
+     * Resolves thresholds for a player profile by UUID. This is used by violation
+     * decay/cleanup paths that may run after Bukkit's Player object is unavailable.
+     * If PacketEvents has no recorded client release for this UUID, server overrides apply.
+     */
+    public static double getVersionedDouble(JavaPlugin plugin, java.util.UUID playerId,
+                                            String check, String key, double fallback) {
+        String clientVersion = playerId == null ? null : ClientVersionRegistry.get(playerId);
+        return VersionedThresholds.resolveForClient(plugin.getConfig(), clientVersion,
+                org.bukkit.Bukkit.getMinecraftVersion(), check, key, fallback);
+    }
+
     private static boolean contains(List<String> values, String value) {
         return values.stream().anyMatch(v -> v.equalsIgnoreCase(value));
     }

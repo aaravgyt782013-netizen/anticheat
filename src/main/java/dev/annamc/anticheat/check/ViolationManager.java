@@ -54,9 +54,10 @@ public final class ViolationManager implements Listener {
         lastActivity.put(id, now);
         int independentFamilies = recordAndCountFamilies(id, check, now);
 
-        double alertVl = finiteNonNegative(plugin.getConfig().getDouble("checks." + check + ".alert-vl", 1.0), 1.0);
-        long alertCooldown = Math.max(0L, plugin.getConfig().getLong(
-                "checks." + check + ".alert-cooldown-ms", 3000L));
+        double alertVl = finiteNonNegative(
+                CheckUtil.getVersionedDouble(plugin, player, check, "alert-vl", 1.0), 1.0);
+        long alertCooldown = Math.max(0L, Math.round(
+                CheckUtil.getVersionedDouble(plugin, player, check, "alert-cooldown-ms", 3000.0)));
         long previousAlert = lastAlert.getOrDefault(key, 0L);
         if (plugin.getConfig().getBoolean("checks." + check + ".alert", true)
                 && current >= alertVl && now - previousAlert >= alertCooldown) {
@@ -66,7 +67,7 @@ public final class ViolationManager implements Listener {
 
         String actionPath = "punishments.actions." + check;
         double fallbackThreshold = finiteNonNegative(
-                plugin.getConfig().getDouble("checks." + check + ".kick-vl", 12.0), 12.0);
+                CheckUtil.getVersionedDouble(plugin, player, check, "kick-vl", 12.0), 12.0);
         double actionThreshold = finiteNonNegative(
                 plugin.getConfig().getDouble(actionPath + ".threshold-vl", fallbackThreshold), fallbackThreshold);
         boolean actionEnabled = plugin.getConfig().getBoolean(actionPath + ".enabled", false);
@@ -153,8 +154,8 @@ public final class ViolationManager implements Listener {
         double stored = playerLevels.getOrDefault(check, 0.0);
         long previous = lastUpdate.getOrDefault(key, now);
         double elapsedSeconds = Math.max(0L, now - previous) / 1000.0;
-        double decay = finiteNonNegative(plugin.getConfig().getDouble(
-                "checks." + check + ".violation-decay-per-second", 0.0), 0.0);
+        double decay = finiteNonNegative(CheckUtil.getVersionedDouble(
+                plugin, id, check, "violation-decay-per-second", 0.0), 0.0);
         double current = ViolationMath.decay(stored, Math.max(0L, now - previous), decay);
         if (current <= 1.0e-9) {
             playerLevels.remove(check);

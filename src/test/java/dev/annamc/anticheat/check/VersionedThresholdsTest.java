@@ -310,6 +310,34 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void alertAndDecayThresholdsCanBeCustomizedPerClientVersion() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  movement:
+                    alert-vl: 3.0
+                    alert-cooldown-ms: 3000
+                    violation-decay-per-second: 0.25
+                    kick-vl: 12.0
+                    client-version-overrides:
+                      '1_8':
+                        alert-vl: 4.0
+                        alert-cooldown-ms: 5000
+                        violation-decay-per-second: 0.10
+                        kick-vl: 15.0
+                """);
+
+        assertEquals(4.0, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "movement", "alert-vl", 3.0));
+        assertEquals(5000.0, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "movement", "alert-cooldown-ms", 3000.0));
+        assertEquals(0.10, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "movement", "violation-decay-per-second", 0.25));
+        assertEquals(15.0, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "movement", "kick-vl", 12.0));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 
