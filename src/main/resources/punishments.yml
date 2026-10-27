@@ -151,6 +151,20 @@ punishments:
       # Commands run as console only for type COMMAND. Use %player%, %uuid%, %check%, and %vl%.
       # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
       commands: []
+    # Optional rapid container shift-transfer signal; off until validated against the server's GUI/inventory plugins.
+    container-steal:
+      # Keep automatic action disabled until the signal passes staging validation.
+      enabled: false
+      # Action: KICK, WARN, COMMAND or NONE. The action runs only when enabled is true.
+      type: "KICK"
+      # Required violation level for this action.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global kick message or built-in warning.
+      message: ""
+      # Commands run as console only for type COMMAND. Keep empty unless deliberately configured.
+      commands: []
     # Experimental rotation and hit-pattern signal; review evidence before punishment.
     combat-pattern:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
