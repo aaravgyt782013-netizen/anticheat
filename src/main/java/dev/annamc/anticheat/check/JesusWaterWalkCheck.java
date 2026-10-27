@@ -42,7 +42,7 @@ public final class JesusWaterWalkCheck implements Listener {
         }
 
         long now = System.currentTimeMillis();
-        long interval = Math.max(35L, plugin.getConfig().getLong("checks.jesus.sample-interval-ms", 50L));
+        long interval = Math.max(35L, Math.round(CheckUtil.getVersionedDouble(plugin, player, "jesus", "sample-interval-ms", 50.0)));
         Sample previous = samples.get(id);
         if (previous == null || !previous.world.equals(to.getWorld().getUID())) {
             samples.put(id, new Sample(to, now, 0));
@@ -50,7 +50,7 @@ public final class JesusWaterWalkCheck implements Listener {
         }
         if (now - previous.sampledAt < interval) return;
         long gap = now - previous.sampledAt;
-        long maxGap = Math.max(interval, plugin.getConfig().getLong("checks.jesus.max-sample-gap-ms", 250L));
+        long maxGap = Math.max(interval, Math.round(CheckUtil.getVersionedDouble(plugin, player, "jesus", "max-sample-gap-ms", 250.0)));
         if (gap > maxGap) {
             samples.put(id, new Sample(to, now, 0));
             return;
@@ -61,7 +61,7 @@ public final class JesusWaterWalkCheck implements Listener {
         double dz = to.getZ() - previous.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
         double maxStep = Math.max(0.5,
-                plugin.getConfig().getDouble("checks.jesus.max-horizontal-distance-per-sample", 1.8));
+                CheckUtil.getVersionedDouble(plugin, player, "jesus", "max-horizontal-distance-per-sample", 1.8));
         if (horizontal > maxStep || Math.abs(dy) > 1.5) {
             samples.put(id, new Sample(to, now, 0));
             return;
@@ -70,11 +70,11 @@ public final class JesusWaterWalkCheck implements Listener {
         double verticalTolerance = Math.max(0.0,
                 CheckUtil.getVersionedDouble(plugin, player, "jesus", "max-vertical-delta", 0.04));
         double minHorizontal = Math.max(0.0,
-                plugin.getConfig().getDouble("checks.jesus.minimum-horizontal-distance", 0.06));
+                CheckUtil.getVersionedDouble(plugin, player, "jesus", "minimum-horizontal-distance", 0.06));
         int count = Math.abs(dy) <= verticalTolerance && horizontal >= minHorizontal
                 ? previous.stableSamples + 1 : 0;
         int required = Math.max(4, Math.min(100,
-                plugin.getConfig().getInt("checks.jesus.required-stable-samples", 10)));
+                (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "jesus", "required-stable-samples", 10.0))));
         samples.put(id, new Sample(to, now, count));
         if (count >= required) {
             samples.put(id, new Sample(to, now, 0));
