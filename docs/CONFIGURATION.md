@@ -50,6 +50,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `fast-break` | Paper break-progress estimate versus observed mining time | Disabled |
 | `nuker-burst` | Repeated rolling-window block-break burst | Disabled |
 | `click-rate` | Arm-swing/CPS telemetry, optional PacketEvents attack-rate limit, and optional statistical attack-interval regularity signal | Disabled |
+| `container-steal` | Repeated rapid shift-transfers from an open top/container inventory | Disabled |
 | `combat-pattern` | Rotation/hit-pattern telemetry | Disabled |
 | `scaffold-signal` | Repeated placement-angle pattern | Disabled |
 | `no-fall` | Fall/landing damage correlation | Disabled |
@@ -71,6 +72,19 @@ Tune these settings under `checks.click-rate` in `checks.yml`:
 - `pattern-evaluation-interval-ms`, `minimum-pattern-windows`, and `pattern-flag-cooldown-ms`: repeat-evidence and alert rate controls.
 
 All thresholds can also use `client-version-overrides`, with underscore-separated version keys, because attack timing can vary with client/protocol behavior. PacketEvents must be installed and compatible with the server protocol. Keep this signal disabled until it has been checked against legitimate players and controlled test cases. Do not enable an automatic kick based on this signal alone.
+
+## Container-looting burst signal
+
+`checks.container-steal.enabled` enables a rate heuristic for repeated `MOVE_TO_OTHER_INVENTORY` events originating from the open top inventory (for example, shift-clicking items out of a chest). It does not detect every ChestStealer implementation and it cannot tell whether a player is using a particular client brand.
+
+The main controls in `checks.yml` are:
+
+- `sample-window-ms` and `max-transfers-per-window`: how many container-to-player shift-transfers fit into the rolling window.
+- `evaluation-interval-ms` and `required-over-limit-windows`: how long the over-limit burst must persist.
+- `flag-cooldown-ms` and `max-buffered-samples-per-player`: repeated-signal rate and per-player memory cap.
+- `ignored-inventory-types`, `ignored-worlds`, `ignored-permissions`, and `exempt-game-modes`: server-specific exclusions.
+
+The detector and its punishment action are disabled by default. Test double chests, ender chests, shulker boxes, custom GUI plugins, ordinary looting, and different ping levels before enabling it. A burst is a reviewable staff signal, not proof of automation.
 
 ## Configuration validation
 
