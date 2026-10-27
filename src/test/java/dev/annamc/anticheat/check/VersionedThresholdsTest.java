@@ -267,6 +267,10 @@ class VersionedThresholdsTest {
                     minimum-pattern-cps: 5.0
                     client-version-overrides:
                       '1_21': { max-attacks-per-window: 27, minimum-pattern-cps: 6.0 }
+                  container-steal:
+                    max-transfers-per-window: 28
+                    client-version-overrides:
+                      '1_8': { max-transfers-per-window: 30 }
                   scaffold-signal:
                     minimum-downward-pitch: 65.0
                     client-version-overrides:
@@ -277,6 +281,8 @@ class VersionedThresholdsTest {
                 "1.21.11", "packet-rate", "max-movement-packets-per-second", 40.0));
         assertEquals(27.0, VersionedThresholds.resolveForClient(config, "1.21.11",
                 "1.21.11", "click-rate", "max-attacks-per-window", 20.0));
+        assertEquals(30.0, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "container-steal", "max-transfers-per-window", 24.0));
         assertEquals(6.0, VersionedThresholds.resolveForClient(config, "1.21.11",
                 "1.21.11", "click-rate", "minimum-pattern-cps", 5.0));
         assertEquals(68.0, VersionedThresholds.resolveForClient(config, "1.21.11",
