@@ -14,8 +14,6 @@
 - `plugins/ANNA-AC/punishments.yml`: global kick switch, independent-signal correlation safety controls, kick message, and per-check actions.
 - `plugins/ANNA-AC/security.yml`: anti-nuke bulk-command protection, explosion limits, optional block-break rate limiting, plugin JAR hashes, lifecycle auditing, and static malware-risk scanning.
 - `plugins/ANNA-AC/messages_en.yml` and `messages_hi.yml`: English and Hindi message text.
-- `plugins/ANNA-AC/messages_en.yml`: English messages.
-- `plugins/ANNA-AC/messages_hi.yml`: Hindi messages.
 - `plugins/ANNA-AC/evidence/<uuid>.jsonl`: recorded detector/security evidence.
 - `plugins/ANNA-AC/operator-baseline.txt`: saved UUID baseline for OP-change auditing.
 
@@ -37,7 +35,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 
 ## Recommended safe starting posture
 
-- Edit `checks.<check>.enabled` in `checks.yml`; leave experimental detectors disabled on the live public server until staging tests pass.
+- Edit the detector's `enabled` value in the matching module file (for example, `checks-combat.yml` for reach or `checks-world.yml` for FastBreak). `checks.yml` is a legacy migration template once module files exist; do not use it to change live settings. Leave experimental detectors disabled on the live public server until staging tests pass.
 - Keep `punishments.actions.<check>.enabled: false` in `punishments.yml` for all checks initially. Alert first, review evidence, then enable one action only after measuring false positives.
 - Keep `punishments.enabled: true` in `punishments.yml` if you want the global master switch available; per-check action flags remain the second gate.
 - Keep `punishments.require-independent-families: true` on a public server. By default, an automatic kick requires repeated flags from at least two distinct detector families inside `correlation-window-ms`, with at least two signals per family. If you enable only one family, the plugin will warn that kicks cannot trigger until you lower the family threshold or enable a second family.
