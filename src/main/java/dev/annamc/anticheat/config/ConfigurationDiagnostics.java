@@ -11,7 +11,7 @@ import java.util.List;
 /** Startup/reload diagnostics for risky or incomplete server configuration. */
 public final class ConfigurationDiagnostics {
     public static final List<String> DETECTORS = List.of(
-            "movement", "movement-physics", "knockback", "reach", "mace-damage", "wall-hit",
+            "movement", "movement-physics", "flight", "knockback", "reach", "mace-damage", "wall-hit",
             "fast-break", "nuker-burst", "click-rate", "combat-pattern",
             "scaffold-signal", "no-fall", "packet-rate", "timer");
 
