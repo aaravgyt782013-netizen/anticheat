@@ -534,12 +534,17 @@ checks:
     ignored-permissions: []
     # Game modes excluded from this check.
     exempt-game-modes: [CREATIVE, SPECTATOR]
-    # Conservative baseline allowance before extra fall-distance allowance and tolerance.
+    # Use the vanilla Java mace smash curve (+4/block through 3, +2/block through 8, then +1/block).
+    # This is still a heuristic, not a complete replay of critical hits, potion effects, plugins, or combat modifiers.
+    vanilla-smash-model-enabled: true
+    # Conservative base-damage allowance for the mace's base hit, critical hit, and ordinary combat effects.
     base-damage-allowance: 10.0
-    # Damage allowance per block of observed fall distance; server plugins may alter this.
-    damage-per-fall-block-allowance: 4.5
-    # Additional tolerance for enchantments, server-specific combat plugins, and engine differences.
+    # Density adds 0.5 raw damage per block per level in vanilla Java; tune upward only if server mechanics require it.
+    density-damage-per-block-per-level: 0.5
+    # Additional tolerance for plugin-modified damage, effects, timing, and engine differences.
     extra-tolerance: 12.0
+    # Legacy fallback used only when vanilla-smash-model-enabled is false.
+    damage-per-fall-block-allowance: 4.5
     # Violation level added when repeated/implausible damage is observed.
     violation-add: 1.0
     # How quickly this check's VL decreases over time.
