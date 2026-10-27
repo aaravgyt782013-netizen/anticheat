@@ -62,6 +62,7 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `nuker-burst` | Repeated rolling-window block-break burst | Disabled |
 | `click-rate` | Arm-swing/CPS telemetry, optional PacketEvents attack-rate limit, and optional statistical attack-interval regularity signal | Disabled |
 | `container-steal` | Repeated rapid shift-transfers from an open top/container inventory | Disabled |
+| `container-move` | Repeated movement while a server-side container GUI is open (not the client's own inventory) | Disabled |
 | `combat-pattern` | Rotation/hit-pattern telemetry | Disabled |
 | `scaffold-signal` | Repeated placement-angle pattern | Disabled |
 | `no-fall` | Fall/landing damage correlation | Disabled |
@@ -100,6 +101,12 @@ The main controls in `checks.yml` are:
 - `ignored-inventory-types`, `ignored-worlds`, `ignored-permissions`, and `exempt-game-modes`: server-specific exclusions.
 
 The detector and its punishment action are disabled by default. Test double chests, ender chests, shulker boxes, custom GUI plugins, ordinary looting, and different ping levels before enabling it. A burst is a reviewable staff signal, not proof of automation.
+
+## Container GUI movement signal
+
+`checks.container-move.enabled` opts in to observing repeated horizontal movement while a server-side container GUI is open. It does not observe movement with the player's client-only inventory screen open, and it cannot reliably infer a particular cheat-client brand.
+
+The `checks-world.yml` section exposes the rolling sample window, minimum per-event movement, maximum accepted horizontal/vertical step, sample buffer cap, required movement samples, total path distance, velocity grace, signal cooldown, ignored inventory types/title substrings, and server/client-version overrides. Exclude custom GUI titles or types used by plugins that permit moving while inventories are open. A server velocity event clears evidence and provides a configurable grace period. Keep it disabled until staging tests cover ordinary containers, custom GUI plugins, knockback, latency, teleports, and legitimate menu interactions.
 
 ## Configuration validation
 

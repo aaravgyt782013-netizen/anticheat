@@ -49,6 +49,28 @@ class CheckConfigModulesTest {
                 "Missing legacy sections should remain at their bundled defaults when copied separately");
     }
 
+
+    @Test
+    void moduleAssignmentMapMatchesBundledResourcesAndLegacyCompatibilityFile() {
+        java.util.Set<String> assigned = new java.util.HashSet<>();
+        for (var entry : ModularConfigManager.CHECK_MODULES.entrySet()) {
+            YamlConfiguration module = YamlConfiguration.loadConfiguration(
+                    new java.io.File("src/main/resources", entry.getKey()));
+            var checks = module.getConfigurationSection("checks");
+            assertNotNull(checks, entry.getKey() + " must contain a checks section");
+            java.util.Set<String> actual = checks.getKeys(false);
+            assertEquals(java.util.Set.copyOf(entry.getValue()), actual,
+                    entry.getKey() + " must match the detector keys selected by the loader");
+            for (String detector : entry.getValue()) {
+                assertTrue(assigned.add(detector), "Detector " + detector + " must be assigned to exactly one module");
+            }
+        }
+        YamlConfiguration legacy = YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources", "checks.yml"));
+        assertEquals(legacy.getConfigurationSection("checks").getKeys(false), assigned,
+                "Legacy checks.yml should keep defaults for every detector so upgrades can migrate old settings.");
+    }
+
     @Test
     void missingLegacySectionDoesNotEraseBundledModuleDefaults() throws Exception {
         YamlConfiguration legacy = new YamlConfiguration();

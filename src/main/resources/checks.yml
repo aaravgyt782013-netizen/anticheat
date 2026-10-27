@@ -554,6 +554,33 @@ checks:
     # VL threshold for configured automatic action.
     kick-vl: 10.0
 
+  # Optional movement signal while a server-side container GUI is open.
+  # It cannot see the player's client-only inventory screen. Test custom GUIs before enabling.
+  container-move:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 5000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    sample-window-ms: 1000
+    version-overrides: {}
+    client-version-overrides: {}
+    velocity-grace-ms: 300
+    minimum-sample-distance: 0.03
+    maximum-horizontal-step: 1.5
+    maximum-vertical-step: 1.25
+    max-buffered-samples-per-player: 512
+    minimum-movement-samples: 4
+    minimum-path-distance: 0.75
+    flag-cooldown-ms: 5000
+    ignored-inventory-types: [PLAYER, CRAFTING, CREATIVE]
+    ignored-title-contains: []
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
   # Experimental rotation and hit-pattern signal; review evidence before punishment.
   combat-pattern:
     # Enable this feature. For experimental checks, leave false until tested on a staging server.

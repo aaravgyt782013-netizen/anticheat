@@ -165,6 +165,56 @@ checks:
     # VL threshold for configured automatic action.
     kick-vl: 10.0
 
+  # Optional movement signal while a server-side container GUI is open.
+  # It cannot see the player's client-only inventory screen. Test custom GUIs before enabling.
+  container-move:
+    # Enable container-GUI movement telemetry. Disabled until server-specific staging validation.
+    enabled: false
+    # Send staff alerts when repeated movement crosses the evidence threshold.
+    alert: true
+    # Cooldown between repeated alerts for the player/check.
+    alert-cooldown-ms: 5000
+    # Worlds exempt from this check; empty means all worlds.
+    ignored-worlds: []
+    # Permissions exempt from this check.
+    ignored-permissions: []
+    # Game modes exempt from this check.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Rolling time window for movement samples while the GUI remains open.
+    sample-window-ms: 1000
+    # Server-version overrides for the movement thresholds below; use keys like '1_21_11'.
+    version-overrides: {}
+    # Client-protocol overrides require compatible PacketEvents; these do not identify cheat brands.
+    client-version-overrides: {}
+    # Ignore movement shortly after server-applied velocity, in milliseconds (0–5000).
+    velocity-grace-ms: 300
+    # Minimum horizontal distance for a movement event to count as a sample.
+    minimum-sample-distance: 0.03
+    # Maximum horizontal step accepted in a sample before the sequence is reset.
+    maximum-horizontal-step: 1.5
+    # Maximum vertical step accepted in a sample before the sequence is reset.
+    maximum-vertical-step: 1.25
+    # Maximum movement samples retained per player (detector clamps this to 64–4096).
+    max-buffered-samples-per-player: 512
+    # Number of movement samples required before evaluating the path distance.
+    minimum-movement-samples: 4
+    # Total horizontal path distance required before raising a signal.
+    minimum-path-distance: 0.75
+    # Minimum delay between repeated signals from one player.
+    flag-cooldown-ms: 5000
+    # Inventory types exempt from tracking.
+    ignored-inventory-types: [PLAYER, CRAFTING, CREATIVE]
+    # Case-insensitive substrings in GUI titles that should be exempt. Empty means none.
+    ignored-title-contains: []
+    # Violation level added when the threshold is reached.
+    violation-add: 1.0
+    # How quickly violation level decreases per second.
+    violation-decay-per-second: 0.5
+    # Violation level at which staff alerts are eligible.
+    alert-vl: 2.0
+    # Threshold for configured automatic action; action remains disabled by default in punishments.yml.
+    kick-vl: 10.0
+
   # Experimental rotation and hit-pattern signal; review evidence before punishment.
 
   scaffold-signal:

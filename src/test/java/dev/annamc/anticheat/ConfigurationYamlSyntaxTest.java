@@ -1,6 +1,7 @@
 package dev.annamc.anticheat;
 
 import org.junit.jupiter.api.Test;
+import dev.annamc.anticheat.config.ConfigurationDiagnostics;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -48,10 +49,24 @@ class ConfigurationYamlSyntaxTest {
                 }
             }
         }
-        assertEquals(java.util.Set.of("movement", "movement-physics", "flight", "jesus",
+        java.util.Set<String> expected = java.util.Set.of("movement", "movement-physics", "flight", "jesus",
                 "spider-signal", "knockback", "reach", "mace-damage", "wall-hit", "click-rate",
-                "combat-pattern", "block-reach", "nuker-burst", "fast-break", "container-steal", "scaffold-signal",
-                "no-fall", "packet-rate", "timer", "force-op"), found);
+                "combat-pattern", "block-reach", "nuker-burst", "fast-break", "container-steal", "container-move",
+                "scaffold-signal", "no-fall", "packet-rate", "timer", "force-op");
+        assertEquals(expected, found);
+        java.util.Set<String> diagnostics = new java.util.HashSet<>(ConfigurationDiagnostics.DETECTORS);
+        java.util.Set<String> punishmentManagedChecks = new java.util.HashSet<>(expected);
+        punishmentManagedChecks.remove("force-op");
+        assertEquals(punishmentManagedChecks, diagnostics,
+                "Every gameplay detector should be represented in diagnostics; Force OP uses its own security guard.");
+        try (InputStream in = Files.newInputStream(Path.of("src/main/resources", "punishments.yml"))) {
+            Map<?, ?> root = yaml.load(in);
+            Map<?, ?> punishments = (Map<?, ?>) root.get("punishments");
+            Map<?, ?> actions = (Map<?, ?>) punishments.get("actions");
+            assertEquals(punishmentManagedChecks, actions.keySet().stream()
+                    .map(String::valueOf).collect(java.util.stream.Collectors.toSet()),
+                    "Every gameplay detector should have an independent configurable punishment entry.");
+        }
     }
 
     @Test

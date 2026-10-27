@@ -19,6 +19,7 @@ Original anti-cheat project targeting **Paper 1.21–1.21.11 / Java 21**. CI is 
 - **Combat pattern:** looks for repeated near-identical rotation deltas around hits. This is low-confidence telemetry, not proof of KillAura; disabled by default.
 - **Click / attack rate:** arm-swing telemetry, a configurable PacketEvents `INTERACT_ENTITY` rolling attack-rate limit, and an optional statistical interval-regularity signal for autoclicker-like timing. The timing signal is disabled by default, requires repeated samples, and is not proof of automation.
 - **Container looting rate:** optional repeated shift-transfer burst signal for ChestStealer-like behavior. It ignores configured inventory types, uses a bounded rolling window, and is disabled by default because custom GUIs and legitimate fast looting can look similar.
+- **Container GUI movement:** optional repeated horizontal-movement signal while a server-side container is open, with velocity grace, configurable inventory/title exclusions, bounded sample history and server/client-version thresholds. It cannot observe the client's own inventory screen and is disabled by default.
 - **Scaffold signal:** placement-angle heuristic; weak evidence only and disabled by default.
 - **No-fall signal:** checks a narrow pattern of landing after a significant fall without observed fall damage. Protection plugins and gameplay effects can create the same pattern; disabled by default.
 - **Packet rate:** optional PacketEvents rolling packet-rate and short-interval telemetry; disabled by default.

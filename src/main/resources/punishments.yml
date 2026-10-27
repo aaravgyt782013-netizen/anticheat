@@ -173,6 +173,20 @@ punishments:
       message: ""
       # Commands run as console only for type COMMAND. Keep empty unless deliberately configured.
       commands: []
+    # Optional container-GUI movement signal; not client-only inventory detection.
+    container-move:
+      # Keep automatic action disabled until this signal passes staging validation.
+      enabled: false
+      # Action: KICK, WARN, COMMAND or NONE.
+      type: "KICK"
+      # Required violation level for this action.
+      threshold-vl: 10.0
+      # Minimum milliseconds between repeated actions for this player/check.
+      cooldown-ms: 30000
+      # Optional message for KICK/WARN; empty uses the global/default message.
+      message: ""
+      # Commands run as console only for type COMMAND; configure deliberately.
+      commands: []
     # Experimental rotation and hit-pattern signal; review evidence before punishment.
     combat-pattern:
       # Enable automatic punishment for this check. Keep false until staging validation is complete.
