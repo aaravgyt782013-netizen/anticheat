@@ -3,7 +3,6 @@ package dev.annamc.anticheat.check;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -79,9 +78,13 @@ public final class MovementPhysicsCheck implements Listener {
         if (player.isSprinting()) base *= CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "sprint-multiplier", 1.3);
         if (player.hasPotionEffect(PotionEffectType.SPEED)) {
             int amplifier = player.getPotionEffect(PotionEffectType.SPEED).getAmplifier() + 1;
-            base *= 1.0 + 0.20 * amplifier;
+            base *= 1.0 + CheckUtil.getVersionedDouble(
+                    plugin, player, "movement-physics", "speed-potion-multiplier-per-level", 0.20) * amplifier;
         }
-        if (player.getGameMode() == GameMode.ADVENTURE) base *= 1.03;
+        if (player.getGameMode() == GameMode.ADVENTURE) {
+            base *= CheckUtil.getVersionedDouble(
+                    plugin, player, "movement-physics", "adventure-mode-multiplier", 1.03);
+        }
         double pingSlack = Math.min(CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "max-ping-slack", 0.75),
                 Math.max(0, player.getPing()) * CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "ping-slack-per-ms", 0.001));
         double allowance = base * ticks + pingSlack;

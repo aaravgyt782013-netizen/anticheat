@@ -117,8 +117,11 @@ public final class VersionedThresholds {
                 || key.equals("maximum-pitch-variance") || key.equals("rotation-quantization-degrees")) {
             return value < 0.0 || value > 180.0 ? "must be between 0 and 180 degrees." : null;
         }
-        if (key.equals("outlier-ratio") || key.equals("sprint-multiplier")) {
+        if (key.equals("outlier-ratio") || key.endsWith("-multiplier")) {
             return value <= 0.0 ? "must be greater than 0." : null;
+        }
+        if (key.equals("speed-potion-multiplier-per-level")) {
+            return value < 0.0 ? "must not be negative." : null;
         }
         if (key.startsWith("minimum-") || key.startsWith("max-") || key.startsWith("required-")
                 || key.startsWith("sample-") || key.contains("slack") || key.contains("window")

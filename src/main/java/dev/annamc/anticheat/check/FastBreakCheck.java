@@ -105,7 +105,7 @@ public final class FastBreakCheck implements Listener {
         long now = System.currentTimeMillis();
         long elapsed = Math.max(0L, now - session.startedAt);
         long timeout = Math.max(1000L,
-                plugin.getConfig().getLong("checks.fast-break.session-timeout-ms", 15000L));
+                Math.round(CheckUtil.getVersionedDouble(plugin, player, "fast-break", "session-timeout-ms", 15000.0)));
         if (elapsed > timeout) return;
 
         double ratio = Math.max(0.05,

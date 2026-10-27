@@ -152,6 +152,10 @@ checks:
     base-horizontal-per-tick: 0.72
     # Movement allowance multiplier when sprinting.
     sprint-multiplier: 1.3
+    # Additional horizontal allowance per active Speed potion level.
+    speed-potion-multiplier-per-level: 0.20
+    # Multiplicative allowance adjustment while in Adventure mode.
+    adventure-mode-multiplier: 1.03
     # Extra movement allowance per millisecond of measured ping.
     ping-slack-per-ms: 0.001
     # Maximum extra movement allowance granted for ping.

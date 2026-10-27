@@ -30,6 +30,8 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("wall-sample-horizontal-offset: 0.36"));
         assertTrue(yaml.contains("wall-sample-heights: [0.35, 1.05, 1.45]"));
         assertTrue(yaml.contains("climbable-materials: [LADDER, VINE"));
+        assertTrue(yaml.contains("speed-potion-multiplier-per-level: 0.20"));
+        assertTrue(yaml.contains("adventure-mode-multiplier: 1.03"));
         assertTrue(yaml.contains("base-horizontal-per-tick"));
         assertTrue(yaml.contains("required-consecutive-outliers"));
         assertTrue(yaml.contains("minimum-observed-displacement"));

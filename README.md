@@ -1,6 +1,6 @@
 # ANNA AC
 
-Original anti-cheat project targeting **Paper 1.21.11 / Java 21**.
+Original anti-cheat project targeting **Paper 1.21–1.21.11 / Java 21**. It compiles against the Paper 1.21 API so newer 1.21 patch releases do not become the minimum API level. Compile compatibility is not a substitute for testing on each target Paper build.
 
 ## Implemented detector signals
 
