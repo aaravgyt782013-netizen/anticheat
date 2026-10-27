@@ -42,6 +42,10 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Minimum interval between movement samples in milliseconds.
     sample-interval-ms: 50
+    # Reset tracking after long server pauses rather than interpreting a lag gap as a normal sample.
+    max-sample-gap-ms: 250
+    # Reset tracking when a single horizontal step exceeds this distance, avoiding teleport artefacts.
+    max-horizontal-distance-per-sample: 2.5
     # Maximum absolute vertical movement between samples still considered near-hover.
     max-hover-vertical-delta: 0.025
     # Minimum horizontal displacement between samples.
