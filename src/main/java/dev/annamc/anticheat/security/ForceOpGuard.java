@@ -45,12 +45,23 @@ public final class ForceOpGuard implements Listener {
         this.baselinePath = plugin.getDataFolder().toPath().resolve("operator-baseline.txt");
         Set<UUID> current = readCurrentOperators();
         Set<UUID> persisted = loadBaseline();
-        if (persisted != null && plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true)) {
-            for (UUID id : current) {
-                if (!persisted.contains(id)) {
-                    OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
-                    String name = operator.getName() == null ? id.toString() : operator.getName();
-                    alert(id, name, "operator status appeared since the previous saved baseline; actor is unknown", Bukkit.getPlayer(id));
+        if (persisted != null) {
+            if (plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true)) {
+                for (UUID id : current) {
+                    if (!persisted.contains(id)) {
+                        OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
+                        String name = operator.getName() == null ? id.toString() : operator.getName();
+                        alert(id, name, "operator status appeared since the previous saved baseline; actor is unknown", Bukkit.getPlayer(id));
+                    }
+                }
+            }
+            if (plugin.getConfig().getBoolean("checks.force-op.detect-op-removals", true)) {
+                for (UUID id : persisted) {
+                    if (!current.contains(id)) {
+                        OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
+                        String name = operator.getName() == null ? id.toString() : operator.getName();
+                        alert(id, name, "operator status disappeared since the previous saved baseline; actor is unknown", Bukkit.getPlayer(id));
+                    }
                 }
             }
         }
@@ -122,6 +133,15 @@ public final class ForceOpGuard implements Listener {
                 OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
                 String name = operator.getName() == null ? id.toString() : operator.getName();
                 alert(id, name, "operator status changed to enabled; granting actor is unknown", Bukkit.getPlayer(id));
+            }
+        }
+        if (plugin.getConfig().getBoolean("checks.force-op.detect-op-removals", true)) {
+            for (UUID id : new ArrayList<>(knownOperators)) {
+                if (!current.contains(id)) {
+                    OfflinePlayer operator = Bukkit.getOfflinePlayer(id);
+                    String name = operator.getName() == null ? id.toString() : operator.getName();
+                    alert(id, name, "operator status changed to disabled; removing actor is unknown", Bukkit.getPlayer(id));
+                }
             }
         }
         if (changed) {
