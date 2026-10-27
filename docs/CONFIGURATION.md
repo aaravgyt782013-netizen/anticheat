@@ -98,7 +98,7 @@ checks:
         max-distance: 3.6
 ```
 
-On startup and `/annaac reload`, ANNA AC reports override keys that use dots instead of underscores, unknown threshold names, and values that are not finite numbers. Review these warnings; a typo may otherwise leave the normal threshold in effect.
+On startup and `/annaac reload`, ANNA AC reports override keys that use dots instead of underscores, unknown threshold names, and values that are not finite numbers. Review these warnings; a typo may otherwise leave the normal threshold in effect. Values outside known safe numeric bounds (negative durations/counts, ratios outside 0–1, or angles outside 0–180 degrees) are ignored by the resolver and fall back to the next valid setting.
 
 These are illustrative values only, not recommended thresholds. Supported threshold fields are those explicitly read through `CheckUtil.getVersionedDouble`; adding a key for an unrelated setting has no effect. The client release name is protocol metadata, not a reliable identifier of a cheat client or proof of cheating. Client-specific overrides require a compatible PacketEvents build (use 2.11.0 or newer for 1.21.11 protocol support; the project compiles against 2.14.0). Without PacketEvents, all checks continue using the server-version/default fallback.
 

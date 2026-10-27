@@ -190,6 +190,27 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void resolverRejectsNegativeSampleAndTimingOverrides() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  flight:
+                    required-hover-samples: 24
+                    client-version-overrides:
+                      '1_8': { required-hover-samples: -5 }
+                  fast-break:
+                    sample-window-ms: 10000
+                    client-version-overrides:
+                      '1_21': { sample-window-ms: -1000 }
+                """);
+
+        assertEquals(24.0, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "flight", "required-hover-samples", 24.0));
+        assertEquals(10000.0, VersionedThresholds.resolveForClient(config, "1.21",
+                "1.21.11", "fast-break", "sample-window-ms", 10000.0));
+    }
+
+    @Test
     void clientOverrideDetectorOnlyReportsNonemptySections() throws Exception {
         YamlConfiguration config = new YamlConfiguration();
         config.loadFromString("""

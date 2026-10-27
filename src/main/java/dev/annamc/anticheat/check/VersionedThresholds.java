@@ -120,8 +120,12 @@ public final class VersionedThresholds {
         if (key.equals("outlier-ratio") || key.equals("sprint-multiplier")) {
             return value <= 0.0 ? "must be greater than 0." : null;
         }
-        if (key.startsWith("minimum-") || key.startsWith("max-")
-                || key.contains("slack") || key.equals("violation-add")
+        if (key.startsWith("minimum-") || key.startsWith("max-") || key.startsWith("required-")
+                || key.startsWith("sample-") || key.contains("slack") || key.contains("window")
+                || key.contains("interval") || key.contains("duration") || key.contains("timeout")
+                || key.contains("cooldown") || key.contains("observation") || key.contains("samples")
+                || key.contains("consecutive") || key.contains("hits") || key.contains("breaks")
+                || key.equals("violation-add")
                 || key.equals("special-block-allowance-per-tick")
                 || key.equals("base-horizontal-per-tick")
                 || key.equals("base-damage-allowance")
