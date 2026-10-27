@@ -52,11 +52,23 @@ public final class FlightHoverCheck implements Listener {
             return;
         }
         if (now - previous.sampledAt < interval) return;
+        long gap = now - previous.sampledAt;
+        long maxGap = Math.max(interval, plugin.getConfig().getLong("checks.flight.max-sample-gap-ms", 250L));
+        if (gap > maxGap) {
+            samples.put(id, new Sample(to, now, 0));
+            return;
+        }
 
         double dx = to.getX() - previous.x;
         double dy = to.getY() - previous.y;
         double dz = to.getZ() - previous.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
+        double maxStep = Math.max(0.5,
+                plugin.getConfig().getDouble("checks.flight.max-horizontal-distance-per-sample", 2.5));
+        if (horizontal > maxStep || Math.abs(dy) > 3.0) {
+            samples.put(id, new Sample(to, now, 0));
+            return;
+        }
         double verticalTolerance = Math.max(0.0,
                 plugin.getConfig().getDouble("checks.flight.max-hover-vertical-delta", 0.025));
         double minimumHorizontal = Math.max(0.0,
