@@ -12,7 +12,7 @@ import java.util.List;
 public final class ConfigurationDiagnostics {
     public static final List<String> DETECTORS = List.of(
             "movement", "movement-physics", "flight", "jesus", "spider-signal", "knockback", "reach", "mace-damage", "wall-hit",
-            "fast-break", "nuker-burst", "click-rate", "container-steal", "combat-pattern",
+            "fast-break", "nuker-burst", "block-reach", "click-rate", "container-steal", "combat-pattern",
             "scaffold-signal", "no-fall", "packet-rate", "timer");
 
     private ConfigurationDiagnostics() {}

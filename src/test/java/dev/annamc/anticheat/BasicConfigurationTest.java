@@ -47,6 +47,9 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("pattern-detection-enabled: false"));
         assertTrue(yaml.contains("container-steal:\nenabled: false"));
         assertTrue(yaml.contains("max-transfers-per-window: 28"));
+        assertTrue(yaml.contains("max-break-distance: 5.0"));
+        assertTrue(yaml.contains("max-interaction-distance: 5.0"));
+        assertTrue(yaml.contains("distance-tolerance: 0.15"));
         assertTrue(yaml.contains("ignored-inventory-types: [PLAYER, CRAFTING, CREATIVE]"));
         assertTrue(yaml.contains("max-attacks-per-window: 24"));
         assertTrue(yaml.contains("minimum-over-limit-windows: 3"));
@@ -88,6 +91,7 @@ class BasicConfigurationTest {
         assertTrue(yaml.contains("spider-signal:\nenabled: false"));
         assertTrue(yaml.contains("knockback:\nenabled: false"));
         assertTrue(yaml.contains("reach:\nenabled: false"));
+        assertTrue(yaml.contains("block-reach:\nenabled: false"));
         assertTrue(yaml.contains("mace-damage:\nenabled: false"));
         assertTrue(yaml.contains("click-rate:\nenabled: false"));
         assertTrue(yaml.contains("combat-pattern:\nenabled: false"));
@@ -103,6 +107,7 @@ class BasicConfigurationTest {
     @Test void allPunishmentsAreIndividuallyConfigurableAndDisabledByDefault() throws Exception {
         String yaml = config();
         assertTrue(yaml.contains("actions:\nmovement:\nenabled: false"));
+        assertTrue(yaml.contains("block-reach:\nenabled: false"));
         assertTrue(yaml.contains("movement-physics:\nenabled: false"));
         assertTrue(yaml.contains("knockback:\nenabled: false"));
         assertTrue(yaml.contains("reach:\nenabled: false"));
@@ -117,6 +122,7 @@ class BasicConfigurationTest {
         assertEquals(2, yaml.split("nuker-burst:\\nenabled: false", -1).length - 1);
         assertEquals(2, yaml.split("fast-break:\\nenabled: false", -1).length - 1);
         assertEquals(2, yaml.split("container-steal:\\nenabled: false", -1).length - 1);
+        assertEquals(2, yaml.split("block-reach:\\nenabled: false", -1).length - 1);
     }
 
     @Test void forceOpHasCommandBlockingAndAuditControls() throws Exception {

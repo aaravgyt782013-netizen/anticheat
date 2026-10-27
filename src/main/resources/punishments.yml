@@ -107,6 +107,14 @@ punishments:
       # Keep this list empty unless you intentionally want console commands executed by ANNA AC.
       commands: []
     # Block-break burst detector action, disabled until its thresholds pass staging tests.
+    # Block-break/right-click block reach telemetry; keep disabled until staging-tested.
+    block-reach:
+      enabled: false
+      type: "KICK"
+      threshold-vl: 10.0
+      cooldown-ms: 30000
+      message: ""
+      commands: []
     nuker-burst:
       # Keep automatic punishment disabled for this heuristic.
       enabled: false

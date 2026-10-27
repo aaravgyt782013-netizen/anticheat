@@ -50,7 +50,7 @@ class ConfigurationYamlSyntaxTest {
         }
         assertEquals(java.util.Set.of("movement", "movement-physics", "flight", "jesus",
                 "spider-signal", "knockback", "reach", "mace-damage", "wall-hit", "click-rate",
-                "combat-pattern", "nuker-burst", "fast-break", "container-steal", "scaffold-signal",
+                "combat-pattern", "block-reach", "nuker-burst", "fast-break", "container-steal", "scaffold-signal",
                 "no-fall", "packet-rate", "timer", "force-op"), found);
     }
 

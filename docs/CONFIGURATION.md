@@ -54,7 +54,8 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `jesus` | Stable surface-walk movement over deep liquid | Disabled |
 | `spider-signal` | Repeated upward movement beside a solid wall | Disabled |
 | `knockback` | Movement after server velocity | Disabled |
-| `reach` | Approximate target hitbox distance | Disabled |
+| `reach` | Approximate entity hitbox distance | Disabled |
+| `block-reach` | Eye-to-block collision-box distance for breaking and right-click interactions | Disabled |
 | `mace-damage` | Piecewise vanilla Java smash curve, Density allowance, extra tolerance, optional legacy formula | Disabled |
 | `wall-hit` | Multi-point hitbox occlusion signal; not latency-compensated | Disabled |
 | `fast-break` | Paper break-progress estimate versus observed mining time | Disabled |
@@ -69,6 +70,10 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `force-op` | Alias-aware OP/deop blocking, configurable permission-mutation patterns, operator-list auditing | Enabled |
 
 These are signals, not guaranteed identification of Meteor, Wurst, Baritone, or any other client. Several are experimental heuristics. See `CHEAT_COVERAGE.md` for the current/planned coverage split.
+
+## Block interaction reach signal
+
+`checks.block-reach.enabled` enables a conservative check on server-observed block-breaking attempts and right-click block interactions. It measures the shortest eye-to-block-collision-box distance, then compares it with separate configurable `max-break-distance` and `max-interaction-distance` limits plus `distance-tolerance`. Tune server releases with `version-overrides` and connected client protocols with `client-version-overrides` (requires compatible PacketEvents). Materials, worlds, permissions and game modes can be excluded. Because this signal observes Bukkit events rather than replaying historical packets, it is not a complete extended-reach detector and remains disabled by default until staging validation is complete.
 
 ## Optional autoclicker interval-regularity signal
 

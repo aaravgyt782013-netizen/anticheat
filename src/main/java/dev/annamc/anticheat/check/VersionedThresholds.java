@@ -153,7 +153,7 @@ public final class VersionedThresholds {
             return value < 0.0 ? "must not be negative." : null;
         }
         if (key.endsWith("-vl") || key.equals("violation-decay-per-second")
-                || key.endsWith("-offset") || key.endsWith("-margin")) {
+                || key.endsWith("-offset") || key.endsWith("-margin") || key.endsWith("-tolerance")) {
             return value < 0.0 ? "must not be negative." : null;
         }
         if (key.startsWith("minimum-") || key.startsWith("max-") || key.startsWith("maximum-")

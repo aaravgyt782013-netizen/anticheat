@@ -1,5 +1,45 @@
 # ANNA AC modular detector settings. Changes here are merged into the active runtime configuration.
 checks:
+  # Conservative eye-to-block reach signal for start-breaking and right-click interactions.
+  # This is server-event telemetry, not packet-level history; leave disabled until staging-tested.
+  block-reach:
+    # Enable block reach observation. Disabled by default to prevent false positives before validation.
+    enabled: false
+    # Send alerts/evidence when an observed block action exceeds the configured reach.
+    alert: true
+    # Minimum milliseconds between repeated alerts for the same player/check.
+    alert-cooldown-ms: 4000
+    # Worlds excluded from block reach observation.
+    ignored-worlds: []
+    # Permissions excluded from block reach observation.
+    ignored-permissions: []
+    # Game modes excluded from the check.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Independently enable checks at the beginning of a block-break attempt.
+    check-breaks: true
+    # Independently enable checks for right-click block interactions.
+    check-interactions: true
+    # Maximum eye-to-collision-box distance for breaking. Increase only with test evidence.
+    max-break-distance: 5.0
+    # Maximum eye-to-collision-box distance for right-click interactions.
+    max-interaction-distance: 5.0
+    # Extra distance allowed for edge rounding and collision-box precision.
+    distance-tolerance: 0.15
+    # Materials skipped entirely by this signal.
+    ignored-materials: [AIR, CAVE_AIR, VOID_AIR]
+    # Optional server-release numeric threshold overrides; use underscore keys such as '1_21_11'.
+    version-overrides: {}
+    # Optional client-protocol numeric thresholds; requires compatible PacketEvents.
+    client-version-overrides: {}
+    # Violation level added for one observed over-range action.
+    violation-add: 1.0
+    # How quickly violation level decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for configured automatic action.
+    kick-vl: 10.0
+
   nuker-burst:
     # Enable the block-break burst signal.
     enabled: false

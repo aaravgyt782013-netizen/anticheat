@@ -10,7 +10,8 @@ Original anti-cheat project targeting **Paper 1.21–1.21.11 / Java 21**. CI is 
 - **Jesus / liquid walk:** flags sustained horizontal movement at a stable Y over deep liquid while not swimming. Server-side state is imperfect; disabled by default.
 - **Spider climb:** flags repeated upward movement beside a solid wall, excluding common climbable blocks, flight modes, jump effects and liquids. Parkour/plugin mechanics require staging validation; disabled by default.
 - **Knockback telemetry:** compares movement observed after server velocity. Collisions, player input and ping affect results; disabled by default.
-- **Reach:** eye-to-nearest-point-on-target-hitbox signal without full historical hitbox/interpolation compensation; disabled by default.
+- **Entity reach:** eye-to-nearest-point-on-target-hitbox signal without full historical hitbox/interpolation compensation; disabled by default.
+- **Block reach:** configurable eye-to-block-collision-box distance checks for observed break attempts and right-click interactions, with separate thresholds and server/client-version tuning; event-level telemetry only and disabled by default.
 - **Mace damage:** configurable vanilla Java smash-damage curve, Density enchantment allowance, extra tolerance, and a legacy custom-server formula fallback. It remains an anomaly signal—not a full combat simulator—and is disabled by default.
 - **Wall-hit:** configurable multi-point target-hitbox occlusion signal; not latency-compensated and disabled by default.
 - **Nuker burst:** counts completed block-break events in a configurable rolling window, with ignored materials and repeated-window threshold; this does not simulate individual block mining speed and is disabled by default.

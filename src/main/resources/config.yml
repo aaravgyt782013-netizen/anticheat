@@ -24,6 +24,7 @@ settings:
       - knockback
       - reach
       - wall-hit
+      - block-reach
       - mace-damage
       - fast-break
       - nuker-burst

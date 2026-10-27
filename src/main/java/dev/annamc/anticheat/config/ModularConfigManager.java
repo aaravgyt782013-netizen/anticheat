@@ -22,7 +22,7 @@ public final class ModularConfigManager {
     private static final Map<String, java.util.List<String>> CHECK_MODULES = Map.of(
             "checks-movement.yml", java.util.List.of("movement", "movement-physics", "flight", "jesus", "spider-signal", "knockback"),
             "checks-combat.yml", java.util.List.of("reach", "mace-damage", "wall-hit", "click-rate", "combat-pattern"),
-            "checks-world.yml", java.util.List.of("nuker-burst", "fast-break", "container-steal", "scaffold-signal", "no-fall"),
+            "checks-world.yml", java.util.List.of("block-reach", "nuker-burst", "fast-break", "container-steal", "scaffold-signal", "no-fall"),
             "checks-packets.yml", java.util.List.of("packet-rate", "timer"),
             "checks-security.yml", java.util.List.of("force-op"));
     private final JavaPlugin plugin;
