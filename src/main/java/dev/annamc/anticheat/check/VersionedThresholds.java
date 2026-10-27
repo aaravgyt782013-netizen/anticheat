@@ -106,6 +106,29 @@ public final class VersionedThresholds {
         return java.util.List.copyOf(warnings);
     }
 
+    /**
+     * Validates ordinary (non-versioned) numeric check settings at startup and reload.
+     * Override maps are validated separately by {@link #validateOverrides(FileConfiguration)}.
+     */
+    public static java.util.List<String> validateConfiguredThresholds(FileConfiguration config) {
+        java.util.List<String> warnings = new java.util.ArrayList<>();
+        ConfigurationSection checks = config.getConfigurationSection("checks");
+        if (checks == null) return java.util.List.of("checks section is missing.");
+
+        for (String check : checks.getKeys(false)) {
+            ConfigurationSection section = checks.getConfigurationSection(check);
+            if (section == null) continue;
+            for (String setting : section.getKeys(false)) {
+                if ("version-overrides".equals(setting) || "client-version-overrides".equals(setting)) continue;
+                Object value = section.get(setting);
+                if (!(value instanceof Number number)) continue;
+                String warning = thresholdRangeWarning(check, setting, number.doubleValue());
+                if (warning != null) warnings.add("checks." + check + "." + setting + " " + warning);
+            }
+        }
+        return java.util.List.copyOf(warnings);
+    }
+
     private static String thresholdRangeWarning(String check, String setting, double value) {
         if (setting == null || !Double.isFinite(value)) return "must be finite.";
         String key = setting.toLowerCase(java.util.Locale.ROOT);
@@ -123,7 +146,12 @@ public final class VersionedThresholds {
         if (key.equals("speed-potion-multiplier-per-level")) {
             return value < 0.0 ? "must not be negative." : null;
         }
-        if (key.startsWith("minimum-") || key.startsWith("max-") || key.startsWith("required-")
+        if (key.endsWith("-vl") || key.equals("violation-decay-per-second")
+                || key.endsWith("-offset") || key.endsWith("-margin")) {
+            return value < 0.0 ? "must not be negative." : null;
+        }
+        if (key.startsWith("minimum-") || key.startsWith("max-") || key.startsWith("maximum-")
+                || key.startsWith("required-")
                 || key.startsWith("sample-") || key.contains("slack") || key.contains("window")
                 || key.contains("interval") || key.contains("duration") || key.contains("timeout")
                 || key.contains("cooldown") || key.contains("observation") || key.contains("samples")
