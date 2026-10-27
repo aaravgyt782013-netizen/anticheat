@@ -25,6 +25,38 @@ checks:
     # VL threshold for kicking, but only when the relevant punishment switches are enabled.
     kick-vl: 12.0
 
+  # Experimental hover/flight signal. Requires sustained airborne near-horizontal movement.
+  # It excludes many legitimate states but is not a full client-physics simulation; disabled by default.
+  flight:
+    # Enable the airborne hover detector.
+    enabled: false
+    # Send staff alerts when sustained hover-like movement is detected.
+    alert: true
+    # Minimum time between repeated alerts for the same player/check.
+    alert-cooldown-ms: 5000
+    # World names where this check should not run.
+    ignored-worlds: []
+    # Permissions that exempt players from this check.
+    ignored-permissions: []
+    # Game modes excluded from this check.
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    # Minimum interval between movement samples in milliseconds.
+    sample-interval-ms: 50
+    # Maximum absolute vertical movement between samples still considered near-hover.
+    max-hover-vertical-delta: 0.025
+    # Minimum horizontal displacement between samples.
+    minimum-horizontal-distance: 0.08
+    # Consecutive near-hover samples required before flagging (a value around 24 is roughly 1.2 seconds).
+    required-hover-samples: 24
+    # Violation level added when the heuristic flags.
+    violation-add: 1.0
+    # How quickly this check's VL decreases over time.
+    violation-decay-per-second: 0.5
+    # VL at which alerts become eligible to be sent.
+    alert-vl: 2.0
+    # VL threshold for configured automatic action.
+    kick-vl: 12.0
+
   # Experimental movement-envelope heuristic; may flag legitimate movement and is disabled by default.
   movement-physics:
     # Enable this feature. For experimental checks, leave false until tested on a staging server.
