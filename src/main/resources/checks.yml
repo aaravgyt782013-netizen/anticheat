@@ -61,6 +61,45 @@ checks:
     # VL threshold for configured automatic action.
     kick-vl: 12.0
 
+  # Experimental liquid-walk/Jesus signal. Requires stable horizontal travel over deep liquid while not swimming.
+  # Shallow water, custom movement plugins, and server mechanics need local validation; disabled by default.
+  jesus:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 5000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    sample-interval-ms: 50
+    max-sample-gap-ms: 250
+    max-horizontal-distance-per-sample: 1.8
+    max-vertical-delta: 0.04
+    minimum-horizontal-distance: 0.06
+    required-stable-samples: 10
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
+  # Experimental Spider signal. Looks for sustained upward movement beside solid walls.
+  # Parkour, custom movement, and unusual geometry require testing; disabled by default.
+  spider-signal:
+    enabled: false
+    alert: true
+    alert-cooldown-ms: 5000
+    ignored-worlds: []
+    ignored-permissions: []
+    exempt-game-modes: [CREATIVE, SPECTATOR]
+    sample-interval-ms: 75
+    max-sample-gap-ms: 250
+    max-horizontal-distance-per-sample: 2.5
+    minimum-upward-delta: 0.08
+    required-upward-samples: 10
+    violation-add: 1.0
+    violation-decay-per-second: 0.5
+    alert-vl: 2.0
+    kick-vl: 10.0
+
   # Experimental movement-envelope heuristic; may flag legitimate movement and is disabled by default.
   movement-physics:
     # Enable this feature. For experimental checks, leave false until tested on a staging server.
