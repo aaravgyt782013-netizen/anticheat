@@ -16,6 +16,8 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Horizontal movement distance threshold per event tick; tune carefully to avoid false positives.
     max-horizontal-distance-per-tick: 1.25
+    # Optional per-version threshold overrides. Use underscores in keys such as '1_21_11'.
+    version-overrides: {}
     # Violation level (VL) added when this check flags.
     violation-add: 1.0
     # How quickly this check's VL decreases over time.
@@ -48,6 +50,8 @@ checks:
     max-horizontal-distance-per-sample: 2.5
     # Maximum absolute vertical movement between samples still considered near-hover.
     max-hover-vertical-delta: 0.025
+    # Optional overrides for max-horizontal-distance-per-sample and max-hover-vertical-delta.
+    version-overrides: {}
     # Minimum horizontal displacement between samples.
     minimum-horizontal-distance: 0.08
     # Consecutive near-hover samples required before flagging (a value around 24 is roughly 1.2 seconds).
@@ -74,6 +78,8 @@ checks:
     max-sample-gap-ms: 250
     max-horizontal-distance-per-sample: 1.8
     max-vertical-delta: 0.04
+    # Optional overrides for max-horizontal-distance-per-sample and max-vertical-delta.
+    version-overrides: {}
     minimum-horizontal-distance: 0.06
     required-stable-samples: 10
     violation-add: 1.0
@@ -94,6 +100,8 @@ checks:
     max-sample-gap-ms: 250
     max-horizontal-distance-per-sample: 2.5
     minimum-upward-delta: 0.08
+    # Optional per-version overrides for minimum-upward-delta; version keys use underscores.
+    version-overrides: {}
     required-upward-samples: 10
     violation-add: 1.0
     violation-decay-per-second: 0.5

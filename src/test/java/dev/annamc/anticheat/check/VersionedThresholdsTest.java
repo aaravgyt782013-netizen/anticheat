@@ -42,6 +42,37 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void movementSignalOverridesResolveIndependently() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  movement:
+                    max-horizontal-distance-per-tick: 1.25
+                    version-overrides:
+                      '1_21': { max-horizontal-distance-per-tick: 1.28 }
+                  flight:
+                    max-hover-vertical-delta: 0.025
+                    version-overrides:
+                      '1_21_11': { max-hover-vertical-delta: 0.03 }
+                  jesus:
+                    max-vertical-delta: 0.04
+                    version-overrides: {}
+                  spider-signal:
+                    minimum-upward-delta: 0.08
+                    version-overrides: {}
+                """);
+
+        assertEquals(1.28, VersionedThresholds.resolve(config, "1.21.11",
+                "movement", "max-horizontal-distance-per-tick", 1.0));
+        assertEquals(0.03, VersionedThresholds.resolve(config, "1.21.11",
+                "flight", "max-hover-vertical-delta", 0.02));
+        assertEquals(0.04, VersionedThresholds.resolve(config, "1.21.11",
+                "jesus", "max-vertical-delta", 0.02));
+        assertEquals(0.08, VersionedThresholds.resolve(config, "1.21.11",
+                "spider-signal", "minimum-upward-delta", 0.02));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 

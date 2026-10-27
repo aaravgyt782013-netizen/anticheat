@@ -59,6 +59,23 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 
 These are signals, not guaranteed identification of Meteor, Wurst, Baritone, or any other client. Several are experimental heuristics. See `CHEAT_COVERAGE.md` for the current/planned coverage split.
 
+## Per-version movement threshold tuning
+
+The movement signals support optional version-specific numeric overrides. This is useful when testing Paper 1.21 through 1.21.11 and keeping a separate threshold for a specific server version. The exact version wins, then the major/minor key, then the normal setting. Bukkit treats dots as YAML path separators, so write version keys with underscores:
+
+```yaml
+checks:
+  movement:
+    max-horizontal-distance-per-tick: 1.25
+    version-overrides:
+      '1_21':
+        max-horizontal-distance-per-tick: 1.28
+      '1_21_11':
+        max-horizontal-distance-per-tick: 1.30
+```
+
+Version overrides are currently wired for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `reach`, and `mace-damage`. For each check, only threshold fields actually read through the version-aware resolver are affected; other settings remain normal global settings. The example numbers are illustrative, not recommended anti-cheat defaults. Keep experimental checks disabled until staging tests confirm they do not flag legitimate movement.
+
 ## Per-check punishment actions
 
 Edit `punishments.yml` under `punishments.actions.<check>`. Every action is disabled by default.
