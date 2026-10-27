@@ -121,8 +121,7 @@ public final class ForceOpGuard implements Listener {
     }
 
     private void auditOperatorList() {
-        if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)
-                || !plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true)) return;
+        if (!plugin.getConfig().getBoolean("checks.force-op.enabled", true)) return;
         Set<UUID> current = readCurrentOperators();
         boolean changed = !current.equals(knownOperators);
         boolean detectGrants = plugin.getConfig().getBoolean("checks.force-op.detect-op-grants", true);
