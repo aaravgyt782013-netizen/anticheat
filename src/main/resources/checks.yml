@@ -377,6 +377,10 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Arm-swing events per second above which the Bukkit-event signal may flag.
     max-cps: 24
+    # Optional server/client-version overrides for click/attack-rate thresholds.
+    version-overrides: {}
+    # Requires PacketEvents for detected client-protocol overrides.
+    client-version-overrides: {}
     # Use PacketEvents INTERACT_ENTITY attack packets for a second attack-rate signal when PacketEvents is installed.
     attack-packets-enabled: true
     # Rolling attack packet window length in milliseconds (effective range 250–5000).
@@ -418,6 +422,9 @@ checks:
     rotation-quantization-degrees: 0.15
     # Maximum angle between view direction and target direction used by this signal.
     maximum-hit-angle-degrees: 22.0
+    # Optional server/client-version overrides for combat-pattern numeric thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
     # Recent rotation history window used around attacks.
     rotation-window-ms: 180
     # Additional angle tolerance per millisecond of ping.
@@ -459,6 +466,9 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Minimum downward view angle for a placement to count toward this scaffold signal.
     minimum-downward-pitch: 65.0
+    # Optional server/client-version overrides for placement-pattern thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
     # Minimum horizontal player movement associated with a placement.
     min-horizontal-distance: 0.8
     # Minimum horizontal speed associated with a placement.
@@ -494,6 +504,9 @@ checks:
     exempt-game-modes: [CREATIVE, SPECTATOR]
     # Only evaluate falls at least this many blocks high.
     minimum-fall-distance: 4.0
+    # Optional server/client-version overrides for fall correlation thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
     # Time window after landing to look for expected fall-damage evidence.
     landing-observation-window-ms: 1500
     # Ticks to wait after landing before evaluating damage correlation.
@@ -527,6 +540,9 @@ checks:
     sample-window: 40
     # Movement packet-rate threshold for this telemetry check.
     max-movement-packets-per-second: 45
+    # Optional server/client-version overrides for packet-rate thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
     # Minimum time between repeated flags from this check.
     flag-cooldown-ms: 3000
     # Violation level (VL) added when this check flags.
@@ -556,6 +572,9 @@ checks:
     minimum-sample-duration-ms: 1200
     # Movement packet-rate threshold for this telemetry check.
     max-movement-packets-per-second: 23
+    # Optional server/client-version overrides for timer telemetry thresholds.
+    version-overrides: {}
+    client-version-overrides: {}
     # Minimum time between repeated flags from this check.
     flag-cooldown-ms: 5000
     # Violation level (VL) added when this check flags.

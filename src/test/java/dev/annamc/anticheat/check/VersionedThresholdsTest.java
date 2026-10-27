@@ -165,6 +165,33 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void packetAndPlacementThresholdsUseClientOverrides() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  packet-rate:
+                    max-movement-packets-per-second: 45
+                    client-version-overrides:
+                      '1_8': { max-movement-packets-per-second: 35 }
+                  click-rate:
+                    max-attacks-per-window: 24
+                    client-version-overrides:
+                      '1_21': { max-attacks-per-window: 27 }
+                  scaffold-signal:
+                    minimum-downward-pitch: 65.0
+                    client-version-overrides:
+                      '1_21_11': { minimum-downward-pitch: 68.0 }
+                """);
+
+        assertEquals(35.0, VersionedThresholds.resolveForClient(config, "1.8",
+                "1.21.11", "packet-rate", "max-movement-packets-per-second", 40.0));
+        assertEquals(27.0, VersionedThresholds.resolveForClient(config, "1.21.11",
+                "1.21.11", "click-rate", "max-attacks-per-window", 20.0));
+        assertEquals(68.0, VersionedThresholds.resolveForClient(config, "1.21.11",
+                "1.21.11", "scaffold-signal", "minimum-downward-pitch", 60.0));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 

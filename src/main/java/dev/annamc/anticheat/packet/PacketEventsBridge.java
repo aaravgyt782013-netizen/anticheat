@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import dev.annamc.anticheat.check.ViolationManager;
 import dev.annamc.anticheat.check.ClientVersionRegistry;
+import dev.annamc.anticheat.check.CheckUtil;
 import dev.annamc.anticheat.check.VersionedThresholds;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
