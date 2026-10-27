@@ -15,6 +15,8 @@ This plan is required before enabling punishments. Automated unit tests cannot p
 Run each case for at least 10 minutes and record alerts per detector.
 
 - Walk, sprint, jump, sprint-jump, stairs, slabs, fences, ladders, swimming, elytra, riptide, vehicles and water transitions.
+- Flight-hover false-positive tests: jump apexes, ladders/vines, slime/honey, water, slow falling, levitation, elytra, vehicles, knockback, and custom movement/flight plugins; verify real hover-like behavior only generates alerts after the configured sustained sample count.
+- Mace combat tests: normal hits, legitimate smash attacks at varied heights, Density/Breach/Wind Burst enchantments where supported, high ping, custom damage modifiers and protection plugins. The Mace check must stay alert-only until logs show no unexplained legitimate alerts.
 - Speed potion levels, jump effects, ice, slime, honey, soul sand, cobwebs, knockback from multiple sources and landing on uneven terrain.
 - Teleports, respawn, world changes, server lag spikes, proxy reconnects and ping changes.
 - Normal PvP with different attack styles, turning while attacking, shield use, knockback resistance, crowded fights and entities near walls.
@@ -28,7 +30,7 @@ Run each case for at least 10 minutes and record alerts per detector.
 - **Combat pattern / reach / click rate:** use alerts only. Require repeated independent signals and manual review; identical rotation deltas and CPS are not proof of KillAura.
 - **Scaffold / no-fall:** test every listed legitimate placement/fall case. These are low-confidence signals and should remain disabled if protection plugins create ambiguous outcomes.
 - **Packet rate / timer:** test all proxy and client versions. Packet timing is not equivalent to tick-rate proof; do not punish on this signal alone.
-- **Force OP guard:** in staging, verify unauthorized player OP/deop and configured permission-management commands are cancelled; authorized admin commands are audited; console operations are logged; and OP grants made by another plugin are detected by the operator-list audit.
+- **Force OP guard:** in staging, verify unauthorized player OP/deop, nested `/execute ... run op` and configured permission-management commands are cancelled; authorized admin commands are audited; console operations are logged; and OP grants made by another plugin are detected by the operator-list audit.
 
 ## Anti-nuke and plugin integrity validation
 
