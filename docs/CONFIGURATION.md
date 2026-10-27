@@ -59,6 +59,10 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 
 These are signals, not guaranteed identification of Meteor, Wurst, Baritone, or any other client. Several are experimental heuristics. See `CHEAT_COVERAGE.md` for the current/planned coverage split.
 
+## Configuration validation
+
+At startup and after `/annaac reload`, ANNA AC prints warnings for invalid numeric thresholds in the main check settings and in version-specific override maps. Examples include negative distances/cooldowns, non-finite values, out-of-range ratios, and degree values outside their supported range. Fix warnings in the relevant section of `checks.yml`; invalid values read through the version-aware resolver fall back to the code-defined threshold instead of being applied. Validation can only check known numeric conventions—run the staging matrix before enabling enforcement.
+
 ## Per-version movement threshold tuning
 
 The movement signals support optional version-specific numeric overrides. This is useful when testing Paper 1.21 through 1.21.11 and keeping a separate threshold for a specific server version. The exact version wins, then the major/minor key, then the normal setting. Bukkit treats dots as YAML path separators, so write version keys with underscores:
