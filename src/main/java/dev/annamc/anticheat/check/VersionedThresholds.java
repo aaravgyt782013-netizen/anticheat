@@ -56,6 +56,60 @@ public final class VersionedThresholds {
         return resolve(config, serverVersion, check, key, fallback);
     }
 
+    /**
+     * Reports malformed or ineffective override entries so configuration mistakes are
+     * visible at startup/reload instead of silently falling back to default thresholds.
+     */
+    public static java.util.List<String> validateOverrides(FileConfiguration config) {
+        java.util.List<String> warnings = new java.util.ArrayList<>();
+        ConfigurationSection checks = config.getConfigurationSection("checks");
+        if (checks == null) return java.util.List.of("checks section is missing.");
+
+        java.util.regex.Pattern versionKey = java.util.regex.Pattern.compile("^\\d+(?:_\\d+){1,2}$");
+        for (String check : checks.getKeys(false)) {
+            ConfigurationSection checkSection = checks.getConfigurationSection(check);
+            if (checkSection == null) continue;
+            for (String mapName : java.util.List.of("version-overrides", "client-version-overrides")) {
+                ConfigurationSection overrides = checkSection.getConfigurationSection(mapName);
+                if (overrides == null) continue;
+                for (String version : overrides.getKeys(false)) {
+                    String path = "checks." + check + "." + mapName + "." + version;
+                    if (!versionKey.matcher(version).matches()) {
+                        warnings.add(path + " should use an underscore-separated release key such as '1_21_11'.");
+                    }
+                    ConfigurationSection settings = overrides.getConfigurationSection(version);
+                    if (settings == null) {
+                        warnings.add(path + " must be a mapping of numeric threshold names to values.");
+                        continue;
+                    }
+                    for (String setting : settings.getKeys(false)) {
+                        Object value = settings.get(setting);
+                        if (!checkSection.contains(setting)) {
+                            warnings.add(path + "." + setting + " does not match a setting in checks." + check
+                                    + " and may be ignored.");
+                        }
+                        if (!(value instanceof Number number) || !Double.isFinite(number.doubleValue())) {
+                            warnings.add(path + "." + setting + " must be a finite numeric value.");
+                        }
+                    }
+                }
+            }
+        }
+        return java.util.List.copyOf(warnings);
+    }
+
+    public static boolean hasClientOverrides(FileConfiguration config) {
+        ConfigurationSection checks = config.getConfigurationSection("checks");
+        if (checks == null) return false;
+        for (String check : checks.getKeys(false)) {
+            ConfigurationSection section = checks.getConfigurationSection(check);
+            ConfigurationSection overrides = section == null
+                    ? null : section.getConfigurationSection("client-version-overrides");
+            if (overrides != null && !overrides.getKeys(false).isEmpty()) return true;
+        }
+        return false;
+    }
+
     private static Double numericValue(Object sectionValue, String key) {
         if (!(sectionValue instanceof ConfigurationSection section)) return null;
         Object value = section.get(key);

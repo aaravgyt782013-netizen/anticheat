@@ -130,6 +130,41 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void overrideValidationReportsBadKeysUnknownSettingsAndNonnumericValues() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  reach:
+                    max-distance: 3.6
+                    version-overrides:
+                      '1.21.11': { max-distance: 3.7 }
+                      '1_21': { typo-threshold: 3.8 }
+                      '1_21_11': { max-distance: not-a-number }
+                """);
+
+        java.util.List<String> warnings = VersionedThresholds.validateOverrides(config);
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("underscore-separated release key")));
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("typo-threshold")));
+        assertTrue(warnings.stream().anyMatch(w -> w.contains("finite numeric value")));
+    }
+
+    @Test
+    void clientOverrideDetectorOnlyReportsNonemptySections() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  reach:
+                    client-version-overrides: {}
+                  movement:
+                    client-version-overrides:
+                      '1_21': { max-horizontal-distance-per-tick: 1.2 }
+                """);
+        assertTrue(VersionedThresholds.hasClientOverrides(config));
+        config.set("checks.movement.client-version-overrides", null);
+        assertFalse(VersionedThresholds.hasClientOverrides(config));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 

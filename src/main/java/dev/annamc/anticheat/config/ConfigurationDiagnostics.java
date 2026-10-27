@@ -24,6 +24,21 @@ public final class ConfigurationDiagnostics {
             notes.add("settings.language is not a supported language (en, hi); verify the language file exists.");
         }
 
+        for (String warning : dev.annamc.anticheat.check.VersionedThresholds.validateOverrides(plugin.getConfig())) {
+            notes.add("Threshold override configuration: " + warning);
+        }
+        if (dev.annamc.anticheat.check.VersionedThresholds.hasClientOverrides(plugin.getConfig())
+                && Bukkit.getPluginManager().getPlugin("packetevents") == null) {
+            notes.add("Client-version overrides are configured, but PacketEvents is not installed; these overrides are inactive and server-version/default thresholds are used.");
+        }
+        org.bukkit.plugin.Plugin packetEventsPlugin = Bukkit.getPluginManager().getPlugin("packetevents");
+        if (packetEventsPlugin != null
+                && compareNumericVersions(packetEventsPlugin.getDescription().getVersion(), "2.11.0") < 0
+                && compareNumericVersions(Bukkit.getMinecraftVersion(), "1.21.11") >= 0) {
+            notes.add("Installed PacketEvents " + packetEventsPlugin.getDescription().getVersion()
+                    + " predates Minecraft 1.21.11 protocol support. Update PacketEvents to 2.11.0 or newer (the ANNA AC build targets 2.14.0).");
+        }
+
         int enabledChecks = 0;
         int enabledActions = 0;
         boolean packetRequired = false;
@@ -115,6 +130,23 @@ public final class ConfigurationDiagnostics {
         }
 
         return List.copyOf(notes);
+    }
+
+    /** Compares numeric dotted versions; unknown strings return 0 to avoid false warnings. */
+    private static int compareNumericVersions(String actual, String expected) {
+        try {
+            String[] a = actual.split("[^0-9]+");
+            String[] e = expected.split("[^0-9]+");
+            int count = Math.max(a.length, e.length);
+            for (int i = 0; i < count; i++) {
+                int av = i < a.length && !a[i].isEmpty() ? Integer.parseInt(a[i]) : 0;
+                int ev = i < e.length && !e[i].isEmpty() ? Integer.parseInt(e[i]) : 0;
+                if (av != ev) return Integer.compare(av, ev);
+            }
+        } catch (RuntimeException ignored) {
+            return 0;
+        }
+        return 0;
     }
 
     private static boolean isDiscordWebhook(String candidate) {
