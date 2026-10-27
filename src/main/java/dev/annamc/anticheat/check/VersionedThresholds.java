@@ -136,6 +136,9 @@ public final class VersionedThresholds {
         if (key.equals("minimum-time-ratio") || key.equals("minimum-occluded-sample-ratio")) {
             return value < 0.0 || value > 1.0 ? "must be between 0 and 1." : null;
         }
+        if (key.equals("max-pattern-coefficient-variation")) {
+            return value < 0.0 || value > 1.0 ? "must be between 0 and 1." : null;
+        }
         if (key.contains("degrees") || key.equals("minimum-downward-pitch")
                 || key.equals("maximum-pitch-variance") || key.equals("rotation-quantization-degrees")) {
             return value < 0.0 || value > 180.0 ? "must be between 0 and 180 degrees." : null;
