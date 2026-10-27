@@ -71,14 +71,14 @@ public final class FastBreakCheck implements Listener {
         // conservative number of full ticks expected to reach 100% progress.
         int expectedTicks = Math.max(1, (int) Math.ceil(1.0 / progressPerTick));
         int minimumTicks = Math.max(1,
-                plugin.getConfig().getInt("checks.fast-break.minimum-expected-ticks", 2));
+                (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "fast-break", "minimum-expected-ticks", 2.0)));
         if (expectedTicks < minimumTicks) {
             sessions.remove(id);
             return;
         }
         long now = System.currentTimeMillis();
         long timeout = Math.max(1000L,
-                plugin.getConfig().getLong("checks.fast-break.session-timeout-ms", 15000L));
+                Math.round(CheckUtil.getVersionedDouble(plugin, player, "fast-break", "session-timeout-ms", 15000.0)));
 
         Session previous = sessions.get(id);
         if (previous != null && previous.sameBlock(block) && now - previous.startedAt <= timeout) {
@@ -121,16 +121,16 @@ public final class FastBreakCheck implements Listener {
         if (elapsed >= thresholdMs) return;
 
         long windowMs = Math.max(1000L,
-                plugin.getConfig().getLong("checks.fast-break.sample-window-ms", 10000L));
+                Math.round(CheckUtil.getVersionedDouble(plugin, player, "fast-break", "sample-window-ms", 10000.0)));
         Deque<Long> times = impossibleBreaks.computeIfAbsent(id, ignoredId -> new ArrayDeque<>());
         times.addLast(now);
         while (!times.isEmpty() && now - times.peekFirst() > windowMs) times.removeFirst();
         int required = Math.max(1,
-                plugin.getConfig().getInt("checks.fast-break.minimum-impossible-breaks", 2));
+                (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "fast-break", "minimum-impossible-breaks", 2.0)));
         if (times.size() < required) return;
 
         long cooldown = Math.max(0L,
-                plugin.getConfig().getLong("checks.fast-break.flag-cooldown-ms", 5000L));
+                Math.round(CheckUtil.getVersionedDouble(plugin, player, "fast-break", "flag-cooldown-ms", 5000.0)));
         if (now - lastFlag.getOrDefault(id, 0L) < cooldown) return;
         lastFlag.put(id, now);
         int sampleCount = times.size();
