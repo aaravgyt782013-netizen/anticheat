@@ -113,7 +113,7 @@ public final class ForceOpGuard implements Listener {
         List<String> configured = plugin.getConfig().getStringList("checks.force-op.protected-command-prefixes");
         if (configured.isEmpty()) {
             configured = List.of("op", "deop", "minecraft:op", "minecraft:deop", "bukkit:op", "bukkit:deop",
-                    "lp", "luckperms", "lpv", "pex", "permissions", "manuadd");
+                    "manuadd");
         }
         return PrivilegeCommandMatcher.isProtected(command, configured)
                 || PrivilegeCommandMatcher.matchesAnyPattern(command,
