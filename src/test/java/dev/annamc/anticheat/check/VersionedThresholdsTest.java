@@ -21,7 +21,7 @@ class VersionedThresholdsTest {
 
     @Test
     void majorMinorOverrideIsUsedWhenExactVersionIsMissing() throws Exception {
-        YamlConfiguration config = config("      '1.21':\n        max-distance: 3.7\n");
+        YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 
         assertEquals(3.7, VersionedThresholds.resolve(config, "1.21.11", "reach", "max-distance", 3.5));
     }
@@ -43,7 +43,7 @@ class VersionedThresholdsTest {
 
     @Test
     void blankVersionUsesNormalSetting() throws Exception {
-        YamlConfiguration config = config("      '1.21':\n        max-distance: 3.7\n");
+        YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 
         assertEquals(3.6, VersionedThresholds.resolve(config, "", "reach", "max-distance", 3.5));
     }
