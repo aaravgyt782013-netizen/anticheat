@@ -33,9 +33,11 @@ public final class JesusWaterWalkCheck implements Listener {
         Location to = event.getTo();
         if (to == null || (from.getX() == to.getX() && from.getY() == to.getY()
                 && from.getZ() == to.getZ())) return;
-        if (!plugin.getConfig().getBoolean("checks.jesus.enabled", false)) return;
-
         UUID id = player.getUniqueId();
+        if (!plugin.getConfig().getBoolean("checks.jesus.enabled", false)) {
+            samples.remove(id);
+            return;
+        }
         if (CheckUtil.shouldSkip(plugin, player, "jesus") || legitimateState(player)
                 || !standingOverDeepLiquid(to)) {
             samples.remove(id);

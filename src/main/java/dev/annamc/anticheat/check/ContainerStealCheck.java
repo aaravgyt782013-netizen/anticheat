@@ -38,11 +38,13 @@ public final class ContainerStealCheck implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)
-                || CheckUtil.shouldSkip(plugin, player, "container-steal")
-                || event.getAction() != InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        UUID id = player.getUniqueId();
+        if (CheckUtil.shouldSkip(plugin, player, "container-steal")) {
+            clear(id);
             return;
         }
+        if (event.getAction() != InventoryAction.MOVE_TO_OTHER_INVENTORY) return;
 
         Inventory top = event.getView().getTopInventory();
         // Only count shift-transfers originating inside the open container, not from the player's inventory into it.
@@ -52,7 +54,6 @@ public final class ContainerStealCheck implements Listener {
                 "checks.container-steal.ignored-inventory-types");
         if (ignoredTypes.stream().anyMatch(type -> type.equalsIgnoreCase(inventoryType))) return;
 
-        UUID id = player.getUniqueId();
         long now = System.currentTimeMillis();
         long windowMs = boundedLong(CheckUtil.getVersionedDouble(
                 plugin, player, "container-steal", "sample-window-ms", 1000.0), 250L, 10000L);

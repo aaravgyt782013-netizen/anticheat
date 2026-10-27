@@ -34,9 +34,11 @@ public final class SpiderClimbCheck implements Listener {
         Location to = event.getTo();
         if (to == null || (from.getX() == to.getX() && from.getY() == to.getY()
                 && from.getZ() == to.getZ())) return;
-        if (!plugin.getConfig().getBoolean("checks.spider-signal.enabled", false)) return;
-
         UUID id = player.getUniqueId();
+        if (!plugin.getConfig().getBoolean("checks.spider-signal.enabled", false)) {
+            samples.remove(id);
+            return;
+        }
         if (CheckUtil.shouldSkip(plugin, player, "spider-signal") || legitimateState(player)
                 || !hasAdjacentSolidWall(to)) {
             samples.remove(id);
