@@ -44,9 +44,13 @@ class HitboxSamplePointsTest {
     @Test
     void configuredMaximumIsBoundedToAvoidUnboundedRayTracing() {
         assertEquals(2, HitboxSamplePoints.resolve(box, List.of(), 2).size());
+        List<Map<String, Double>> manyPoints = new java.util.ArrayList<>();
+        for (int i = 0; i < 40; i++) {
+            manyPoints.add(Map.of("x", 0.5, "y", 0.5, "z", 0.5));
+        }
         assertEquals(HitboxSamplePoints.HARD_MAX_SAMPLES,
-                HitboxSamplePoints.resolve(box, List.of(), Integer.MAX_VALUE).size());
-        assertEquals(1, HitboxSamplePoints.resolve(box, List.of(), Integer.MIN_VALUE).size());
+                HitboxSamplePoints.resolve(box, manyPoints, Integer.MAX_VALUE).size());
+        assertEquals(1, HitboxSamplePoints.resolve(box, manyPoints, Integer.MIN_VALUE).size());
     }
 
     @Test
