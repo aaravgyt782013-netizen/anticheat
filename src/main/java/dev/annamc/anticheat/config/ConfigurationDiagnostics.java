@@ -118,6 +118,15 @@ public final class ConfigurationDiagnostics {
         if (packetRequired && Bukkit.getPluginManager().getPlugin("packetevents") == null) {
             notes.add("PacketEvents is missing, but packet-rate, timer, or click-rate packet telemetry is enabled; those packet signals will not function.");
         }
+        if (!plugin.getConfig().getBoolean("checks.block-reach.enabled", false)
+                && (plugin.getConfig().getBoolean("checks.block-reach.cancel-out-of-range-breaks", false)
+                || plugin.getConfig().getBoolean("checks.block-reach.cancel-out-of-range-interactions", false))) {
+            notes.add("Block-reach cancellation is configured but checks.block-reach.enabled is false; no block-reach actions will be intercepted.");
+        } else if (plugin.getConfig().getBoolean("checks.block-reach.enabled", false)
+                && (plugin.getConfig().getBoolean("checks.block-reach.cancel-out-of-range-breaks", false)
+                || plugin.getConfig().getBoolean("checks.block-reach.cancel-out-of-range-interactions", false))) {
+            notes.add("Block-reach action blocking is enabled. Validate block shapes, custom interaction plugins, latency and creative/admin exemptions on staging before live use.");
+        }
 
         boolean antiNukeEnabled = plugin.getConfig().getBoolean("security.antinuke.enabled", true);
         if (antiNukeEnabled && plugin.getConfig().getBoolean("security.antinuke.block-bulk-commands", true)

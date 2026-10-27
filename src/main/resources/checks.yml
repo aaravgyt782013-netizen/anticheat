@@ -346,6 +346,10 @@ checks:
     check-breaks: true
     # Independently enable checks for right-click block interactions.
     check-interactions: true
+    # Cancel a block-damage attempt measured beyond configured reach. Disabled by default; validate on staging.
+    cancel-out-of-range-breaks: false
+    # Deny only the interacted block action for an out-of-range right-click. Disabled by default.
+    cancel-out-of-range-interactions: false
     # Maximum eye-to-collision-box distance for breaking. Increase only with test evidence.
     max-break-distance: 5.0
     # Maximum eye-to-collision-box distance for right-click interactions.

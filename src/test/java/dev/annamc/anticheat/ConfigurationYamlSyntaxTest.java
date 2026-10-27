@@ -96,6 +96,21 @@ class ConfigurationYamlSyntaxTest {
     }
 
     @Test
+    void blockReachEnforcementIsConfigurableAndOffByDefault() throws Exception {
+        Yaml yaml = new Yaml();
+        for (String file : List.of("checks-world.yml", "checks.yml")) {
+            try (InputStream in = Files.newInputStream(Path.of("src/main/resources", file))) {
+                Map<?, ?> root = yaml.load(in);
+                Map<?, ?> checks = (Map<?, ?>) root.get("checks");
+                Map<?, ?> options = (Map<?, ?>) checks.get("block-reach");
+                assertNotNull(options, file + " must include block-reach");
+                assertEquals(Boolean.FALSE, options.get("cancel-out-of-range-breaks"));
+                assertEquals(Boolean.FALSE, options.get("cancel-out-of-range-interactions"));
+            }
+        }
+    }
+
+    @Test
     void movementVelocityGraceIsConfigurableInBothModernAndLegacyFiles() throws Exception {
         Yaml yaml = new Yaml();
         for (String file : List.of("checks-movement.yml", "checks.yml")) {
