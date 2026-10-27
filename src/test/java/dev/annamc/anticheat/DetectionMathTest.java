@@ -24,4 +24,12 @@ class DetectionMathTest {
         assertFalse(DetectionMath.exceedsPacketRate(44, 45));
         assertFalse(DetectionMath.exceedsPacketRate(100, 0));
     }
+
+    @Test void velocityGracePeriodIsBoundedAndExpires() {
+        long event = 1_000_000_000L;
+        assertTrue(DetectionMath.isWithinGracePeriod(event + 300_000_000L, event, 300));
+        assertFalse(DetectionMath.isWithinGracePeriod(event + 300_000_001L, event, 300));
+        assertFalse(DetectionMath.isWithinGracePeriod(event + 1L, event, 0));
+        assertFalse(DetectionMath.isWithinGracePeriod(event - 1L, event, 300));
+    }
 }

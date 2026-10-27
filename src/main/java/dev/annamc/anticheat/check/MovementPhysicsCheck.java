@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerVelocityEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,6 +26,7 @@ public final class MovementPhysicsCheck implements Listener {
     private final JavaPlugin plugin;
     private final ViolationManager violations;
     private final Map<UUID, Sample> samples = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> recentVelocity = new ConcurrentHashMap<>();
 
     public MovementPhysicsCheck(JavaPlugin plugin, ViolationManager violations) {
         this.plugin = plugin;
@@ -33,12 +35,26 @@ public final class MovementPhysicsCheck implements Listener {
 
     @EventHandler
     public void onTeleport(PlayerTeleportEvent event) {
-        samples.remove(event.getPlayer().getUniqueId());
+        UUID id = event.getPlayer().getUniqueId();
+        samples.remove(id);
+        recentVelocity.remove(id);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onVelocity(PlayerVelocityEvent event) {
+        if (!plugin.getConfig().getBoolean("checks.movement-physics.enabled", false)) return;
+        Player player = event.getPlayer();
+        UUID id = player.getUniqueId();
+        long now = System.nanoTime();
+        recentVelocity.put(id, now);
+        samples.put(id, new Sample(player.getLocation().clone(), now));
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        samples.remove(event.getPlayer().getUniqueId());
+        UUID id = event.getPlayer().getUniqueId();
+        samples.remove(id);
+        recentVelocity.remove(id);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -46,24 +62,37 @@ public final class MovementPhysicsCheck implements Listener {
         Player player = event.getPlayer();
         Location to = event.getTo();
         if (to == null) return;
+        UUID id = player.getUniqueId();
         if (CheckUtil.shouldSkip(plugin, player, "movement-physics")) {
-            samples.remove(player.getUniqueId());
+            samples.remove(id);
+            recentVelocity.remove(id);
             return;
         }
         if (player.isInsideVehicle() || player.isFlying() || player.isGliding()
                 || player.isSwimming() || player.isRiptiding() || player.isInWater()
                 || player.isClimbing() || player.isSleeping()) {
-            samples.remove(player.getUniqueId());
+            samples.remove(id);
+            recentVelocity.remove(id);
             return;
         }
         Location from = event.getFrom();
         if (from.getWorld() != to.getWorld()) {
-            samples.remove(player.getUniqueId());
+            samples.remove(id);
+            recentVelocity.remove(id);
             return;
         }
 
         long now = System.nanoTime();
-        Sample previous = samples.get(player.getUniqueId());
+        Long velocityAt = recentVelocity.get(id);
+        if (velocityAt != null) {
+            long graceMs = CheckUtil.getVersionedGraceMillis(plugin, player, "movement-physics", 300L);
+            if (DetectionMath.isWithinGracePeriod(now, velocityAt, graceMs)) {
+                samples.put(id, new Sample(to.clone(), now));
+                return;
+            }
+            recentVelocity.remove(id, velocityAt);
+        }
+        Sample previous = samples.get(id);
         if (previous == null) { samples.put(player.getUniqueId(), new Sample(to.clone(), now)); return; }
         long elapsedMs = Math.max(1L, (now - previous.nanoTime) / 1_000_000L);
         if (elapsedMs > Math.round(CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "max-sample-gap-ms", 250.0))) { samples.put(player.getUniqueId(), new Sample(to.clone(), now)); return; }
@@ -93,7 +122,7 @@ public final class MovementPhysicsCheck implements Listener {
         double ratio = distance / Math.max(0.01, allowance);
         if (DetectionMath.isMovementOutlier(distance, allowance, CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "outlier-ratio", 2.2))) {
             int streak = previous.outlierStreak + 1;
-            samples.put(player.getUniqueId(), new Sample(to.clone(), now, streak));
+            samples.put(id, new Sample(to.clone(), now, streak));
             int required = (int) Math.round(CheckUtil.getVersionedDouble(plugin, player, "movement-physics", "required-consecutive-outliers", 3.0));
             if (streak >= required) {
                 violations.add(player, "movement-physics",
@@ -101,13 +130,13 @@ public final class MovementPhysicsCheck implements Listener {
                         String.format(java.util.Locale.ROOT,
                                 "repeated movement-envelope outlier ratio=%.2f distance=%.3f allowance=%.3f ping=%dms",
                                 ratio, distance, allowance, player.getPing()));
-                samples.put(player.getUniqueId(), new Sample(to.clone(), now, 0));
+                samples.put(id, new Sample(to.clone(), now, 0));
             }
         } else {
             // Always advance the baseline. Keeping an old baseline across normal
             // movement makes later distances cover multiple events and corrupts
             // the per-sample movement envelope.
-            samples.put(player.getUniqueId(), new Sample(to.clone(), now, 0));
+            samples.put(id, new Sample(to.clone(), now, 0));
         }
     }
 

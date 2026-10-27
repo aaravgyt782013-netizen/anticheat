@@ -341,6 +341,30 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void velocityGraceBoundsAreValidatedForDefaultsAndVersionOverrides() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  movement:
+                    velocity-grace-ms: 300
+                    version-overrides:
+                      '1_21': { velocity-grace-ms: 6000 }
+                  movement-physics:
+                    velocity-grace-ms: -1
+                    version-overrides: {}
+                """);
+
+        assertEquals(300.0, VersionedThresholds.resolve(config, "1.21.11",
+                "movement", "velocity-grace-ms", 250.0));
+        assertEquals(250.0, VersionedThresholds.resolve(config, "1.21.11",
+                "movement-physics", "velocity-grace-ms", 250.0));
+        assertTrue(VersionedThresholds.validateOverrides(config).stream()
+                .anyMatch(w -> w.contains("velocity-grace-ms")));
+        assertTrue(VersionedThresholds.validateConfiguredThresholds(config).stream()
+                .anyMatch(w -> w.contains("velocity-grace-ms")));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 

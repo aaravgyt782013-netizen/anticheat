@@ -133,6 +133,9 @@ public final class VersionedThresholds {
         if (setting == null || !Double.isFinite(value)) return "must be finite.";
         String key = setting.toLowerCase(java.util.Locale.ROOT);
 
+        if (key.equals("velocity-grace-ms")) {
+            return value < 0.0 || value > 5000.0 ? "must be between 0 and 5000 milliseconds." : null;
+        }
         if (key.equals("minimum-time-ratio") || key.equals("minimum-occluded-sample-ratio")) {
             return value < 0.0 || value > 1.0 ? "must be between 0 and 1." : null;
         }

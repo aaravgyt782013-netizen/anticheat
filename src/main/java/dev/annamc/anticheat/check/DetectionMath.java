@@ -26,6 +26,19 @@ public final class DetectionMath {
         return maximum > 0 && observed >= maximum;
     }
 
+    /**
+     * Checks a monotonic timestamp against a grace window after a velocity event.
+     * Timestamps are from System.nanoTime(); a zero/negative window disables it.
+     */
+    public static boolean isWithinGracePeriod(long nowNanos, long eventNanos, long graceMillis) {
+        if (graceMillis <= 0) return false;
+        long ageNanos = nowNanos - eventNanos;
+        if (ageNanos < 0) return false;
+        long maxNanos = graceMillis > Long.MAX_VALUE / 1_000_000L
+                ? Long.MAX_VALUE : graceMillis * 1_000_000L;
+        return ageNanos <= maxNanos;
+    }
+
     private static double normalize(double value) {
         while (value > 180.0) value -= 360.0;
         while (value < -180.0) value += 360.0;

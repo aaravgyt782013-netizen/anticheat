@@ -68,6 +68,13 @@ public final class CheckUtil {
                 org.bukkit.Bukkit.getMinecraftVersion(), check, key, fallback);
     }
 
+    /** Resolves the bounded grace period after server-applied velocity changes. */
+    public static long getVersionedGraceMillis(JavaPlugin plugin, Player player, String check, long fallback) {
+        double configured = getVersionedDouble(plugin, player, check, "velocity-grace-ms", fallback);
+        if (!Double.isFinite(configured)) configured = fallback;
+        return Math.max(0L, Math.min(5000L, Math.round(configured)));
+    }
+
     private static boolean contains(List<String> values, String value) {
         return values.stream().anyMatch(v -> v.equalsIgnoreCase(value));
     }
