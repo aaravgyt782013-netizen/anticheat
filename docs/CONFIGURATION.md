@@ -41,6 +41,8 @@ Supported languages are `en` (English) and `hi` (Hindi). Set `language: "hi"` to
 | `movement` | Basic displacement heuristic | Disabled |
 | `movement-physics` | Repeated movement-envelope outlier heuristic | Disabled |
 | `flight` | Sustained airborne hover heuristic | Disabled |
+| `jesus` | Stable surface-walk movement over deep liquid | Disabled |
+| `spider-signal` | Repeated upward movement beside a solid wall | Disabled |
 | `knockback` | Movement after server velocity | Disabled |
 | `reach` | Approximate target hitbox distance | Disabled |
 | `mace-damage` | Implausible Mace damage signal; configurable allowance/tolerance | Disabled |
