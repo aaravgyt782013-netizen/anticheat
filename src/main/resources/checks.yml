@@ -18,6 +18,8 @@ checks:
     max-horizontal-distance-per-tick: 1.25
     # Optional per-version threshold overrides. Use underscores in keys such as '1_21_11'.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Violation level (VL) added when this check flags.
     violation-add: 1.0
     # How quickly this check's VL decreases over time.
@@ -52,6 +54,8 @@ checks:
     max-hover-vertical-delta: 0.025
     # Optional overrides for max-horizontal-distance-per-sample and max-hover-vertical-delta.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Minimum horizontal displacement between samples.
     minimum-horizontal-distance: 0.08
     # Consecutive near-hover samples required before flagging (a value around 24 is roughly 1.2 seconds).
@@ -80,6 +84,8 @@ checks:
     max-vertical-delta: 0.04
     # Optional overrides for max-horizontal-distance-per-sample and max-vertical-delta.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     minimum-horizontal-distance: 0.06
     required-stable-samples: 10
     violation-add: 1.0
@@ -102,6 +108,8 @@ checks:
     minimum-upward-delta: 0.08
     # Optional per-version overrides for minimum-upward-delta; version keys use underscores.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     required-upward-samples: 10
     violation-add: 1.0
     violation-decay-per-second: 0.5
@@ -148,6 +156,8 @@ checks:
     #   '1_21':
     #     base-horizontal-per-tick: 0.72
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Violation level (VL) added when this check flags.
     violation-add: 1.0
     # How quickly this check's VL decreases over time.
@@ -175,6 +185,8 @@ checks:
     minimum-horizontal-velocity: 0.25
     # Optional version overrides for velocity/projection thresholds; use keys such as '1_21_11'.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Time window after velocity in which movement is observed.
     observation-window-ms: 350
     # Additional observation-window time per millisecond of ping.
@@ -216,6 +228,8 @@ checks:
     max-distance: 3.6
     # Optional exact server version or major.minor numeric overrides for this check.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Extra movement allowance per millisecond of measured ping.
     ping-slack-per-ms: 0.001
     # Maximum extra movement allowance granted for ping.
@@ -248,6 +262,8 @@ checks:
     max-evaluation-distance: 6.0
     # Optional overrides for evaluation distance, occlusion margin and required blocked-sample ratio.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Require this ratio of sampled target points to be occluded before flagging (0.0–1.0).
     minimum-occluded-sample-ratio: 1.0
     # Ignore block hits closer than this margin to a target sample to reduce edge noise.
@@ -284,6 +300,8 @@ checks:
     max-block-breaks-per-window: 18
     # Optional version overrides for block-rate and repeated-window thresholds.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Consecutive over-limit evaluations required before the check flags.
     required-over-limit-windows: 3
     # Block material names excluded from the rolling count; edit for your server's gameplay.
@@ -316,6 +334,8 @@ checks:
     minimum-time-ratio: 0.5
     # Optional overrides for timing ratio, ping slack and minimum observed-time threshold.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Minimum observed time threshold in milliseconds after latency slack is applied.
     minimum-required-time-ms: 60
     # Latency allowance subtracted from the expected-time threshold per ping millisecond.
@@ -569,6 +589,8 @@ checks:
     base-damage-allowance: 10.0
     # Optional exact server version or major.minor numeric overrides for mace damage constants.
     version-overrides: {}
+    # Optional client-protocol numeric overrides; requires compatible PacketEvents. Use keys like '1_21_11'.
+    client-version-overrides: {}
     # Density adds 0.5 raw damage per block per level in vanilla Java; tune upward only if server mechanics require it.
     density-damage-per-block-per-level: 0.5
     # Additional tolerance for plugin-modified damage, effects, timing, and engine differences.

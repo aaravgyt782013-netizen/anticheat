@@ -74,7 +74,31 @@ checks:
         max-horizontal-distance-per-tick: 1.30
 ```
 
-Version overrides are currently wired for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, and `mace-damage`. For each check, only the numeric settings explicitly read through the version-aware resolver are affected; all other settings remain normal global settings. The example numbers are illustrative, not recommended anti-cheat defaults. Keep experimental checks disabled until staging tests confirm they do not flag legitimate movement.
+Server-version and client-protocol overrides are wired for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, and `mace-damage`. For each check, only the numeric settings explicitly read through the version-aware resolver are affected; all other settings remain normal global settings. The example numbers are illustrative, not recommended anti-cheat defaults. Keep experimental checks disabled until staging tests confirm they do not flag legitimate movement.
+
+## Client-protocol-aware tuning
+
+When PacketEvents is installed, ANNA AC records the protocol release reported by each connected client. For checks whose numeric thresholds use the version-aware resolver, a client override is checked first, followed by the server's version override, then the normal threshold. If the client's version is unknown, ANNA AC safely falls back to the server version.
+
+Use a separate `client-version-overrides` map; do not mix client values into `version-overrides`. Bukkit treats dots as path separators, so version keys must use underscores.
+
+```yaml
+checks:
+  reach:
+    max-distance: 3.6
+    version-overrides:
+      '1_21_11':
+        max-distance: 3.6
+    client-version-overrides:
+      '1_8':
+        max-distance: 3.2
+      '1_21':
+        max-distance: 3.6
+      '1_21_11':
+        max-distance: 3.6
+```
+
+These are illustrative values only, not recommended thresholds. Supported threshold fields are those explicitly read through `CheckUtil.getVersionedDouble`; adding a key for an unrelated setting has no effect. The client release name is protocol metadata, not a reliable identifier of a cheat client or proof of cheating. Client-specific overrides require a compatible PacketEvents build (use 2.11.0 or newer for 1.21.11 protocol support; the project compiles against 2.14.0). Without PacketEvents, all checks continue using the server-version/default fallback.
 
 ## Per-check punishment actions
 

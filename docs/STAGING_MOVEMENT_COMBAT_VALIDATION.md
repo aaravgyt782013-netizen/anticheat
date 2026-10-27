@@ -27,7 +27,7 @@ version-overrides:
     max-ping-slack: 0.75
 ```
 
-Version-aware numeric tuning now covers `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, and `mace-damage`. Only settings explicitly wired to the resolver can be overridden; use exact-version and major/minor keys with underscores.
+Server-version overrides and PacketEvents client-protocol overrides are supported for `movement`, `movement-physics`, `flight`, `jesus`, `spider-signal`, `knockback`, `reach`, `wall-hit`, `fast-break`, `nuker-burst`, and `mace-damage`. Client overrides use the separate `client-version-overrides` map, keys with underscores, and only affect fields read through the version-aware resolver. A client protocol version is not a cheat-client brand fingerprint.
 
 ## Baseline and test matrix
 

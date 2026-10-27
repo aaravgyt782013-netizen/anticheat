@@ -106,6 +106,30 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void clientExactOverrideWinsThenMajorMinorThenServerVersion() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  reach:
+                    max-distance: 3.6
+                    version-overrides:
+                      '1_21_11': { max-distance: 3.7 }
+                    client-version-overrides:
+                      '1_21': { max-distance: 3.8 }
+                      '1_21_11': { max-distance: 3.9 }
+                """);
+
+        assertEquals(3.9, VersionedThresholds.resolveForClient(config, "1.21.11",
+                "1.21.11", "reach", "max-distance", 3.5));
+        assertEquals(3.8, VersionedThresholds.resolveForClient(config, "1.21.10",
+                "1.21.11", "reach", "max-distance", 3.5));
+        assertEquals(3.7, VersionedThresholds.resolveForClient(config, null,
+                "1.21.11", "reach", "max-distance", 3.5));
+        assertEquals(3.7, VersionedThresholds.resolveForClient(config, "unknown",
+                "1.21.11", "reach", "max-distance", 3.5));
+    }
+
+    @Test
     void blankVersionUsesNormalSetting() throws Exception {
         YamlConfiguration config = config("      '1_21':\n        max-distance: 3.7\n");
 
