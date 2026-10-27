@@ -567,5 +567,31 @@ checks:
     detect-op-removals: true
     # Log and alert when the console executes configured privilege-management commands.
     audit-console-op-commands: true
-    # Command labels/prefixes to audit or block. Add aliases used by your permission plugins.
-    protected-command-prefixes: [op, deop, minecraft:op, minecraft:deop, bukkit:op, bukkit:deop, lp, luckperms, lpv, pex, permissions, manuadd]
+    # Commands whose root is dedicated to privilege changes; namespaces/aliases are also matched.
+    protected-command-prefixes: [op, deop, minecraft:op, minecraft:deop, bukkit:op, bukkit:deop, manuadd]
+    # Token patterns for permission plugins. '*' matches one token; '**' matches the remaining tokens.
+    # This avoids blocking harmless /lp help, /lp list, and other read-only commands.
+    # Add the actual aliases and syntax used by your permission plugin.
+    protected-command-patterns:
+      - 'lp user * permission set **'
+      - 'lp user * permission unset **'
+      - 'lp user * permission clear'
+      - 'lp user * parent add **'
+      - 'lp user * parent set **'
+      - 'lp user * parent clear'
+      - 'lp group * permission set **'
+      - 'lp group * permission unset **'
+      - 'lp group * permission clear'
+      - 'lp group * parent add **'
+      - 'lp group * parent set **'
+      - 'lp group * parent clear'
+      - 'lp track * append **'
+      - 'lp track * insert **'
+      - 'lp editor'
+      - 'pex user * add **'
+      - 'pex user * set **'
+      - 'pex user * group add **'
+      - 'pex group * add **'
+      - 'pex group * set **'
+      - 'permissions user * set **'
+      - 'permissions group * set **'
