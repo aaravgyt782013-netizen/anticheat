@@ -5,6 +5,7 @@ import dev.annamc.anticheat.check.ClickRateCheck;
 import dev.annamc.anticheat.config.ConfigurationDiagnostics;
 import dev.annamc.anticheat.config.ModularConfigManager;
 import dev.annamc.anticheat.check.FastBreakCheck;
+import dev.annamc.anticheat.check.FlightHoverCheck;
 import dev.annamc.anticheat.check.CombatPatternCheck;
 import dev.annamc.anticheat.check.KnockbackPredictionCheck;
 import dev.annamc.anticheat.check.MovementCheck;
@@ -55,6 +56,7 @@ public final class AnnaACPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new MovementCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new MovementPhysicsCheck(this, violations), this);
+        getServer().getPluginManager().registerEvents(new FlightHoverCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new KnockbackPredictionCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new ReachCheck(this, violations), this);
         getServer().getPluginManager().registerEvents(new MaceDamageCheck(this, violations), this);
