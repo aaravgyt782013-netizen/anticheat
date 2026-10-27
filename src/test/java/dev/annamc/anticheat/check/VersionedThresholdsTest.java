@@ -149,6 +149,25 @@ class VersionedThresholdsTest {
     }
 
     @Test
+    void resolverFallsBackInsteadOfApplyingInvalidOverrideOrDefault() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString("""
+                checks:
+                  reach:
+                    max-distance: -1.0
+                    version-overrides:
+                      '1_21_11': { max-distance: -3.0 }
+                      '1_21': { max-distance: 3.7 }
+                """);
+
+        assertEquals(3.7, VersionedThresholds.resolve(config, "1.21.11",
+                "reach", "max-distance", 3.5));
+        config.set("checks.reach.version-overrides", null);
+        assertEquals(3.5, VersionedThresholds.resolve(config, "1.21.11",
+                "reach", "max-distance", 3.5));
+    }
+
+    @Test
     void overrideValidationWarnsOnOutOfRangeRatiosAndNegativeThresholds() throws Exception {
         YamlConfiguration config = new YamlConfiguration();
         config.loadFromString("""

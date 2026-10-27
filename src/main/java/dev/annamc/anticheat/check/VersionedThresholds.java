@@ -17,17 +17,22 @@ public final class VersionedThresholds {
         ConfigurationSection overrides = config.getConfigurationSection(base + "version-overrides");
         if (overrides != null && version != null && !version.isBlank()) {
             String exactKey = version.replace('.', '_');
-            Double exact = numericValue(overrides.getValues(false).get(exactKey), key);
+            Double exact = numericValue(overrides.getValues(false).get(exactKey), check, key);
             if (exact != null) return exact;
 
             String[] parts = version.split("\\.");
             if (parts.length >= 2) {
                 String majorMinor = parts[0] + "_" + parts[1];
-                Double compatible = numericValue(overrides.getValues(false).get(majorMinor), key);
+                Double compatible = numericValue(overrides.getValues(false).get(majorMinor), check, key);
                 if (compatible != null) return compatible;
             }
         }
-        return config.getDouble(base + key, fallback);
+        Object normalValue = config.get(base + key);
+        if (normalValue instanceof Number number && Double.isFinite(number.doubleValue())
+                && thresholdRangeWarning(check, key, number.doubleValue()) == null) {
+            return number.doubleValue();
+        }
+        return fallback;
     }
 
     /**
@@ -43,13 +48,13 @@ public final class VersionedThresholds {
         ConfigurationSection overrides = config.getConfigurationSection(base + "client-version-overrides");
         if (overrides != null && clientVersion != null && !clientVersion.isBlank()) {
             String exactKey = clientVersion.replace('.', '_');
-            Double exact = numericValue(overrides.getValues(false).get(exactKey), key);
+            Double exact = numericValue(overrides.getValues(false).get(exactKey), check, key);
             if (exact != null) return exact;
 
             String[] parts = clientVersion.split("\\.");
             if (parts.length >= 2) {
                 String majorMinor = parts[0] + "_" + parts[1];
-                Double compatible = numericValue(overrides.getValues(false).get(majorMinor), key);
+                Double compatible = numericValue(overrides.getValues(false).get(majorMinor), check, key);
                 if (compatible != null) return compatible;
             }
         }
@@ -140,11 +145,12 @@ public final class VersionedThresholds {
         return false;
     }
 
-    private static Double numericValue(Object sectionValue, String key) {
+    private static Double numericValue(Object sectionValue, String check, String key) {
         if (!(sectionValue instanceof ConfigurationSection section)) return null;
         Object value = section.get(key);
         if (!(value instanceof Number number)) return null;
         double result = number.doubleValue();
-        return Double.isFinite(result) ? result : null;
+        if (!Double.isFinite(result) || thresholdRangeWarning(check, key, result) != null) return null;
+        return result;
     }
 }
