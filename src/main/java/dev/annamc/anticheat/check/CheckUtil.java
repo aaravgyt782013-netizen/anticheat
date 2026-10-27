@@ -24,6 +24,32 @@ public final class CheckUtil {
         return false;
     }
 
+    /**
+     * Reads a numeric check setting with optional exact Minecraft-version overrides.
+     * Configuration path: checks.<check>.version-overrides.<version>.<key>.
+     * Exact server version wins; then major.minor; then the normal setting.
+     * This keeps tuning explicit instead of silently applying guessed physics constants.
+     */
+    public static double getVersionedDouble(JavaPlugin plugin, String check, String key, double fallback) {
+        String base = "checks." + check + ".";
+        String version = org.bukkit.Bukkit.getMinecraftVersion();
+        if (version != null && !version.isBlank()) {
+            String exact = base + "version-overrides." + version + "." + key;
+            if (plugin.getConfig().isDouble(exact) || plugin.getConfig().isInt(exact)) {
+                return plugin.getConfig().getDouble(exact, fallback);
+            }
+            String[] parts = version.split("\\.");
+            if (parts.length >= 2) {
+                String minor = parts[0] + "." + parts[1];
+                String compatible = base + "version-overrides." + minor + "." + key;
+                if (plugin.getConfig().isDouble(compatible) || plugin.getConfig().isInt(compatible)) {
+                    return plugin.getConfig().getDouble(compatible, fallback);
+                }
+            }
+        }
+        return plugin.getConfig().getDouble(base + key, fallback);
+    }
+
     private static boolean contains(List<String> values, String value) {
         return values.stream().anyMatch(v -> v.equalsIgnoreCase(value));
     }
