@@ -419,6 +419,24 @@ checks:
     minimum-over-limit-windows: 3
     # Minimum time between repeated packet-level attack-rate flags.
     attack-flag-cooldown-ms: 3000
+    # Optional statistical attack-interval regularity signal; not proof of automation and disabled by default.
+    pattern-detection-enabled: false
+    # Rolling time window used to estimate the player's attack interval distribution (effective range 500–10000).
+    pattern-window-ms: 3000
+    # Minimum attack timestamps required before checking for unusually regular intervals (effective range 5–200).
+    minimum-pattern-attacks: 15
+    # Require at least this average attacks-per-second rate before timing regularity counts.
+    minimum-pattern-cps: 5.0
+    # Maximum population standard deviation of intervals, in milliseconds, for a regularity candidate.
+    max-pattern-interval-stddev-ms: 3.0
+    # Maximum standard-deviation/mean ratio (coefficient of variation, 0–1) for a regularity candidate.
+    max-pattern-coefficient-variation: 0.08
+    # Time between statistical pattern evaluations (effective range 100–2000).
+    pattern-evaluation-interval-ms: 200
+    # Repeated regularity evaluations required before adding a violation level.
+    minimum-pattern-windows: 3
+    # Cooldown between regularity-pattern signals.
+    pattern-flag-cooldown-ms: 5000
     # Minimum time between repeated flags from this check.
     flag-cooldown-ms: 1500
     # Violation level (VL) added when this check flags.
