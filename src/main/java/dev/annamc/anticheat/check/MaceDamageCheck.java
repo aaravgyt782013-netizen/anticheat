@@ -1,6 +1,7 @@
 package dev.annamc.anticheat.check;
 
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,9 +35,20 @@ public final class MaceDamageCheck implements Listener {
 
         double fallDistance = Math.max(0.0, player.getFallDistance());
         double baseAllowance = plugin.getConfig().getDouble("checks.mace-damage.base-damage-allowance", 10.0);
-        double perBlockAllowance = plugin.getConfig().getDouble("checks.mace-damage.damage-per-fall-block-allowance", 4.5);
         double tolerance = plugin.getConfig().getDouble("checks.mace-damage.extra-tolerance", 12.0);
-        double maximumExpected = baseAllowance + fallDistance * perBlockAllowance + tolerance;
+        double maximumExpected;
+        if (plugin.getConfig().getBoolean("checks.mace-damage.vanilla-smash-model-enabled", true)) {
+            int densityLevel = weapon.getEnchantmentLevel(Enchantment.DENSITY);
+            double densityAllowance = plugin.getConfig().getDouble(
+                    "checks.mace-damage.density-damage-per-block-per-level", 0.5);
+            maximumExpected = MaceDamageMath.expectedAllowance(
+                    fallDistance, densityLevel, baseAllowance, tolerance, densityAllowance);
+        } else {
+            // Compatibility mode for servers with custom mace damage formulas.
+            double perBlockAllowance = plugin.getConfig().getDouble(
+                    "checks.mace-damage.damage-per-fall-block-allowance", 4.5);
+            maximumExpected = baseAllowance + fallDistance * Math.max(0.0, perBlockAllowance) + tolerance;
+        }
         double observed = event.getDamage();
 
         if (observed > maximumExpected) {
